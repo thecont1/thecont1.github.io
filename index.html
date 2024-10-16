@@ -135,7 +135,7 @@
 
 &#9648; <a href="https://www.itsnicethat.com/articles/mahesh-shantaram-matrimania-photography-011019">It'sNiceThat</a> <i>A look beneath the glossy veneer of Indian weddings</i><br><br>
 
-<a href="http://www.thecontrarian.in/photography/matrimania/"><img src="photography/matrimania/book.jpg" width='248' height='300'><br>Order a signed copy of Matrimania</a><br><br>
+<a href="http://www.thecontrarian.in/photography/matrimania/"><img src="http://thecontrarian.in/photography/matrimania/book.jpg" width='248' height='300'><br>Order a signed copy of Matrimania</a><br><br>
 <br>
 
 <b>THE AFRICAN PORTRAITS</b> <a href="https://foreignpolicy.com/2017/07/24/the-harsh-reality-of-being-african-in-india-race-violence-college-students/" target="_blank" title="Out of India">Foreign Policy</a>, <a href="http://www.hindustantimes.com/art-and-culture/in-india-too-black-lives-should-matter/story-JrfZmOJ8atL6PxDcXTMGPP.html" target="_blank" title="In India too, black lives should matter">Hindustan Times</a>, <a href="https://bangaloremirror.indiatimes.com/bangalore/others/what-you-see-when-you-see-portraits-of-black-african-diaspora/articleshow/58096847.cms" target="_blank" title="What you see when you see: Portraits of Black African diaspora">Bangalore Mirror</a>, <a href="https://www.architecturaldigest.in/content/intimate-portrayal-black-lives-india/" target="_blank" title="An intimate portrayal of Black lives in India">Architectural Digest</a>, <a href="http://edition.cnn.com/2017/03/31/africa/racism-africans-india-photgrapher/index.html" target="_blank" title="The photographer giving Africans in India a voice">CNN Africa</a>, <a href="http://www.thehindu.com/entertainment/art/Content-over-colour-Looking-beyond-looking-within/article16758929.ece" target="_blank" title="Content over colour: Looking beyond, within">The Hindu</a>, <a href="http://fotoroom.co/african-portraits-mahesh-shantaram/" target="_blank" title="Too Black for India: Interview with Graziano">fotoroom.co</a>, <a href="http://www.firstpost.com/living/indian-colleges-want-african-dollars-but-not-necessarily-the-africans-mahesh-shantaram-2996430.html" target="_blank" title="Indian colleges want African dollars (interview)">Firstpost</a>, <a href="http://www.huffingtonpost.in/2016/08/25/these-evocative-photographs-document-the-everyday-lives-of-afric_a_21458663/" target="_blank" title="Breaking stereotypes">Huffington Post</a>, <a href="http://bengaluru.citizenmatters.in/mahesh-shantaram-s-the-african-portraits-encourages-dialogue-around-racism-in-india-8649" target="_blank" title="Mahesh Shantaram’s African Portraits encourages dialogue around racism in India">Citizen Matters</a>, <a href="https://www.bbc.com/news/world-asia-india-37094516" target="_blank" title="In pictures: Africans living in India">BBC News</a>, <a href="https://www.thebetterindia.com/67185/photography-exhibition-racism-india-the-african-portrait/" target="_blank" title="An Empathetic Photo Series Sheds Light on the Invisible Lives of Africans Living in India">the better india</a>, <a href="http://scroll.in/article/808987/a-photographer-trains-his-lens-on-the-racism-faced-by-africans-in-india" target="_blank" title="A photographer trains his lens on the racism faced by Africans in India">scroll.in</a>, <a href="https://thewire.in/author/mshantaram" target="_blank" title="">thewire.in</a>, <a href="https://www.thenewsminute.com/article/stunning-photographs-go-beyond-headlines-daily-realities-african-lives-india-49093" target="_blank" title="Stunning photographs go beyond headlines to the daily realities of African lives in India">The News Minute</a>, <a href="https://www.thenational.ae/world/photographer-captures-africans-experiences-of-racism-in-india-1.223462" target="_blank" title="Photographer captures Africans’ experiences of racism in India">The National</a>, <a href="https://www.aljazeera.com/program/the-stream/2017/4/6/racism-against-africans-in-india" target="_blank" title="The Stream: Racism against Africans in India">Al-Jazeera Stream</a>, <a href="http://www.shutterloveonline.com/contest_galleries/photoannual/2017/Gallery.php?ShowCase=4#cat-CatPersonal" target="_blank">PDN Photo Annual 2017</a>, Winner - The Alkazi Foundation for the Arts Photobook Grant 2018<br><br>
@@ -202,3 +202,50 @@ Looking for a <b><a href="https://thecontrarian.contently.com/" target="_blank">
 
 </BODY>
 </HTML>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="ism/js/ism-2.0.1-min.js"></script>
+
+<script type='text/javascript'>
+//<![CDATA[ 
+
+$(function() {
+    // Stick the #menuWrap to the top of the window
+    var nav = $('#menuWrap');
+    var navHomeY = nav.offset().top;
+    var isFixed = false;
+    var $w = $(window);
+    $w.scroll(function() {
+        var scrollTop = $w.scrollTop();
+        var shouldBeFixed = scrollTop > navHomeY;
+        if (shouldBeFixed && !isFixed) {
+            nav.css({
+                position: 'fixed',
+                top: 0,
+                left: nav.offset().left,
+                width: nav.width()
+            });
+            isFixed = true;
+        }
+        else if (!shouldBeFixed && isFixed)
+        {
+            nav.css({
+                position: 'static'
+            });
+            isFixed = false;
+        }
+    });
+});
+
+//]]>  
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1782033-3', 'auto');
+  ga('send', 'pageview');
+
+</script>

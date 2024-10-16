@@ -1,0 +1,26 @@
+<span style="font-size: small;">
+<b>Mahesh Shantaram</b> | independent photographer
+</span><br /><br />
+
+<a href="mailto:ms@thecontrarian.in">ms@thecontrarian.in</a><br />
+<span style="">(+91) 99801 29770</span><br /><br />
+<!--span style="color:red; font-weight: bold;">NOTE:</span> I will be based in <span style="background: #FFFF00;">Jordan until Jan 12</span>. During this time, I can be reached at <span style="background: #FFFF00;">+962 780220296 (GMT+2)</span>.<br><br><br-->
+
+Questions, comments, queries? Get in touch with me via the email id above or the facebook messenger window below. I'm known to reply super-quickly when the situaton demands it.  
+
+<br><br><br>
+
+<form action="send.php" enctype="multipart/form-data" method="POST" style="background-color: #dddddd; padding: 10px;">
+OR send me a message instantly. I read all email. I'm prompt with my replies when the situation demands it.<br><br>
+<textarea name="Message" rows="10" cols="55"></textarea><br><br>
+Your email id<br>
+<input type="text" name="mailfrom" size="35" style="font-size: 8pt;" value="">
+<input type="hidden" name="redirect" value="http://thecontrarian.in/about/">&nbsp;&nbsp;
+<input type="submit" name="redirect" style="font-size: 8pt;" value="Send"/>
+<button class="g-recaptcha" data-sitekey="6LfRSDcUAAAAAMx8AOCjkEcNDOkTPEOXD4P2DGyv" data-callback="YourOnSubmitFn">
+Submit</button>
+<br><br>
+</form>
+<br><br>
+
+<br><br>
