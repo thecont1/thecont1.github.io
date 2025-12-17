@@ -1,0 +1,28 @@
+---
+import HeroStatement from "./HeroStatement.astro";
+import Carousel from "./Carousel";
+import "../../styles/home.css";
+
+const modules = import.meta.glob(
+  "/public/library/originals/collection/*.{jpg,jpeg,png,webp,avif}"
+);
+
+const imagePaths = Object.keys(modules).sort((a, b) =>
+  a.localeCompare(b)
+);
+
+const images = imagePaths.map((path) => ({
+  src: path.replace("/public", ""),
+  caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
+}));
+---
+
+<section class="home-hero">
+  <!-- Fixed carousel layer -->
+  <div class="hero-fixed">
+    <Carousel images={images} client:load />
+  </div>
+
+  <!-- Curtain -->
+  <HeroStatement />
+</section>
