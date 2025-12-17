@@ -1,46 +1,76 @@
-# Astro Starter Kit: Basics
+# WARP.md
 
-```sh
-npm create astro@latest -- --template basics
+This file provides guidance to WARP (warp.dev) when working with code in this repository.
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start dev server at `localhost:4321` |
+| `npm run build` | Build production site to `./dist/` |
+| `npm run preview` | Preview production build locally |
+| `npm run astro add <integration>` | Add Astro integrations |
+| `npm run astro check` | Run Astro type checking |
+
+## Tech Stack
+
+- **Framework**: Astro 5.x with React 19 integration
+- **Language**: TypeScript (strict mode via `astro/tsconfigs/strict`)
+- **Styling**: Plain CSS (no Tailwind/preprocessors)
+- **Content**: Astro Content Collections with Zod schemas
+
+## Architecture
+
+### Content Collections (`src/content/`)
+
+Three collections defined in `src/content/config.ts` with a shared schema:
+- `photography/` - Photo project entries
+- `essays/` - Text-based writing
+- `datascience/` - Data science projects
+
+Each collection uses the same base schema:
+```ts
+{ title, excerpt, status: "draft" | "published", heroImage?: string }
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Content is filtered by `status === "published"` when queried.
 
-## 🚀 Project Structure
+### Component Pattern
 
-Inside of your Astro project, you'll see the following folders and files:
+- **`.astro` files**: Static/server-rendered components (layouts, pages, structural components)
+- **`.tsx` files**: React components for client-side interactivity (use `client:load` directive)
 
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
-```
+Example: `HomeHero.astro` wraps `Carousel.tsx` with `client:load` for hydration.
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+### Hero Carousel System
 
-## 🧞 Commands
+The homepage hero uses a scroll-driven "curtain lift" animation:
 
-All commands are run from the root of the project, from a terminal:
+1. `HomeHero.astro` - Globs images from `/public/library/originals/collection/`
+2. `Carousel.tsx` - React component with auto-play, manual navigation, caption toggle
+3. `curtain-scroll-fallback.js` - JS fallback for browsers without CSS `animation-timeline: scroll()`
+4. `.hero-statement` element slides up as user scrolls, revealing carousel beneath
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+### Public Scripts (`public/`)
 
-## 👀 Want to learn more?
+Vanilla JS loaded via `<script>` tags (not bundled):
+- `snow.js` - Animated snowfall canvas effect with toggle button, respects `prefers-reduced-motion`
+- `textmode.js` - Text-only mode toggle
+- `curtain-scroll-fallback.js` - Scroll animation polyfill
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+### Image Handling
+
+- Hero images referenced via `heroImage` frontmatter field (path like `/public/library/originals/...`)
+- `normalizePublicPath()` strips `/public/` prefix for browser URLs
+- `hasPublicFile()` checks file existence at build time before rendering `<img>`
+
+### CSS Architecture
+
+Single `src/styles/home.css` file contains all homepage styles including:
+- Site header with dynamic `--nav-bg-alpha` CSS variable (controlled by scroll JS)
+- Carousel styles
+- Project cards grid
+- Responsive breakpoints
+
+The `--nav-bg-alpha` variable is set by `curtain-scroll-fallback.js` based on scroll position, enabling smooth header background transitions.
