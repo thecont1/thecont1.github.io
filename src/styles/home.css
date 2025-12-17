@@ -1,0 +1,652 @@
+/* ======================================================
+   GLOBAL
+   ====================================================== */
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+
+  /* Core palette */
+  --ink: #111;
+  --paper: #fff;
+  --surface: #f5f5f5;
+  --hairline: #e5e5e5;
+  --hairline-2: #eee;
+  --muted: #555;
+  --muted-2: #999;
+
+  /* Shadow system (replaces old shadow-soft / shadow-lift) */
+  --shadow-color: 0, 0, 0;
+  --shadow-elev-1:
+    0 1px 3px rgba(var(--shadow-color), 0.12),
+    0 1px 2px rgba(var(--shadow-color), 0.08);
+  --shadow-elev-2:
+    0 6px 14px rgba(var(--shadow-color), 0.16),
+    0 2px 4px rgba(var(--shadow-color), 0.10);
+
+  /* Card tokens */
+  --card-width: min(85vw, 350px);
+  --card-padding: 1rem 1.05rem 1.25rem;
+  --card-border: 1px solid var(--hairline-2);
+  --card-top-rule: 2px solid var(--ink);
+  --card-shadow: var(--shadow-elev-1);
+  --card-shadow-hover: var(--shadow-elev-2);
+  --card-media-border: 1px solid #e8e8e8;
+  --card-media-bg: #fafafa;
+  --card-media-padding: 0.45rem;
+
+  /* Existing globals */
+  background: var(--surface);
+  color: var(--ink);
+  --site-header-height: 64px;
+  --nav-bg-alpha: 0;
+  --carousel-gutter: 15px;
+  --controls-right: 2rem;
+  --controls-bottom: 3rem;
+  --caption-bottom: 0.85rem;
+  --controls-hit: 56px;
+  --controls-icon: 50px;
+  --controls-stroke: 3.25px;
+  --controls-shadow: 0 10px 24px rgba(0,0,0,0.0);
+  --controls-sphere-bg: rgba(255, 255, 255, 0.0);
+  --controls-sphere-border: rgba(255, 255, 255, 0.8);
+  --controls-glyph: rgba(255, 255, 255, 0.8);
+
+  --projects-label-font: "Lexend", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --projects-label-size: 3.0rem;
+  --projects-label-weight: 100;
+  --projects-label-letter-spacing: 0.005em;
+  --projects-label-nudge: 3vw;
+}
+
+/* Optional: subtly soften media background with your mix */
+@supports (background: color-mix(in srgb, #fff, #000)) {
+  body {
+    --card-media-bg: color-mix(in srgb, var(--paper), var(--surface) 55%);
+  }
+}
+
+/* ======================================================
+   SITE HEADER (LEGIBLE ON ANY IMAGE)
+   ====================================================== */
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.site-header-inner {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  height: var(--site-header-height);
+  padding: 0 2.5vw;
+  background: rgba(255, 255, 255, var(--nav-bg-alpha));
+  transition: background 220ms linear;
+}
+
+.site-header a,
+.site-header svg {
+  color: white;
+  stroke: white;
+  transition: color 220ms linear, stroke 220ms linear;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+@supports (color: color-mix(in srgb, #fff, #000)) {
+  .site-header a,
+  .site-header svg {
+    color: color-mix(in srgb, var(--paper) calc((1 - var(--nav-bg-alpha)) * 100%), var(--ink) calc(var(--nav-bg-alpha) * 100%));
+    stroke: color-mix(in srgb, var(--paper) calc((1 - var(--nav-bg-alpha)) * 100%), var(--ink) calc(var(--nav-bg-alpha) * 100%));
+    text-shadow: 0 1px 2px rgba(0, 0, 0, calc((1 - var(--nav-bg-alpha)) * 0.55));
+  }
+
+  .site-title {
+    border-color: color-mix(in srgb, var(--paper) calc((1 - var(--nav-bg-alpha)) * 100%), var(--ink) calc(var(--nav-bg-alpha) * 100%));
+  }
+}
+
+.site-title {
+  pointer-events: auto;
+  display: inline-block;
+  padding: 0.45rem 0.9rem;
+  border: 2px solid white;
+  transition: border-color 220ms linear;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+}
+
+.site-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2.2rem;
+  pointer-events: auto;
+}
+
+.site-nav a {
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.site-actions {
+  display: flex;
+  gap: 1.6rem;
+  margin-left: 3rem;
+  pointer-events: auto;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.icon-btn svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  stroke-width: 1.75;
+  fill: none;
+}
+
+#toggle-snow[aria-pressed="false"] {
+  opacity: 0.55;
+}
+
+.eye-slash {
+  stroke-width: 2;
+  opacity: 0;
+}
+
+body.text-only .eye-slash {
+  opacity: 1;
+}
+
+/* =========================
+   TEXT-ONLY MODE
+   ========================= */
+
+body.text-only img,
+body.text-only .carousel,
+body.text-only .card-media {
+  display: none !important;
+}
+
+/* =========================
+   HERO STRUCTURE
+   ========================= */
+
+.home-hero {
+  position: relative;
+}
+
+/* Fixed visual layer */
+.hero-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: var(--surface);
+  overflow: hidden;
+  transition: opacity 380ms ease;
+}
+
+/* Creates scroll distance before projects */
+.scroll-runway {
+  height: 160vh;
+}
+
+.scroll-buffer {
+  height: 120vh;
+}
+
+/* ======================================================
+   CAROUSEL (EDGE-TO-EDGE TRAIN)
+   ====================================================== */
+
+.carousel {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.carousel-gap {
+  flex: 0 0 0;
+  width: 0;
+  height: 100vh;
+  position: relative;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.carousel-gap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  --_seam: max(var(--carousel-gutter), 12px);
+  width: var(--_seam);
+  height: 100vh;
+  transform: translateX(calc(var(--_seam) * -0.5));
+  background-repeat: repeat-y;
+  background-position: center;
+  background-size: 100% 22px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='22' viewBox='0 0 24 22'%3E%3Cpath d='M0 0 L12 5.5 L0 11 L12 16.5 L0 22' fill='none' stroke='%23ffffff' stroke-opacity='0.55' stroke-width='2'/%3E%3Cpath d='M24 0 L12 5.5 L24 11 L12 16.5 L24 22' fill='none' stroke='%23000000' stroke-opacity='0.18' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-slide {
+  flex: 0 0 auto;
+  height: 100vh;
+  scroll-snap-align: start;
+}
+
+.carousel-image {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: contain;
+  display: block;
+}
+
+/* Responsive fitting */
+@media (min-aspect-ratio: 4/3) {
+  .carousel-image {
+    height: 100%;
+    width: auto;
+  }
+}
+
+@media (max-aspect-ratio: 4/3) {
+  .carousel-image {
+    height: 100%;
+    width: auto;
+  }
+}
+
+/* =========================
+   CAROUSEL CONTROLS (POST-CURTAIN)
+   ========================= */
+
+.carousel-controls {
+  position: fixed;
+  bottom: var(--controls-bottom);
+  right: var(--controls-right);
+
+  display: flex;
+  gap: 1rem;
+  z-index: 4;
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.carousel-controls button {
+  width: var(--controls-hit);
+  height: var(--controls-hit);
+  padding: 0;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  border-radius: 999px;
+  border: 3px solid var(--controls-sphere-border);
+  background: var(--controls-sphere-bg);
+  box-shadow: var(--controls-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: carousel-bob 2.6s ease-in-out infinite;
+}
+
+.carousel-controls button:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.carousel-controls button:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+.carousel-controls .carousel-glyph {
+  width: var(--controls-icon);
+  height: var(--controls-icon);
+  display: grid;
+  place-items: center;
+  font-size: calc(var(--controls-icon) * 0.82);
+  line-height: 1;
+  font-weight: 800;
+  color: var(--controls-glyph);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.carousel-controls button:hover .carousel-glyph,
+.carousel-controls button:focus-visible .carousel-glyph {
+  transform: translateY(-1px);
+}
+
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  .carousel-controls button {
+    background: rgba(255, 255, 255, 0.22);
+  }
+}
+
+@keyframes carousel-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel-controls button {
+    animation: none;
+  }
+}
+
+.carousel-caption {
+  position: fixed;
+  bottom: var(--caption-bottom);
+  right: var(--controls-right);
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.4rem 0.6rem;
+  text-align: right;
+  max-width: min(70vw, 360px);
+  transition: opacity 300ms ease;
+}
+
+/* Once curtain is gone */
+@supports (animation-timeline: scroll()) {
+  body {
+    animation: reveal-controls linear both;
+    animation-timeline: scroll();
+    animation-range: 120vh 140vh;
+  }
+}
+
+@keyframes reveal-controls {
+  to {
+    --controls-visible: 1;
+  }
+}
+
+body {
+  --controls-visible: 0;
+}
+
+body[style*="--controls-visible: 1"] .carousel-controls,
+body.controls-visible .carousel-controls {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* =========================
+   CURTAIN TEXT
+   ========================= */
+
+.hero-statement {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0vh 0vw;
+  margin: 0;
+
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(4.5rem, 8vw, 9.5rem);
+  font-weight: 700;
+  line-height: 1.02;
+  text-align: center;
+
+  color: rgba(255, 255, 255, 0.95);
+  background: rgba(90, 90, 90, 0.3);
+  text-shadow: 0px 2px 2px rgba(0, 0, 0, 1);
+
+  transform: translateY(0);
+  transition: transform 0.1s ease-out;
+
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  height: 105%;
+}
+
+/* =========================
+   SCROLL INTERACTION
+   ========================= */
+
+/* As user scrolls, curtain lifts */
+@supports (animation-timeline: scroll()) {
+  .hero-statement {
+    animation: curtain-raise linear both;
+    animation-timeline: scroll();
+    animation-range: 0vh 120vh;
+  }
+}
+
+@keyframes curtain-raise {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-120vh);
+  }
+}
+
+/* ======================================================
+   PROJECTS
+   ====================================================== */
+
+.projects {
+  position: relative;
+  z-index: 3;
+  background: var(--paper);
+  padding: 10vh 6vw 8vh;
+}
+
+.projects-header {
+  position: sticky;
+  top: var(--site-header-height);
+  z-index: 9;
+  background: var(--paper);
+  padding: 1.2rem 0 1rem;
+  margin-bottom: 8vh;
+}
+
+.projects-title {
+  position: relative;
+  margin: 0;
+
+  font-family: "Fraunces", serif;
+  font-size: 3.4rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 4px;
+  text-underline-offset: 0.18em;
+}
+
+.projects-section {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  column-gap: 4vw;
+  margin-bottom: 10vh;
+}
+
+.projects-section-apps {
+  display: none;
+}
+
+.projects-label {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-family: var(--projects-label-font);
+  font-weight: var(--projects-label-weight);
+  letter-spacing: var(--projects-label-letter-spacing);
+  font-size: var(--projects-label-size);
+  left: var(--projects-label-nudge);
+  position: relative;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.projects-row {
+  display: flex;
+  gap: 2.2rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 3rem;
+  scrollbar-width: none;
+}
+
+.projects-row::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .projects-section {
+    grid-template-columns: 60px 1fr;
+  }
+
+  .projects-row {
+    gap: 1.4rem;
+  }
+}
+
+/* ======================================================
+   PROJECT CARDS (POLAROID FEEL)
+   ====================================================== */
+
+/* Project card keeps same structure but picks up new tokens */
+.project-card {
+  background: var(--paper);
+  padding: var(--card-padding);
+  border: var(--card-border);
+  border-top: var(--card-top-rule);
+  box-shadow: var(--card-shadow);
+  width: var(--card-width);
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+  transition:
+    transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    box-shadow 220ms ease;
+}
+
+.project-card a {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.project-card:hover,
+.project-card:focus-within {
+  transform: translateY(-6px);
+  box-shadow: var(--card-shadow-hover);
+  border-top: var(--card-top-rule);
+}
+
+.card-media {
+  margin-bottom: 1rem;
+  border: var(--card-media-border);
+  background: var(--card-media-bg);
+  padding: var(--card-media-padding);
+}
+
+.card-media img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(1);
+  transition: filter 220ms ease;
+}
+
+.project-card:hover .card-media img,
+.project-card:focus-within .card-media img {
+  filter: grayscale(0);
+}
+
+.card-placeholder {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.card-placeholder rect {
+  fill: #f3f3f3;
+  stroke: #e2e2e2;
+  stroke-width: 0.04;
+}
+
+.project-card h3 {
+  font-family: "Fraunces", serif;
+  margin: 0.8rem 0 0.4rem;
+}
+
+.project-card p {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.read-more {
+  display: inline-block;
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+body.in-projects .hero-fixed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.in-projects .carousel-controls,
+body.in-projects .carousel-caption {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ======================================================
+   FOOTER
+   ====================================================== */
+
+.site-footer {
+  font-family: "Fraunces", serif;
+  position: relative;
+  z-index: 3;
+  border-top: 1px solid var(--hairline);
+  margin-top: 0;
+  background: var(--paper);
+  padding: 1.75rem 6vw;
+  text-align: center;
+  color: var(--muted-2);
+  font-size: 1.5rem;
+}

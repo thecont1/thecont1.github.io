@@ -1,11 +1,179 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import SiteHeader from "../components/SiteHeader.astro";
+import HomeHero from "../components/home/HomeHero.astro";
+import "../styles/home.css";
+import { getCollection } from "astro:content";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const photography = await getCollection("photography", ({ data }) => data.status === "published");
+const essays = await getCollection("essays", ({ data }) => data.status === "published");
+const datascience = await getCollection("datascience", ({ data }) => data.status === "published");
+
+const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") : p);
+
+const publicDir = fileURLToPath(new URL("../../public/", import.meta.url));
+const hasPublicFile = (p?: string) => {
+  if (!p) return false;
+  const rel = p.replace(/^\/+/, "");
+  return existsSync(path.join(publicDir, rel));
+};
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Mahesh Shantaram | visual artist, data scientist</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&family=Lexend:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <canvas id="snow-canvas" aria-hidden="true"></canvas>
+    <!-- Persistent navigation -->
+    <SiteHeader />
+
+    <main>
+      <!-- ===================================== -->
+      <!-- HERO: carousel + curtain -->
+      <!-- ===================================== -->
+      <HomeHero />
+
+      <!-- Creates space for curtain lift -->
+      <div class="scroll-runway"></div>
+
+      <!-- Small pause before projects take over -->
+      <div class="scroll-buffer"></div>
+
+      <!-- ===================================== -->
+      <!-- PROJECTS -->
+      <!-- ===================================== -->
+      <section class="projects">
+        <header class="projects-header">
+          <h1 class="projects-title">The Projects</h1>
+        </header>
+
+        <!-- PHOTOGRAPHY -->
+        <div class="projects-section">
+          <div class="projects-label">Photography</div>
+          <div class="projects-row">
+            {photography.map((post) => (
+              <article class="project-card image-card">
+                <a href={`/photography/${post.slug}`}>
+                  <div class="card-media">
+                    {(() => {
+                      const heroSrc = normalizePublicPath(post.data.heroImage);
+                      return heroSrc && hasPublicFile(heroSrc) ? (
+                        <img src={heroSrc} alt={post.data.title} />
+                      ) : (
+                        <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
+                          <rect x="0" y="0" width="4" height="3" />
+                        </svg>
+                      );
+                    })()}
+                  </div>
+                  <h3>{post.data.title}</h3>
+                  <p>{post.data.excerpt}</p>
+                  <span class="read-more">Read More →</span>
+                </a>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <!-- ESSAYS -->
+        <div class="projects-section">
+          <div class="projects-label">Writing</div>
+          <div class="projects-row">
+            {essays.map((post) => (
+              <article class="project-card text-card">
+                <a href={`/essay/${post.slug}`}>
+                  <h3>{post.data.title}</h3>
+                  <p>{post.data.excerpt}</p>
+                  <span class="read-more">Read More →</span>
+                </a>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <!-- DATA SCIENCE -->
+        <div class="projects-section">
+          <div class="projects-label">Data Science</div>
+          <div class="projects-row">
+            {datascience.map((post) => (
+              <article class="project-card image-card">
+                <a href={`/datascience/${post.slug}`}>
+                  <div class="card-media">
+                    {(() => {
+                      const heroSrc = normalizePublicPath(post.data.heroImage);
+                      return heroSrc && hasPublicFile(heroSrc) ? (
+                        <img src={heroSrc} alt={post.data.title} />
+                      ) : (
+                        <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
+                          <rect x="0" y="0" width="4" height="3" />
+                        </svg>
+                      );
+                    })()}
+                  </div>
+                  <h3>{post.data.title}</h3>
+                  <p>{post.data.excerpt}</p>
+                  <span class="read-more">Read More →</span>
+                </a>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <!-- APPS -->
+        <div class="projects-section projects-section-apps">
+          <div class="projects-label">Apps</div>
+          <div class="projects-row">
+            {datascience.map((post) => (
+              <article class="project-card image-card">
+                <a href={`/datascience/${post.slug}`}>
+                  <div class="card-media">
+                    {(() => {
+                      const heroSrc = normalizePublicPath(post.data.heroImage);
+                      return heroSrc && hasPublicFile(heroSrc) ? (
+                        <img src={heroSrc} alt={post.data.title} />
+                      ) : (
+                        <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
+                          <rect x="0" y="0" width="4" height="3" />
+                        </svg>
+                      );
+                    })()}
+                  </div>
+                  <h3>{post.data.title}</h3>
+                  <p>{post.data.excerpt}</p>
+                  <span class="read-more">Read More →</span>
+                </a>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================== -->
+      <!-- FOOTER -->
+      <!-- ===================================== -->
+      <footer class="site-footer">
+        <p>
+          &copy; {new Date().getFullYear()} Mahesh Shantaram. All rights reserved.
+        </p>
+      </footer>
+    </main>
+    <script src="/textmode.js" defer></script>
+    <script src="/curtain-scroll-fallback.js" defer></script>
+    <script src="/snow.js" defer></script>
+  </body>
+</html>
