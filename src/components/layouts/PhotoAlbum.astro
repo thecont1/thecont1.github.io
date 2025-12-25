@@ -1,0 +1,86 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Carousel from "../home/Carousel";
+import "../../styles/home.css";
+
+interface Props {
+  post: CollectionEntry<"photography">;
+}
+
+const { post } = Astro.props;
+
+// Glob all images from the library
+const allImages = import.meta.glob(
+  "/public/library/originals/**/*.{jpg,jpeg,png,webp,avif}"
+);
+
+// Filter images that belong to this project/container
+// Assuming images are stored in /public/library/originals/{container}/ or {slug}/
+const container = post.data.container || post.slug;
+const filterPath = `/public/library/originals/${container}/`;
+
+const imagePaths = Object.keys(allImages)
+  .filter((path) => path.includes(filterPath))
+  .sort((a, b) => a.localeCompare(b));
+
+const images = imagePaths.map((path) => ({
+  src: path.replace("/public", ""),
+  caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
+}));
+---
+
+<div class="photo-album-layout">
+  <div class="album-carousel">
+    {images.length > 0 ? (
+      <Carousel images={images} client:load />
+    ) : (
+      <div class="no-images">
+        <p>No images found in {filterPath}</p>
+      </div>
+    )}
+  </div>
+  
+  <div class="album-info">
+    <h1>{post.data.title}</h1>
+    <p>{post.data.excerpt}</p>
+  </div>
+</div>
+
+<style>
+  .photo-album-layout {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: var(--paper);
+    overflow: hidden;
+  }
+
+  .album-carousel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .album-info {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1rem;
+    max-width: 400px;
+    border-radius: 4px;
+    pointer-events: none; /* Let clicks pass through to carousel controls if needed */
+  }
+
+  .no-images {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--muted);
+  }
+</style>

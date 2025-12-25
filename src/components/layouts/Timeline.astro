@@ -1,0 +1,124 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"photography" | "essays">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<!-- 
+  Timeline Component
+  In a real implementation, this would parse the content or use a structured data source
+  to render a horizontal scrolling timeline. 
+  For now, we'll implement the horizontal scroll container structure.
+-->
+
+<div class="timeline-layout">
+  <header class="timeline-header">
+    <h1>{post.data.title}</h1>
+    <p>Scroll &rarr;</p>
+  </header>
+
+  <div class="timeline-scroll-container">
+    <div class="timeline-track">
+      <!-- 
+        Placeholder timeline entries. 
+        In production, we'd map over structured events from frontmatter or content.
+      -->
+      <article class="timeline-event intro-card">
+        <h2>{post.data.excerpt}</h2>
+      </article>
+
+      <div class="timeline-content-wrapper">
+        <Content />
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .timeline-layout {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .timeline-header {
+    padding: 1rem 2rem;
+    background: var(--paper);
+    border-bottom: 1px solid var(--hairline);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .timeline-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 1.2rem;
+    margin: 0;
+  }
+
+  .timeline-scroll-container {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    display: flex;
+    align-items: center;
+    /* Hide scrollbar for cleaner look, but keep functionality */
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+  }
+
+  .timeline-scroll-container::-webkit-scrollbar {
+    display: none;
+  }
+
+  .timeline-track {
+    display: flex;
+    padding: 0 4rem;
+    gap: 4rem;
+    height: 70vh; /* Contain content height */
+    align-items: center;
+  }
+
+  .timeline-event {
+    flex: 0 0 400px;
+    background: var(--paper);
+    padding: 2rem;
+    border: 1px solid var(--hairline-2);
+    border-radius: 2px;
+  }
+
+  .intro-card {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .timeline-content-wrapper {
+    display: flex;
+    gap: 4rem;
+  }
+  
+  /* Force children of Content to layout horizontally */
+  .timeline-content-wrapper :global(> *) {
+    flex: 0 0 400px; /* Each paragraph/block becomes a card */
+    width: 400px;
+    max-height: 100%;
+    overflow-y: auto;
+  }
+
+  .timeline-content-wrapper :global(img) {
+    width: auto;
+    height: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    flex: 0 0 auto; /* Images size naturally */
+  }
+</style>

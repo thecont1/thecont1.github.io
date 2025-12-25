@@ -1,0 +1,25 @@
+---
+import Post from "./Post.astro";
+import Longform from "./Longform.astro";
+import PhotoEssay from "./PhotoEssay.astro";
+import PhotoAlbum from "./PhotoAlbum.astro";
+import Code from "./Code.astro";
+import Timeline from "./Timeline.astro";
+import Thread from "./Thread.astro";
+
+const { post } = Astro.props;
+
+const layouts = {
+  post: Post,
+  longform: Longform,
+  "photo-essay": PhotoEssay,
+  "photo-album": PhotoAlbum,
+  code: Code,
+  timeline: Timeline,
+  thread: Thread,
+};
+
+const Component = layouts[post.data.layout] || Post;
+---
+
+<Component post={post} />

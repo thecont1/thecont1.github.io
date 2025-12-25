@@ -1,0 +1,90 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"photography" | "essays">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<article class="photo-essay-layout">
+  <header class="photo-essay-header">
+    <h1>{post.data.title}</h1>
+    {post.data.excerpt && <p class="intro">{post.data.excerpt}</p>}
+  </header>
+
+  <div class="photo-essay-content">
+    <Content />
+  </div>
+</article>
+
+<style>
+  .photo-essay-layout {
+    width: 100%;
+  }
+
+  .photo-essay-header {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10rem 2rem 6rem;
+    text-align: center;
+  }
+
+  .photo-essay-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .intro {
+    font-size: 1.25rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .photo-essay-content {
+    /* Allow images to go full width or wide */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Default text container */
+  .photo-essay-content :global(p),
+  .photo-essay-content :global(h2),
+  .photo-essay-content :global(h3),
+  .photo-essay-content :global(ul),
+  .photo-essay-content :global(ol) {
+    width: 100%;
+    max-width: 680px;
+    padding: 0 1.5rem;
+    margin-bottom: 1.5rem;
+    font-family: "Inter", sans-serif;
+    line-height: 1.7;
+  }
+
+  /* Images break out of the column */
+  .photo-essay-content :global(img) {
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    margin: 3rem 0;
+    display: block;
+  }
+
+  .photo-essay-content :global(figure) {
+    width: 100%;
+    max-width: 1200px;
+    margin: 3rem 0;
+  }
+
+  .photo-essay-content :global(figcaption) {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    font-family: "DM Sans", sans-serif;
+  }
+</style>

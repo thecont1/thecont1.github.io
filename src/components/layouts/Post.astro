@@ -1,0 +1,74 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"photography" | "essays" | "datascience">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<article class="post-layout">
+  <header class="post-header">
+    <h1>{post.data.title}</h1>
+    {post.data.excerpt && <p class="post-excerpt">{post.data.excerpt}</p>}
+  </header>
+
+  <div class="post-content">
+    <Content />
+  </div>
+</article>
+
+<style>
+  .post-layout {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+  }
+
+  .post-header {
+    margin-bottom: 3rem;
+    text-align: center;
+  }
+
+  .post-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+  }
+
+  .post-excerpt {
+    font-family: "DM Sans", sans-serif;
+    font-size: 1.2rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .post-content {
+    font-family: "Inter", sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+
+  .post-content :global(p) {
+    margin-bottom: 1.5em;
+  }
+
+  .post-content :global(h2) {
+    font-family: "Fraunces", serif;
+    margin-top: 2.5em;
+    margin-bottom: 1em;
+    font-size: 2rem;
+  }
+
+  .post-content :global(blockquote) {
+    border-left: 3px solid var(--accent);
+    padding-left: 1.5rem;
+    margin-left: 0;
+    font-style: italic;
+    color: var(--muted);
+  }
+</style>
