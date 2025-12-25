@@ -1,0 +1,19 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import ContentDispatcher from "../../components/layouts/ContentDispatcher.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("photography");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<Layout title={post.data.title}>
+  <ContentDispatcher post={post} />
+</Layout>

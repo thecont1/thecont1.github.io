@@ -1,0 +1,83 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"photography" | "essays" | "datascience">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<article class="longform-layout">
+  <header class="longform-header">
+    <h1>{post.data.title}</h1>
+    {post.data.excerpt && <p class="lead">{post.data.excerpt}</p>}
+  </header>
+
+  <div class="longform-content">
+    <Content />
+  </div>
+</article>
+
+<style>
+  .longform-layout {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 10rem 2rem 6rem;
+  }
+
+  .longform-header {
+    margin-bottom: 5rem;
+    text-align: center;
+  }
+
+  .longform-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 4rem;
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 2rem;
+  }
+
+  .lead {
+    font-family: "Fraunces", serif;
+    font-size: 1.5rem;
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--muted);
+  }
+
+  .longform-content {
+    font-family: "Merriweather", "Georgia", serif; /* Fallback to a serif for longform */
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--ink);
+  }
+
+  /* Drop cap for first paragraph */
+  .longform-content > p:first-of-type::first-letter {
+    float: left;
+    font-family: "Fraunces", serif;
+    font-size: 4.5em;
+    line-height: 0.8;
+    padding-top: 0.1em;
+    padding-right: 0.1em;
+    color: var(--ink);
+  }
+
+  .longform-content :global(h2) {
+    font-family: "Fraunces", serif;
+    font-size: 2rem;
+    margin-top: 3em;
+    margin-bottom: 1em;
+    text-align: center;
+  }
+
+  .longform-content :global(hr) {
+    margin: 4rem auto;
+    width: 100px;
+    border: 0;
+    border-top: 1px solid var(--muted);
+  }
+</style>

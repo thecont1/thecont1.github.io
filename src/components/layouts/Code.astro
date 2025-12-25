@@ -1,0 +1,88 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  post: CollectionEntry<"datascience">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+---
+
+<article class="code-layout">
+  <header class="code-header">
+    <h1>{post.data.title}</h1>
+    {post.data.excerpt && <p class="summary">{post.data.excerpt}</p>}
+    <div class="meta">
+      <span class="engine">Engine: {post.data.notebook?.engine || "Marimo"}</span>
+    </div>
+  </header>
+
+  <div class="notebook-container">
+    <Content />
+    <!-- 
+      Future integration: 
+      If post.data.notebook.engine === 'marimo', 
+      we might inject the Marimo runtime or specific iframe here. 
+    -->
+  </div>
+</article>
+
+<style>
+  .code-layout {
+    max-width: 100%;
+    background: var(--surface);
+    min-height: 100vh;
+  }
+
+  .code-header {
+    background: var(--paper);
+    padding: 6rem 2rem 3rem;
+    border-bottom: 1px solid var(--hairline);
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .code-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .summary {
+    font-family: "DM Sans", sans-serif;
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
+
+  .meta {
+    margin-top: 2rem;
+    font-family: "Inter", monospace;
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .notebook-container {
+    max-width: 900px;
+    margin: 4rem auto;
+    padding: 0 2rem 4rem;
+    font-family: "Inter", sans-serif;
+  }
+
+  /* Code block styling override */
+  .notebook-container :global(pre) {
+    background: #f4f4f4 !important;
+    border-radius: 6px;
+    padding: 1.5rem;
+    border: 1px solid var(--hairline-2);
+    overflow-x: auto;
+  }
+
+  .notebook-container :global(code) {
+    font-family: "Fira Code", monospace;
+    font-size: 0.9em;
+  }
+</style>

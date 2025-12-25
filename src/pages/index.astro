@@ -8,7 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const photography = await getCollection("photography", ({ data }) => data.status === "published");
-const essays = await getCollection("essays", ({ data }) => data.status === "published");
+const writing = await getCollection("writing", ({ data }) => data.status === "published");
 const datascience = await getCollection("datascience", ({ data }) => data.status === "published");
 
 const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") : p);
@@ -57,7 +57,7 @@ const hasPublicFile = (p?: string) => {
       <!-- ===================================== -->
       <!-- PROJECTS -->
       <!-- ===================================== -->
-      <section class="projects">
+      <section id="projects" class="projects">
         <header class="projects-header">
           <h1 class="projects-title">The Projects</h1>
         </header>
@@ -90,13 +90,13 @@ const hasPublicFile = (p?: string) => {
           </div>
         </div>
 
-        <!-- ESSAYS -->
+        <!-- WRITING -->
         <div class="projects-section">
           <div class="projects-label">Writing</div>
           <div class="projects-row">
-            {essays.map((post) => (
+            {writing.map((post) => (
               <article class="project-card text-card">
-                <a href={`/essay/${post.slug}`}>
+                <a href={`/writing/${post.slug}`}>
                   <h3>{post.data.title}</h3>
                   <p>{post.data.excerpt}</p>
                   <span class="read-more">Read More →</span>
@@ -164,6 +164,101 @@ const hasPublicFile = (p?: string) => {
       </section>
 
       <!-- ===================================== -->
+      <!-- ABOUT ME -->
+      <!-- ===================================== -->
+      <section id="about" class="about-section">
+        <header class="projects-header">
+          <h2 class="projects-title">About Me</h2>
+        </header>
+
+        <div class="about-container">
+          <div class="about-text">
+            <p class="lead"><strong>Mahesh Shantaram</strong> <br><i>Documentary Photographer. <br>Visual Artist. <br>Data Scientist. <br>Bangalore, India.</i></p>
+            <p>I'm Mahesh Shantaram, independent photographer based in Bangalore, India. I use personal and subjective documentary photo series to study complex systems, societies, and institutions, particularly with reference to contemporary India.</p>
+            <p>Everything that's great about India and everything that's wrong with it can be summarised by a single wedding. <a href="/photography/matrimania">Matrimania</a>, six years in the making, is a fictional photo series about society seen through the prism of India's wedding culture. Matrimania was seen at photo festivals around the world, such as Photoquai 2011, PhotoPhnomPenh 2012, Delhi Photo Festival 2013, Addis Photo Festival 2014, Chobi Mela 2015, and Angkor Photo Festival 2015.</p>
+            <p>I'm often seen rubbing shoulders with politicians. This is necessitated by the project <a href="/photography/lastdays">Last Days of Manmohan</a> that was born during the tumultuous days leading into India's hotly contested general elections of 2014. (Mis)using the tools of news photojournalism to document political culture in India, I offer a window into the theatre of Indian-style politics and its state actors.</p>
+            <p>My latest obsession in 2016 concerns <a href="/photography/africans">racism in India</a>. I look at this difficult subject through anecdotes and stories of black Africans living in India. This is the realisation of a long-held dream to work on a pure portrait project.</p>
+            <p>Circumstances once forced me to <a href="http://thecontrarian.in/blog/2007/bangalore_loves_volvo.php" target="_blank" rel="noopener noreferrer">steer a Volvo bus to safety</a>. I've also flown a plane after downing six pints of Guinness the previous night (this is not recommended). My personal goal for <strike>2010</strike> <strike>2011</strike> <strike>2012</strike> <strike>2014</strike> the near future is to learn to drive a car.</p>
+            <p>After a degree in Computer Electronics, I went on to offset the error with a diploma in photography from Paris. I moved back to Bangalore in 2006 and have been an independent photographer ever since.</p>
+            
+            <div class="about-links">
+               <a href="/about/cv_MaheshShantaram.pdf" class="btn-text" target="_blank">View Resume →</a>
+            </div>
+          </div>
+
+          <div class="about-scroll-wrapper">
+            <div class="about-images">
+              <figure class="about-card">
+                <img src="/assets/ms1.jpg" alt="Portrait by my 3 year-old niece" />
+                <figcaption>Portrait by my 3 year-old niece when I was teaching her how to make a portrait. San Jose, 2013.</figcaption>
+              </figure>
+              <figure class="about-card">
+                <img src="/assets/ms2.jpg" alt="Photoquai, Paris, 2011" />
+                <figcaption>My profound explanation causes the Culture Minister to instantly spin into a deep meditative state whereupon he ponders the meaning of life; Photoquai, Paris, 2011.</figcaption>
+              </figure>
+              <figure class="about-card">
+                <img src="/assets/ms3.jpg" alt="First days. Navi Mumbai, 2000" />
+                <figcaption>First days. Navi Mumbai, 2000.</figcaption>
+              </figure>
+              <figure class="about-card">
+                <img src="/assets/ms1.jpg" alt="Portrait by my 3 year-old niece" />
+                <figcaption>Portrait by my 3 year-old niece when I was teaching her how to make a portrait. San Jose, 2013.</figcaption>
+              </figure>
+              <figure class="about-card">
+                <img src="/assets/ms2.jpg" alt="Photoquai, Paris, 2011" />
+                <figcaption>My profound explanation causes the Culture Minister to instantly spin into a deep meditative state whereupon he ponders the meaning of life; Photoquai, Paris, 2011.</figcaption>
+              </figure>
+              <figure class="about-card">
+                <img src="/assets/ms3.jpg" alt="First days. Navi Mumbai, 2000" />
+                <figcaption>First days. Navi Mumbai, 2000.</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================================== -->
+      <!-- CONTACT -->
+      <!-- ===================================== -->
+      <section id="contact" class="contact-section">
+        <header class="projects-header">
+          <h2 class="projects-title">Contact</h2>
+        </header>
+        
+        <div class="contact-grid">
+          <div class="whatsapp-box">
+            <h3>Start a Conversation over WhatsApp</h3>
+            <p class="wa-label">Type a message below and hit send to open a chat with me.</p>
+            <form id="wa-form" class="wa-form">
+              <textarea id="wa-message" rows="7" placeholder="Hi Mahesh, I'd like to discuss..."></textarea>
+              <button type="submit" class="wa-btn">
+                Send to WhatsApp
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 2L11 13" />
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z" />
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <div class="contact-info">
+            <p class="contact-intro">Get in touch for assignments, print sales, or just to say hello.</p>
+            <a href="mailto:ms@thecontrarian.in" class="email-link">ms@thecontrarian.in</a>
+            
+            <div class="social-links">
+              <a href="https://x.com/thecontrarian" target="_blank" rel="noopener noreferrer" class="social-link">
+                X (Twitter) ↗
+              </a>
+              <a href="https://www.linkedin.com/in/mahesh-shantaram/" target="_blank" rel="noopener noreferrer" class="social-link">
+                LinkedIn ↗
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ===================================== -->
       <!-- FOOTER -->
       <!-- ===================================== -->
       <footer class="site-footer">
@@ -175,5 +270,22 @@ const hasPublicFile = (p?: string) => {
     <script src="/textmode.js" defer></script>
     <script src="/curtain-scroll-fallback.js" defer></script>
     <script src="/snow.js" defer></script>
+    <script>
+      // WhatsApp Form Handler
+      const form = document.getElementById('wa-form');
+      const messageInput = document.getElementById('wa-message');
+      const PHONE_NUMBER = "919980129770";
+
+      if (form && messageInput) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const text = encodeURIComponent(messageInput.value);
+          if (!text) return;
+          
+          const url = `https://wa.me/${PHONE_NUMBER}?text=${text}`;
+          window.open(url, '_blank');
+        });
+      }
+    </script>
   </body>
 </html>
