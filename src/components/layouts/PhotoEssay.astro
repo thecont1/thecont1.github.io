@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import Lightbox from "../ui/Lightbox.astro";
 
 interface Props {
   post: CollectionEntry<"photography" | "essays">;
@@ -18,6 +19,8 @@ const { Content } = await post.render();
   <div class="photo-essay-content">
     <Content />
   </div>
+
+  <Lightbox selector=".photo-essay-content" gallery={post.data.lightbox?.gallery} />
 </article>
 
 <style>

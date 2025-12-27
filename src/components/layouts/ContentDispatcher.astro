@@ -6,6 +6,8 @@ import PhotoAlbum from "./PhotoAlbum.astro";
 import Code from "./Code.astro";
 import Timeline from "./Timeline.astro";
 import Thread from "./Thread.astro";
+import Datastory from "./Datastory.astro";
+import Project from "./Project.astro";
 
 const { post } = Astro.props;
 
@@ -17,6 +19,8 @@ const layouts = {
   code: Code,
   timeline: Timeline,
   thread: Thread,
+  datastory: Datastory,
+  project: Project,
 };
 
 const Component = layouts[post.data.layout] || Post;
