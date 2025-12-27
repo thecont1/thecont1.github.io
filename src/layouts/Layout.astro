@@ -1,5 +1,6 @@
 ---
 import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 import "../styles/home.css";
 
 interface Props {
@@ -35,11 +36,7 @@ const { title } = Astro.props;
     </main>
 
     <!-- FOOTER -->
-    <footer class="site-footer">
-      <p>
-        &copy; {new Date().getFullYear()} Mahesh Shantaram. All rights reserved.
-      </p>
-    </footer>
+    <SiteFooter />
 
     <script src="/textmode.js" defer></script>
     <script src="/curtain-scroll-fallback.js" defer></script>

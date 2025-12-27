@@ -67,6 +67,13 @@
   let raf = 0;
   let enabled = true;
 
+  try {
+    const saved = sessionStorage.getItem("snow_enabled");
+    if (saved !== null) {
+      enabled = saved === "true";
+    }
+  } catch (e) {}
+
   const readNavAlpha = () => {
     const raw = getComputedStyle(document.body).getPropertyValue("--nav-bg-alpha");
     const n = Number.parseFloat(raw);
@@ -75,6 +82,10 @@
 
   const setCanvasEnabled = (on) => {
     enabled = !!on;
+    try {
+      sessionStorage.setItem("snow_enabled", String(enabled));
+    } catch (e) {}
+
     canvas.style.display = enabled ? "block" : "none";
     setPressed(enabled);
 
