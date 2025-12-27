@@ -13,9 +13,14 @@ const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") :
 const publicDir = fileURLToPath(new URL("../../../public/", import.meta.url));
 const hasPublicFile = (p?: string) => {
   if (!p) return false;
-  const rel = p.replace(/^\/+/, "");
+  let rel = p.replace(/^\/+/, "");
+  // If the path starts with 'public/', remove it because publicDir already includes it
+  if (rel.startsWith("public/")) {
+    rel = rel.replace(/^public\//, "");
+  }
   return existsSync(path.join(publicDir, rel));
 };
+
 ---
 
 <section id="projects" class="projects">
@@ -81,5 +86,33 @@ const hasPublicFile = (p?: string) => {
     </div>
   </div>
 
+
+  <!-- DATA STORIES -->
+  <div class="projects-section">
+    <div class="projects-label">Data Stories</div>
+    <div class="projects-row">
+      {datascience.map((post) => (
+        <article class="project-card image-card">
+          <a href={`/datascience/${post.slug}`}>
+            <div class="card-media">
+              {(() => {
+                const heroSrc = normalizePublicPath(post.data.heroImage);
+                return heroSrc && hasPublicFile(heroSrc) ? (
+                  <img src={heroSrc} alt={post.data.title} />
+                ) : (
+                  <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
+                    <rect x="0" y="0" width="4" height="3" />
+                  </svg>
+                );
+              })()}
+            </div>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.excerpt}</p>
+            <span class="read-more">Read More →</span>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
 
 </section>

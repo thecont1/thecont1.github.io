@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import Carousel from "../carousel/Carousel.tsx";
+import Lightbox from "../ui/Lightbox.astro";
 import "../../styles/home.css";
 
 interface Props {
@@ -15,7 +15,6 @@ const allImages = import.meta.glob(
 );
 
 // Filter images that belong to this project/container
-// Assuming images are stored in /public/library/originals/{container}/ or {slug}/
 const container = post.data.container || post.slug;
 const filterPath = `/public/library/originals/${container}/`;
 
@@ -30,57 +29,86 @@ const images = imagePaths.map((path) => ({
 ---
 
 <div class="photo-album-layout">
-  <div class="album-carousel">
-    {images.length > 0 ? (
-      <Carousel images={images} client:load />
-    ) : (
+  <header class="album-header">
+    <h1>{post.data.title}</h1>
+    <p>{post.data.excerpt}</p>
+  </header>
+
+  <div class="album-grid">
+    {images.map((img) => (
+      <figure class="album-item">
+        <img src={img.src} alt={img.caption || ""} loading="lazy" />
+        {img.caption && <figcaption>{img.caption}</figcaption>}
+      </figure>
+    ))}
+    {images.length === 0 && (
       <div class="no-images">
         <p>No images found in {filterPath}</p>
       </div>
     )}
   </div>
-  
-  <div class="album-info">
-    <h1>{post.data.title}</h1>
-    <p>{post.data.excerpt}</p>
-  </div>
+
+  <Lightbox selector=".album-grid" gallery={post.data.lightbox?.gallery} />
 </div>
 
 <style>
   .photo-album-layout {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    background: var(--paper);
-    overflow: hidden;
+    min-height: 100vh;
+    background: #f9e4e4;
+    padding: 6rem 0;
   }
 
-  .album-carousel {
-    position: absolute;
-    top: 0;
-    left: 0;
+  .album-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .album-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  .album-header p {
+    color: #666;
+  }
+
+  /* Tight Masonry Grid */
+  .album-grid {
+    column-count: 2;
+    column-gap: 0px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .album-item {
+    break-inside: avoid;
+    margin: 0;
+    background: none;
+    padding: 3px;
+    line-height: 0;
+    display: block;
+  }
+
+  .album-item img {
     width: 100%;
-    height: 100%;
-    z-index: 1;
+    height: auto;
+    display: block;
+    border-radius: 0;
   }
 
-  .album-info {
-    position: absolute;
-    bottom: 2rem;
-    left: 2rem;
-    z-index: 2;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 1rem;
-    max-width: 400px;
-    border-radius: 4px;
-    pointer-events: none; /* Let clicks pass through to carousel controls if needed */
+  .album-item figcaption {
+    display: none;
   }
 
   .no-images {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--muted);
+    text-align: center;
+    padding: 4rem;
+    color: #666;
+    grid-column: 1 / -1;
   }
 </style>

@@ -2,7 +2,7 @@ import { defineCollection, z } from "astro:content";
 
 // Reusable schemas
 const categoryEnum = z.enum(["photography", "writing", "datastories", "lab0"]);
-const layoutEnum = z.enum(["post", "longform", "photo-essay", "photo-album", "notebook", "timeline", "thread"]);
+const layoutEnum = z.enum(["post", "longform", "photo-essay", "photo-album", "notebook", "timeline", "thread", "datastory", "project", "code"]);
 const geographyEnum = z.enum(["bangalore", "india", "africa", "europe", "usa", "asia", "middle-east", "airtime"]);
 const themeEnum = z.enum(["weddings", "travel", "society", "justice", "technology", "motorcycling", "humour", "interview", "lore", "night"]);
 const containerEnum = z.enum(["matrimania", "the-african-portraits", "last-days-of-manmohan", "magazine-work", "indiacomestogether", "caerdydd-diary", "bruxelles-diary", "conakry-diary"]);
@@ -28,7 +28,12 @@ const baseSchema = z.object({
     engine: z.enum(["marimo", "jupyter"]).optional(),
     entry: z.string().optional(),
     env: z.string().optional(),
-  }).optional()
+  }).optional(),
+
+  // Lightbox settings
+  lightbox: z.object({
+    gallery: z.boolean().optional().default(true),
+  }).optional().default({ gallery: true })
 });
 
 export const collections = {
