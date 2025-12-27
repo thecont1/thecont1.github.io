@@ -1,0 +1,85 @@
+---
+import { getCollection } from "astro:content";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const photography = await getCollection("photography", ({ data }) => data.status === "published");
+const writing = await getCollection("writing", ({ data }) => data.status === "published");
+const datascience = await getCollection("datascience", ({ data }) => data.status === "published");
+
+const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") : p);
+
+const publicDir = fileURLToPath(new URL("../../../public/", import.meta.url));
+const hasPublicFile = (p?: string) => {
+  if (!p) return false;
+  const rel = p.replace(/^\/+/, "");
+  return existsSync(path.join(publicDir, rel));
+};
+---
+
+<section id="projects" class="projects">
+  <header class="projects-header">
+    <h1 class="projects-title">The Projects</h1>
+  </header>
+
+  <!-- PHOTOGRAPHY -->
+  <div class="projects-section">
+    <div class="projects-label">Photography</div>
+    <div class="projects-row">
+      {photography.map((post) => (
+
+        <article class="project-card image-card">
+          <a href={`/photography/${post.slug}`}>
+            <div class="card-media">
+              {(() => {
+                const heroSrc = normalizePublicPath(post.data.heroImage);
+                return heroSrc && hasPublicFile(heroSrc) ? (
+                  <img src={heroSrc} alt={post.data.title} />
+                ) : (
+                  <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
+                    <rect x="0" y="0" width="4" height="3" />
+                  </svg>
+                );
+              })()}
+            </div>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.excerpt}</p>
+            <span class="read-more">Read More →</span>
+          </a>
+        </article>
+
+      ))}
+    </div>
+  </div>
+
+  <!-- WRITING -->
+  <div class="projects-section">
+    <div class="projects-label">Writing</div>
+    <div class="projects-row">
+      {writing.map((post) => (
+        <article class="project-card image-card">
+          <a href={`/writing/${post.slug}`}>
+            <div class="card-media">
+              {(() => {
+                const heroSrc = normalizePublicPath(post.data.heroImage);
+                return heroSrc && hasPublicFile(heroSrc) ? (
+                  <img src={heroSrc} alt={post.data.title} />
+                ) : (
+                  <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
+                    <rect x="0" y="0" width="4" height="3" />
+                  </svg>
+                );
+              })()}
+            </div>
+            <h3>{post.data.title}</h3>
+            <p>{post.data.excerpt}</p>
+            <span class="read-more">Read More →</span>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+
+
+</section>

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from "react";
+import CaptionToggle from "./CaptionToggle";
 
 type Image = {
   src: string;
@@ -83,16 +84,9 @@ export default function Carousel({ images }: { images: Image[] }) {
             &lt;
           </span>
         </button>
-        <button
-          type="button"
-          aria-label="Toggle image info"
-          aria-pressed={showCaption}
-          onClick={onToggleInfo}
-        >
-          <span className="carousel-glyph" aria-hidden="true">
-            i
-          </span>
-        </button>
+        
+        <CaptionToggle enabled={showCaption} onToggle={onToggleInfo} />
+        
         <button type="button" aria-label="Next image" onClick={onNext}>
           <span className="carousel-glyph" aria-hidden="true">
             &gt;
