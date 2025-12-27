@@ -1,0 +1,36 @@
+---
+import IconX from "./icons/IconX.astro";
+import IconLinkedIn from "./icons/IconLinkedIn.astro";
+import IconInstagram from "./icons/IconInstagram.astro";
+import IconWhatsApp from "./icons/IconWhatsApp.astro";
+import IconGravatar from "./icons/IconGravatar.astro";
+import IconGitHub from "./icons/IconGitHub.astro";
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-socials">
+      <a href="https://x.com/thecontrarian" target="_blank" aria-label="X (Twitter)">
+        <IconX width="24" height="24" />
+      </a>
+      <a href="https://www.linkedin.com/in/mahesh-shantaram" target="_blank" aria-label="LinkedIn">
+        <IconLinkedIn width="24" height="24" />
+      </a>
+      <a href="https://wa.me/919980129770" target="_blank" aria-label="WhatsApp">
+        <IconWhatsApp width="24" height="24" />
+      </a>
+      <a href="https://www.instagram.com/thesquarerootofindia/" aria-label="Instagram">
+        <IconInstagram width="24" height="24" />
+      </a>
+      <a href="https://gravatar.com/thecont1" aria-label="Gravatar">
+        <IconGravatar width="24" height="24" />
+      </a>
+      <a href="https://github.com/thecont1" target="_blank" aria-label="GitHub">
+        <IconGitHub width="24" height="24" />
+      </a>
+    </div>
+    <p>
+      &copy; {new Date().getFullYear()} Mahesh Shantaram. All rights reserved.
+    </p>
+  </div>
+</footer>

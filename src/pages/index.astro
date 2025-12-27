@@ -1,5 +1,6 @@
 ---
 import SiteHeader from "../components/SiteHeader.astro";
+import SiteFooter from "../components/SiteFooter.astro";
 import HomeHero from "../components/home/HomeHero.astro";
 import "../styles/home.css";
 import { getCollection } from "astro:content";
@@ -106,61 +107,6 @@ const hasPublicFile = (p?: string) => {
           </div>
         </div>
 
-        <!-- DATA SCIENCE -->
-        <div class="projects-section">
-          <div class="projects-label">Data Science</div>
-          <div class="projects-row">
-            {datascience.map((post) => (
-              <article class="project-card image-card">
-                <a href={`/datascience/${post.slug}`}>
-                  <div class="card-media">
-                    {(() => {
-                      const heroSrc = normalizePublicPath(post.data.heroImage);
-                      return heroSrc && hasPublicFile(heroSrc) ? (
-                        <img src={heroSrc} alt={post.data.title} />
-                      ) : (
-                        <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
-                          <rect x="0" y="0" width="4" height="3" />
-                        </svg>
-                      );
-                    })()}
-                  </div>
-                  <h3>{post.data.title}</h3>
-                  <p>{post.data.excerpt}</p>
-                  <span class="read-more">Read More →</span>
-                </a>
-              </article>
-            ))}
-          </div>
-        </div>
-
-        <!-- APPS -->
-        <div class="projects-section projects-section-apps">
-          <div class="projects-label">Apps</div>
-          <div class="projects-row">
-            {datascience.map((post) => (
-              <article class="project-card image-card">
-                <a href={`/datascience/${post.slug}`}>
-                  <div class="card-media">
-                    {(() => {
-                      const heroSrc = normalizePublicPath(post.data.heroImage);
-                      return heroSrc && hasPublicFile(heroSrc) ? (
-                        <img src={heroSrc} alt={post.data.title} />
-                      ) : (
-                        <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
-                          <rect x="0" y="0" width="4" height="3" />
-                        </svg>
-                      );
-                    })()}
-                  </div>
-                  <h3>{post.data.title}</h3>
-                  <p>{post.data.excerpt}</p>
-                  <span class="read-more">Read More →</span>
-                </a>
-              </article>
-            ))}
-          </div>
-        </div>
       </section>
 
       <!-- ===================================== -->
@@ -200,18 +146,6 @@ const hasPublicFile = (p?: string) => {
                 <img src="/assets/ms3.jpg" alt="First days. Navi Mumbai, 2000" />
                 <figcaption>First days. Navi Mumbai, 2000.</figcaption>
               </figure>
-              <figure class="about-card">
-                <img src="/assets/ms1.jpg" alt="Portrait by my 3 year-old niece" />
-                <figcaption>Portrait by my 3 year-old niece when I was teaching her how to make a portrait. San Jose, 2013.</figcaption>
-              </figure>
-              <figure class="about-card">
-                <img src="/assets/ms2.jpg" alt="Photoquai, Paris, 2011" />
-                <figcaption>My profound explanation causes the Culture Minister to instantly spin into a deep meditative state whereupon he ponders the meaning of life; Photoquai, Paris, 2011.</figcaption>
-              </figure>
-              <figure class="about-card">
-                <img src="/assets/ms3.jpg" alt="First days. Navi Mumbai, 2000" />
-                <figcaption>First days. Navi Mumbai, 2000.</figcaption>
-              </figure>
             </div>
           </div>
         </div>
@@ -230,7 +164,7 @@ const hasPublicFile = (p?: string) => {
             <h3>Start a Conversation over WhatsApp</h3>
             <p class="wa-label">Type a message below and hit send to open a chat with me.</p>
             <form id="wa-form" class="wa-form">
-              <textarea id="wa-message" rows="7" placeholder="Hi Mahesh, I'd like to discuss..."></textarea>
+              <textarea id="wa-message" rows="7" placeholder="Hey Mahesh, about that 500 bucks I owe you..."></textarea>
               <button type="submit" class="wa-btn">
                 Send to WhatsApp
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
@@ -242,17 +176,8 @@ const hasPublicFile = (p?: string) => {
           </div>
 
           <div class="contact-info">
-            <p class="contact-intro">Get in touch for assignments, print sales, or just to say hello.</p>
+            <p class="contact-intro">Get in touch to say hello.</p>
             <a href="mailto:ms@thecontrarian.in" class="email-link">ms@thecontrarian.in</a>
-            
-            <div class="social-links">
-              <a href="https://x.com/thecontrarian" target="_blank" rel="noopener noreferrer" class="social-link">
-                X (Twitter) ↗
-              </a>
-              <a href="https://www.linkedin.com/in/mahesh-shantaram/" target="_blank" rel="noopener noreferrer" class="social-link">
-                LinkedIn ↗
-              </a>
-            </div>
           </div>
 
         </div>
@@ -261,11 +186,7 @@ const hasPublicFile = (p?: string) => {
       <!-- ===================================== -->
       <!-- FOOTER -->
       <!-- ===================================== -->
-      <footer class="site-footer">
-        <p>
-          &copy; {new Date().getFullYear()} Mahesh Shantaram. All rights reserved.
-        </p>
-      </footer>
+      <SiteFooter />
     </main>
     <script src="/textmode.js" defer></script>
     <script src="/curtain-scroll-fallback.js" defer></script>
