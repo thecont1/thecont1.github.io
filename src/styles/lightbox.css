@@ -1,0 +1,261 @@
+/* Lightbox Component Styles */
+
+:global(body.lightbox-open .toc-toggle-btn) {
+  display: none !important;
+}
+
+:global(body.toc-hidden .toc-toggle-btn) {
+  display: none !important;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 10000001; /* Higher than TOC toggle */
+  display: flex;
+  flex-direction: row;
+  background: white;
+  backdrop-filter: blur(20px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, background 0.4s ease;
+}
+
+.lightbox.lights-off {
+  background: #333333;
+}
+
+.lightbox[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  cursor: zoom-out;
+  background: transparent;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox-main {
+  position: relative;
+  z-index: 2;
+  width: 80vw;
+  height: 100vh;
+  flex: 0 0 80vw;
+  overflow: hidden;
+  display: block;
+  background: transparent;
+}
+
+.lightbox-figure {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+  position: relative;
+}
+
+.lightbox-figure img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  will-change: opacity;
+  transition: opacity 0.3s ease;
+  opacity: 1;
+}
+
+#lightbox-img {
+  z-index: 1;
+}
+
+#lightbox-img.is-hidden {
+  opacity: 0;
+}
+
+/* Sidebar Design - Right 20% */
+.lightbox-sidebar {
+  position: relative;
+  z-index: 10;
+  width: 20vw;
+  min-width: 250px;
+  height: 100vh;
+  flex: 0 0 20vw;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1.5rem;
+  background: white;
+  box-sizing: border-box;
+  transition: opacity 0.3s ease;
+  /* Clean look: no borders */
+}
+
+.sidebar-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 4px;
+}
+
+.lightbox-meta {
+  transition: opacity 0.3s ease;
+  opacity: 0; /* Hidden state */
+}
+
+.lightbox-meta.is-active {
+  opacity: 1;
+}
+
+.lightbox-caption {
+  font-family: "Fraunces", serif;
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-bottom: 0.75rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.lightbox-exif {
+  font-family: "Inter", sans-serif;
+  font-size: 0.75rem;
+  color: var(--muted, #666);
+  line-height: 1.5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1.5rem 0;
+  background: white;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.control-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+.icon-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: var(--muted, #999);
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.icon-btn:hover {
+  color: var(--ink, #111);
+  background: rgba(0,0,0,0.05);
+}
+
+.icon-btn.active {
+  color: var(--ink, #111);
+  background: rgba(0,0,0,0.05);
+}
+
+.icon-btn svg {
+  display: block;
+}
+
+/* Lights On/Off logic */
+.lightbox.lights-off .sidebar-content,
+.lightbox.lights-off .lightbox-overlay,
+.lightbox.lights-off #lightbox-prev,
+.lightbox.lights-off #lightbox-next,
+.lightbox.lights-off #lightbox-close {
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.lightbox.lights-off .lightbox-sidebar {
+  background: transparent;
+}
+
+.lightbox.lights-off .sidebar-footer {
+  background: transparent;
+}
+
+.lightbox.lights-off #toggle-lights {
+  opacity: 1;
+  color: #ffcc00; /* Yellow bulb */
+  position: relative;
+  z-index: 100;
+  pointer-events: auto;
+}
+
+.lightbox.lights-off #toggle-lights:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Ensure transition for all elements */
+.sidebar-content,
+.lightbox-sidebar,
+.sidebar-footer,
+.icon-btn,
+.lightbox-overlay {
+  transition: opacity 0.4s ease, background 0.4s ease;
+}
+
+/* Ensure the info toggle itself remains somewhat interactive or visible if needed, 
+   but the request said "every single element except the image". 
+   If we dim the control-group, all buttons dim. */
+
+@media (max-width: 768px) {
+  .lightbox {
+    flex-direction: column;
+  }
+  
+  .lightbox-sidebar {
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .lightbox-main {
+    width: 100vw;
+    height: 70vh;
+  }
+
+  .sidebar-footer {
+    justify-content: center;
+  }
+}

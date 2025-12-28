@@ -1,0 +1,136 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Lightbox from "../ui/Lightbox.astro";
+
+interface Props {
+  post: CollectionEntry<"datastories">;
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const backgroundColor = post.data.backgroundColor || "var(--surface)";
+---
+
+<article class="datastory-layout" style={`--page-bg: ${backgroundColor};`}>
+  <header class="datastory-header">
+    <div class="meta-top">Data Story</div>
+    <h1>{post.data.title}</h1>
+    {post.data.excerpt && <p class="lead">{post.data.excerpt}</p>}
+  </header>
+
+  <div class="datastory-container">
+    <div class="notebook-wrapper">
+      <Content />
+    </div>
+  </div>
+
+  <Lightbox selector=".notebook-wrapper" gallery={post.data.lightbox?.gallery} />
+</article>
+
+<script>
+  // Update menubar background
+  function refineDatastoryContent() {
+    const article = document.querySelector('.datastory-layout') as HTMLElement;
+    if (article) {
+      // Background Sync
+      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
+      const header = document.querySelector('.site-header') as HTMLElement;
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+    }
+  }
+
+  refineDatastoryContent();
+  document.addEventListener('astro:page-load', refineDatastoryContent);
+</script>
+
+<style>
+  .datastory-layout {
+    width: 100%;
+    min-height: 100vh;
+    background: var(--page-bg, var(--surface));
+  }
+
+  .datastory-header {
+    background: var(--paper);
+    padding: 8rem 2rem 4rem;
+    text-align: center;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .meta-top {
+    font-family: "Inter", monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.8rem;
+    color: var(--accent, #d04b36);
+    margin-bottom: 1.5rem;
+  }
+
+  .datastory-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .lead {
+    font-family: "DM Sans", sans-serif;
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .datastory-container {
+    padding: 4rem 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .notebook-wrapper {
+    background: var(--paper);
+    padding: 4rem;
+    border: 1px solid var(--hairline-2);
+    box-shadow: var(--shadow-elev-1);
+    border-radius: 4px;
+  }
+
+  /* Style for code blocks usually found in datastories */
+  .notebook-wrapper :global(pre) {
+    background: #f4f4f4 !important;
+    padding: 1.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--hairline-2);
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+
+  .notebook-wrapper :global(code) {
+    font-family: "Fira Code", monospace;
+    font-size: 0.9em;
+  }
+
+  .notebook-wrapper :global(h2) {
+    font-family: "Fraunces", serif;
+    font-size: 1.8rem;
+    margin-top: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .notebook-wrapper :global(p) {
+    font-family: "Inter", sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    color: var(--ink);
+  }
+</style>

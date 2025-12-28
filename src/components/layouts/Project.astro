@@ -1,0 +1,222 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import ContentDispatcher from "./ContentDispatcher.astro";
+import Carousel from "../carousel/Carousel.tsx";
+import "../../styles/home.css";
+
+interface Props {
+  post: CollectionEntry<"photography" | "writing" | "datascience">;
+}
+
+const { post } = Astro.props;
+
+// 1. Identify the container (Project ID)
+const container = post.data.container || post.slug;
+
+// 2. Fetch all content associated with this container
+const allPhotography = await getCollection("photography");
+const allWriting = await getCollection("writing");
+const allData = await getCollection("datascience");
+
+const allContent = [...allPhotography, ...allWriting, ...allData];
+
+// Filter for items in this project, EXCLUDING the current project meta-post itself
+const projectContent = allContent.filter(
+  (p) =>
+    (p.data.container === container || p.slug === container) &&
+    p.id !== post.id &&
+    p.data.status === "published"
+);
+
+// Sort by date or some other metric if needed?
+// For now, maybe we just list them or let the user define an order in frontmatter?
+// Or we can group them by layout type.
+
+// 3. Also fetch images for the Carousel
+const allImages = import.meta.glob(
+  "/public/library/originals/**/*.{jpg,jpeg,png,webp,avif}"
+);
+const filterPath = `/public/library/originals/${container}/`;
+const imagePaths = Object.keys(allImages)
+  .filter((path) => path.includes(filterPath))
+  .sort((a, b) => a.localeCompare(b));
+
+const carouselImages = imagePaths.map((path) => ({
+  src: path.replace("/public", ""),
+  caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
+}));
+
+const backgroundColor = post.data.backgroundColor || "var(--paper)";
+---
+
+<div class="project-layout" style={`--page-bg: ${backgroundColor};`}>
+  <!-- PROJECT HEADER -->
+  <header class="project-header">
+    <h1>{post.data.title}</h1>
+    <p class="lead">{post.data.excerpt}</p>
+  </header>
+
+  <!-- CAROUSEL SECTION (The "wholesome way to view the series") -->
+  {carouselImages.length > 0 && (
+    <section class="project-carousel-section">
+      <Carousel images={carouselImages} client:visible />
+    </section>
+  )}
+
+  <!-- RELATED CONTENT / MODULES -->
+  <section class="project-modules">
+    <div class="modules-grid">
+      {projectContent.map((module) => (
+        <a href={`/${module.collection}/${module.slug}`} class="module-card">
+          <span class="module-type">{module.data.layout || module.collection}</span>
+          <h2 class="module-title">{module.data.title}</h2>
+          <p class="module-excerpt">{module.data.excerpt}</p>
+          <span class="read-more">Explore &rarr;</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- PROJECT META CONTENT (The text of the project post itself) -->
+  <section class="project-body">
+    <div class="content-wrapper">
+       <slot /> 
+       {/* Note: ContentDispatcher usually renders Content, but here we might just want links? 
+           Or if the Project post has content, render it. */}
+       {async () => {
+         const { Content } = await post.render();
+         return <Content />;
+       }}
+    </div>
+  </section>
+</div>
+
+<script>
+  // Update menubar background
+  function refineProjectContent() {
+    const article = document.querySelector('.project-layout') as HTMLElement;
+    if (article) {
+      // Background Sync
+      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
+      const header = document.querySelector('.site-header') as HTMLElement;
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+    }
+  }
+
+  refineProjectContent();
+  document.addEventListener('astro:page-load', refineProjectContent);
+</script>
+
+<style>
+  .project-layout {
+    background: var(--page-bg, var(--paper));
+    min-height: 100vh;
+  }
+
+  .project-header {
+    padding: 8rem 2rem 4rem;
+    text-align: center;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .project-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .lead {
+    font-size: 1.4rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  .project-carousel-section {
+    height: 80vh;
+    width: 100%;
+    margin-bottom: 6rem;
+    background: #000;
+  }
+
+  .project-modules {
+    padding: 0 2rem 6rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .modules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--hairline-2);
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elev-1);
+  }
+
+  .module-type {
+    font-family: "Inter", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: inline-block;
+    border: 1px solid var(--hairline-2);
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    align-self: flex-start;
+  }
+
+  .module-title {
+    font-family: "Fraunces", serif;
+    font-size: 1.5rem;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  .module-excerpt {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: auto; /* Push read-more to bottom */
+    line-height: 1.5;
+  }
+
+  .read-more {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .project-body {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+    font-family: "Inter", sans-serif;
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+</style>
