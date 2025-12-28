@@ -4,6 +4,9 @@
   - Auto-attaches to images within a specified selector or globally if none provided.
   - Handles opening, closing, and basic accessibility.
 */
+import "../../styles/lightbox.css";
+import IconBulb from "../icons/IconBulb.astro";
+
 interface Props {
   selector?: string; // CSS selector to scope image listeners (e.g., '.post-content')
   gallery?: boolean; // Whether to allow cycling through images
@@ -14,19 +17,42 @@ const { selector = "main", gallery = true } = Astro.props;
 
 <div id="lightbox" class="lightbox" aria-hidden="true">
   <div class="lightbox-overlay"></div>
-  <figure class="lightbox-figure">
-    <img id="lightbox-img" src="" alt="" />
-    <figcaption id="lightbox-caption"></figcaption>
-  </figure>
   
-  <button id="lightbox-close" class="lightbox-ctrl close" aria-label="Close lightbox">&times;</button>
-  
-  {gallery && (
-    <div class="lightbox-nav">
-      <button id="lightbox-prev" class="lightbox-ctrl prev" aria-label="Previous image">&lsaquo;</button>
-      <button id="lightbox-next" class="lightbox-ctrl next" aria-label="Next image">&rsaquo;</button>
+  <div class="lightbox-main">
+    <figure class="lightbox-figure">
+      <img id="lightbox-img" src="" alt="" />
+    </figure>
+  </div>
+
+  <aside class="lightbox-sidebar">
+    <div class="sidebar-content">
+      <div id="lightbox-meta" class="lightbox-meta">
+        <h3 id="lightbox-caption" class="lightbox-caption"></h3>
+        <div id="lightbox-exif" class="lightbox-exif"></div>
+      </div>
     </div>
-  )}
+
+    <div class="sidebar-footer">
+      <div class="control-group">
+        {gallery && (
+          <>
+            <button id="lightbox-prev" class="icon-btn" aria-label="Previous image">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
+            <button id="lightbox-next" class="icon-btn" aria-label="Next image">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </>
+        )}
+        <button id="toggle-lights" class="icon-btn" aria-label="Toggle Lights">
+          <IconBulb />
+        </button>
+        <button id="lightbox-close" class="icon-btn" aria-label="Close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
 </div>
 
 <script define:vars={{ selector, gallery }}>
@@ -37,20 +63,18 @@ const { selector = "main", gallery = true } = Astro.props;
   const prevBtn = document.getElementById("lightbox-prev");
   const nextBtn = document.getElementById("lightbox-next");
   const overlay = document.querySelector(".lightbox-overlay");
+  const toggleLightsBtn = document.getElementById("toggle-lights");
+  const metaContainer = document.getElementById("lightbox-meta");
+  const exifContainer = document.getElementById("lightbox-exif");
 
   let currentImages = [];
   let currentIndex = -1;
+  let isTransitioning = false;
 
   if (lightbox && img && caption && closeBtn && overlay) {
-    const updateLightbox = (index) => {
-      if (index < 0 || index >= currentImages.length) return;
-      currentIndex = index;
-      const target = currentImages[currentIndex];
-      
-      img.src = target.src;
-      img.alt = target.alt || "";
-      
-      // Look for figcaption if inside figure
+
+    const updateCaptionAndMeta = (target) => {
+       // Look for figcaption if inside figure
       let capText = "";
       const fig = target.closest("figure");
       if (fig) {
@@ -58,7 +82,77 @@ const { selector = "main", gallery = true } = Astro.props;
         if (cap) capText = cap.textContent;
       }
       caption.textContent = capText || target.alt || "";
+
+      // Placeholder for EXIF - could be expanded to fetch real EXIF
+      if (exifContainer) {
+        exifContainer.innerHTML = `
+          <p>Dimensions: ${target.naturalWidth} x ${target.naturalHeight}</p>
+          <p>Format: ${target.src.split('.').pop().toUpperCase()}</p>
+        `;
+      }
     };
+
+    const updateLightbox = (index, withTransition = false) => {
+      if (index < 0 || index >= currentImages.length) return;
+      
+      const target = currentImages[index];
+      
+      // Determine orientation for sizing
+      const isVertical = target.naturalHeight > target.naturalWidth;
+      lightbox.setAttribute("data-orientation", isVertical ? "vertical" : "horizontal");
+
+      updateCaptionAndMeta(target);
+
+      if (withTransition && !isTransitioning) {
+        isTransitioning = true;
+        
+        // Phase 1: Fade out (300ms)
+        img.classList.add('is-hidden');
+        
+        setTimeout(() => {
+          // Phase 2: Swap src (while hidden)
+          img.src = target.src;
+          img.alt = target.alt || "";
+          
+          // Phase 3: Fade in (300ms)
+          // We wait a frame to ensure src swap is registered
+          requestAnimationFrame(() => {
+              img.classList.remove('is-hidden');
+              
+              // Only clear flag after fade-in completes
+              setTimeout(() => {
+                  isTransitioning = false;
+              }, 300);
+          });
+        }, 300); 
+
+      } else {
+        // Instant update
+        img.src = target.src;
+        img.alt = target.alt || "";
+        img.classList.remove('is-hidden');
+      }
+
+      currentIndex = index;
+    };
+
+    if (toggleLightsBtn && metaContainer) {
+      toggleLightsBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isLightsOn = lightbox.classList.toggle("lights-on");
+        const isLightsOff = !isLightsOn;
+        
+        if (isLightsOff) {
+          lightbox.classList.add("lights-off");
+          metaContainer.classList.remove("is-active");
+          toggleLightsBtn.classList.remove("active");
+        } else {
+          lightbox.classList.remove("lights-off");
+          metaContainer.classList.add("is-active");
+          toggleLightsBtn.classList.add("active");
+        }
+      });
+    }
 
     const openLightbox = (imageElement) => {
       if (gallery) {
@@ -72,31 +166,62 @@ const { selector = "main", gallery = true } = Astro.props;
         currentIndex = 0;
       }
 
-      updateLightbox(currentIndex);
+      updateLightbox(currentIndex, false); 
       lightbox.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
+      document.body.classList.add("lightbox-open");
+      document.body.classList.add("toc-hidden");
+      
+      // Default state: Lights On
+      lightbox.classList.add("lights-on");
+      lightbox.classList.remove("lights-off");
+      if (metaContainer) {
+          metaContainer.classList.add("is-active");
+          if (toggleLightsBtn) toggleLightsBtn.classList.add("active");
+      }
+      
       closeBtn.focus();
     };
 
     const closeLightbox = () => {
       lightbox.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
-      img.src = "";
+      document.body.classList.remove("lightbox-open");
+      document.body.classList.remove("toc-hidden");
+      
+      // Reset image state
+      setTimeout(() => {
+          img.src = "";
+          img.classList.remove('is-hidden');
+          isTransitioning = false;
+      }, 300);
     };
 
+    // Close when clicking main area or overlay
+    const mainArea = document.querySelector(".lightbox-main");
+    if (mainArea) {
+      mainArea.addEventListener("click", (e) => {
+        if (e.target === mainArea || e.target === document.querySelector(".lightbox-figure")) {
+          closeLightbox();
+        }
+      });
+    }
+
     const nextImage = () => {
+      if (isTransitioning) return;
       if (currentIndex < currentImages.length - 1) {
-        updateLightbox(currentIndex + 1);
+        updateLightbox(currentIndex + 1, true);
       } else if (currentImages.length > 1) {
-        updateLightbox(0); // Loop to start
+        updateLightbox(0, true); // Loop to start
       }
     };
 
     const prevImage = () => {
+      if (isTransitioning) return;
       if (currentIndex > 0) {
-        updateLightbox(currentIndex - 1);
+        updateLightbox(currentIndex - 1, true);
       } else if (currentImages.length > 1) {
-        updateLightbox(currentImages.length - 1); // Loop to end
+        updateLightbox(currentImages.length - 1, true); // Loop to end
       }
     };
 
@@ -145,107 +270,3 @@ const { selector = "main", gallery = true } = Astro.props;
     });
   }
 </script>
-
-<style>
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .lightbox[aria-hidden="false"] {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .lightbox-overlay {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(10px);
-  }
-
-  .lightbox-figure {
-    position: relative;
-    z-index: 10;
-    max-width: 90vw;
-    max-height: 90vh;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .lightbox-figure img {
-    max-width: 100%;
-    max-height: 82vh;
-    object-fit: contain;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-    border-radius: 2px;
-  }
-
-  .lightbox-figure figcaption {
-    margin-top: 1.5rem;
-    font-family: "DM Sans", sans-serif;
-    color: var(--ink, #111);
-    font-size: 1.1rem;
-    text-align: center;
-    max-width: 600px;
-  }
-
-  .lightbox-ctrl {
-    position: absolute;
-    background: none;
-    border: none;
-    color: var(--muted, #555);
-    cursor: pointer;
-    transition: color 0.2s, transform 0.2s;
-    z-index: 20;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-  }
-
-  .lightbox-ctrl:hover {
-    color: var(--ink, #000);
-    transform: scale(1.1);
-  }
-
-  .lightbox-ctrl.close {
-    top: 2rem;
-    right: 2rem;
-    font-size: 3rem;
-    line-height: 1;
-  }
-
-  .lightbox-ctrl.prev,
-  .lightbox-ctrl.next {
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 4rem;
-    width: 6rem;
-    height: 8rem;
-  }
-
-  .lightbox-ctrl.prev { left: 1rem; }
-  .lightbox-ctrl.next { right: 1rem; }
-
-  @media (max-width: 768px) {
-    .lightbox-ctrl.prev,
-    .lightbox-ctrl.next {
-      width: 4rem;
-      font-size: 3rem;
-    }
-    .lightbox-ctrl.close {
-      top: 1rem;
-      right: 1rem;
-    }
-  }
-</style>
