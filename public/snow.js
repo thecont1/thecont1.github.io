@@ -1,55 +1,28 @@
 (() => {
+  let raf = 0;
+  let enabled = true;
+  let canvas, ctx, toggleBtn;
+  const STORAGE_KEY = "snow_enabled";
+
   const prefersReduced =
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const toggleBtn = document.getElementById("toggle-snow");
   const setPressed = (pressed) => {
     if (!(toggleBtn instanceof HTMLButtonElement)) return;
     toggleBtn.setAttribute("aria-pressed", pressed ? "true" : "false");
   };
 
-  const canvas = document.getElementById("snow-canvas");
-  if (!(canvas instanceof HTMLCanvasElement)) return;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  if (prefersReduced) {
-    canvas.style.display = "none";
-    if (toggleBtn instanceof HTMLButtonElement) toggleBtn.disabled = true;
-    setPressed(false);
-    return;
-  }
-
-  canvas.style.position = "fixed";
-  canvas.style.top = "0";
-  canvas.style.left = "0";
-  canvas.style.width = "100vw";
-  canvas.style.height = "100vh";
-  canvas.style.pointerEvents = "none";
-  canvas.style.zIndex = "9999";
-
   const NUM_FLAKES = 200;
   const MAX_SIZE = 3;
   const MAX_SPEED = 1.5;
-
   const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
-
   const flakes = [];
-
-  const resizeCanvas = () => {
-    const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
-    canvas.width = Math.floor(window.innerWidth * dpr);
-    canvas.height = Math.floor(window.innerHeight * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  };
 
   const createFlake = () => {
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
-
     return {
       x: Math.random() * w,
       y: Math.random() * h,
@@ -59,20 +32,18 @@
     };
   };
 
-  const init = () => {
+  const initFlakes = () => {
     flakes.length = 0;
     for (let i = 0; i < NUM_FLAKES; i++) flakes.push(createFlake());
   };
 
-  let raf = 0;
-  let enabled = true;
-
-  try {
-    const saved = sessionStorage.getItem("snow_enabled");
-    if (saved !== null) {
-      enabled = saved === "true";
-    }
-  } catch (e) {}
+  const resizeCanvas = () => {
+    if (!canvas || !ctx) return;
+    const dpr = clamp(window.devicePixelRatio || 1, 1, 2);
+    canvas.width = Math.floor(window.innerWidth * dpr);
+    canvas.height = Math.floor(window.innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
 
   const readNavAlpha = () => {
     const raw = getComputedStyle(document.body).getPropertyValue("--nav-bg-alpha");
@@ -80,28 +51,11 @@
     return Number.isFinite(n) ? clamp(n, 0, 1) : 0;
   };
 
-  const setCanvasEnabled = (on) => {
-    enabled = !!on;
-    try {
-      sessionStorage.setItem("snow_enabled", String(enabled));
-    } catch (e) {}
-
-    canvas.style.display = enabled ? "block" : "none";
-    setPressed(enabled);
-
-    if (!enabled) {
-      if (raf) window.cancelAnimationFrame(raf);
+  const draw = () => {
+    if (!enabled || !canvas || !ctx) {
       raf = 0;
-      ctx.clearRect(0, 0, window.innerWidth || 1, window.innerHeight || 1);
       return;
     }
-
-    onResize();
-    draw();
-  };
-
-  const draw = () => {
-    if (!enabled) return;
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
 
@@ -130,35 +84,83 @@
     raf = window.requestAnimationFrame(draw);
   };
 
+  const setCanvasEnabled = (on) => {
+    enabled = !!on;
+    try {
+      sessionStorage.setItem(STORAGE_KEY, String(enabled));
+    } catch (e) {}
+
+    if (canvas) canvas.style.display = enabled ? "block" : "none";
+    setPressed(enabled);
+
+    if (!enabled) {
+      if (raf) {
+        window.cancelAnimationFrame(raf);
+        raf = 0;
+      }
+      if (ctx) ctx.clearRect(0, 0, window.innerWidth || 1, window.innerHeight || 1);
+      return;
+    }
+
+    onResize();
+    draw();
+  };
+
   const onResize = () => {
     resizeCanvas();
-    init();
+    initFlakes();
+  };
+
+  const initSnow = () => {
+    canvas = document.getElementById("snow-canvas");
+    toggleBtn = document.getElementById("toggle-snow");
+
+    if (!canvas) return;
+    
+    ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    if (prefersReduced) {
+      canvas.style.display = "none";
+      if (toggleBtn instanceof HTMLButtonElement) toggleBtn.disabled = true;
+      setPressed(false);
+      return;
+    }
+
+    canvas.style.position = "fixed";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.width = "100vw";
+    canvas.style.height = "100vh";
+    canvas.style.pointerEvents = "none";
+    canvas.style.zIndex = "9999";
+
+    try {
+      const saved = sessionStorage.getItem(STORAGE_KEY);
+      if (saved !== null) {
+        enabled = saved === "true";
+      }
+    } catch (e) {}
+
+    if (toggleBtn instanceof HTMLButtonElement && !toggleBtn.dataset.hasSnowListener) {
+      toggleBtn.addEventListener("click", () => {
+        setCanvasEnabled(!enabled);
+      });
+      toggleBtn.dataset.hasSnowListener = "true";
+    }
+
+    setCanvasEnabled(enabled);
   };
 
   window.addEventListener("resize", onResize, { passive: true });
-  onResize();
-  draw();
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (raf) window.cancelAnimationFrame(raf);
+    } else if (enabled) {
+      draw();
+    }
+  });
 
-  if (toggleBtn instanceof HTMLButtonElement) {
-    setPressed(true);
-    toggleBtn.addEventListener(
-      "click",
-      () => {
-        setCanvasEnabled(!enabled);
-      },
-      { passive: true }
-    );
-  }
-
-  document.addEventListener(
-    "visibilitychange",
-    () => {
-      if (document.hidden) {
-        if (raf) window.cancelAnimationFrame(raf);
-      } else {
-        draw();
-      }
-    },
-    { passive: true }
-  );
+  initSnow();
+  document.addEventListener("astro:page-load", initSnow);
 })();

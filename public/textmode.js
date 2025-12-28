@@ -1,29 +1,32 @@
-const toggle = document.getElementById("toggle-textmode");
-const STORAGE_KEY = "textmode_enabled";
+const initTextMode = () => {
+  const toggleBtn = document.getElementById("toggle-textmode");
+  if (!toggleBtn || toggleBtn.dataset.hasListener) return;
 
-const apply = (enabled) => {
-  document.body.classList.toggle("text-only", enabled);
-  toggle?.setAttribute("aria-pressed", enabled ? "true" : "false");
+  const STORAGE_KEY = "textmode_enabled";
+
+  const applyTextMode = (enabled) => {
+    document.body.classList.toggle("text-only", enabled);
+    toggleBtn.setAttribute("aria-pressed", enabled ? "true" : "false");
+    try {
+      sessionStorage.setItem(STORAGE_KEY, String(enabled));
+    } catch (e) {}
+  };
+
   try {
-    sessionStorage.setItem(STORAGE_KEY, String(enabled));
-  } catch (e) {
-    // Ignore storage errors
-  }
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored !== null) {
+      applyTextMode(stored === "true");
+    }
+  } catch (e) {}
+
+  toggleBtn.addEventListener("click", () => {
+    const next = !document.body.classList.contains("text-only");
+    applyTextMode(next);
+  });
+
+  toggleBtn.dataset.hasListener = "true";
 };
 
-// Initialize state from storage
-try {
-  const stored = sessionStorage.getItem(STORAGE_KEY);
-  if (stored === "true") {
-    apply(true);
-  } else {
-    apply(false);
-  }
-} catch (e) {
-  apply(false);
-}
-
-toggle?.addEventListener("click", () => {
-  const next = !document.body.classList.contains("text-only");
-  apply(next);
-});
+// Handle initial load and view transitions
+initTextMode();
+document.addEventListener("astro:page-load", initTextMode);
