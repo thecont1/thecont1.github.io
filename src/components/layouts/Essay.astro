@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
-import "../../styles/post.css";
+import "../../styles/essay.css";
 
 interface Props {
   post: CollectionEntry<"photography" | "writing" | "datastories">;
@@ -10,7 +10,7 @@ interface Props {
 const { post } = Astro.props;
 const { Content, headings } = await post.render();
 
-const backgroundColor = post.data.backgroundColor || "#ffffff";
+const backgroundColor = post.data.backgroundColor || "#f9e4e4";
 
 // TOC logic: Filter for H2s
 const toc = headings.filter((h) => h.depth === 2);
@@ -26,7 +26,7 @@ const formattedDate = post.data.date?.toLocaleDateString("en-US", {
 const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 ---
 
-<article class="simple-post" style={`--page-bg: ${backgroundColor};`}>
+<article class="editorial-post" style={`--page-bg: ${backgroundColor};`}>
   <header class="post-header">
     <div class="post-meta-top">
       {post.data.category && <span class="category">{post.data.category}</span>}
@@ -51,9 +51,15 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
   <div class="post-layout-container">
     {toc.length > 0 && (
-      <aside class="post-sidebar">
+      <aside class="post-sidebar" id="toc-sidebar">
+        <button id="toc-toggle" class="toc-toggle-btn" aria-label="Toggle Table of Contents">
+          <span class="dot"></span>
+          <span class="label">Contents</span>
+        </button>
         <nav class="sticky-toc">
-          <span class="toc-title">Contents</span>
+          <div class="toc-header">
+            <span class="toc-title">Contents</span>
+          </div>
           <ul>
             {toc.map((h) => (
               <li><a href={`#${h.slug}`}>{h.text}</a></li>
@@ -102,8 +108,8 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   }
 
   // Update menubar background and auto-captions
-  function refinePostContent() {
-    const article = document.querySelector('.simple-post') as HTMLElement;
+  function refineEssayContent() {
+    const article = document.querySelector('.editorial-post') as HTMLElement;
     if (article) {
       // Background Sync
       const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
@@ -134,10 +140,22 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     }
   }
 
-  // Handle dropcaps and header sync
-  function initPostFeatures() {
-    const article = document.querySelector('.simple-post') as HTMLElement;
+  // Handle dropcaps and TOC toggle
+  function initEditorialFeatures() {
+    const article = document.querySelector('.editorial-post') as HTMLElement;
     if (!article) return;
+
+    // TOC Toggle Logic
+    const sidebar = document.getElementById('toc-sidebar');
+    const toggle = document.getElementById('toc-toggle');
+    if (sidebar && toggle) {
+      if (!toggle.dataset.hasTocListener) {
+        toggle.addEventListener('click', () => {
+          sidebar.classList.toggle('is-open');
+        });
+        toggle.dataset.hasTocListener = 'true';
+      }
+    }
 
     // Over-the-top Dropcaps
     const dropcaps = article.querySelectorAll('.dropcap');
@@ -151,12 +169,12 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   }
 
   tagImageOrientation();
-  refinePostContent();
-  initPostFeatures();
+  refineEssayContent();
+  initEditorialFeatures();
   
   document.addEventListener('astro:page-load', () => {
     tagImageOrientation();
-    refinePostContent();
-    initPostFeatures();
+    refineEssayContent();
+    initEditorialFeatures();
   });
 </script>

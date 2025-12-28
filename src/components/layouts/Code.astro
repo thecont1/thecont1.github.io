@@ -1,15 +1,18 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import Lightbox from "../ui/Lightbox.astro";
 
 interface Props {
-  post: CollectionEntry<"datascience">;
+  post: CollectionEntry<"datascience" | "writing" | "photography">;
 }
 
 const { post } = Astro.props;
 const { Content } = await post.render();
+
+const backgroundColor = post.data.backgroundColor || "var(--surface)";
 ---
 
-<article class="code-layout">
+<article class="code-layout" style={`--page-bg: ${backgroundColor};`}>
   <header class="code-header">
     <h1>{post.data.title}</h1>
     {post.data.excerpt && <p class="summary">{post.data.excerpt}</p>}
@@ -20,18 +23,36 @@ const { Content } = await post.render();
 
   <div class="notebook-container">
     <Content />
-    <!-- 
-      Future integration: 
-      If post.data.notebook.engine === 'marimo', 
-      we might inject the Marimo runtime or specific iframe here. 
-    -->
   </div>
+
+  <Lightbox selector=".notebook-container" gallery={post.data.lightbox?.gallery} />
 </article>
+
+<script>
+  // Update menubar background
+  function refineCodeContent() {
+    const article = document.querySelector('.code-layout') as HTMLElement;
+    if (article) {
+      // Background Sync
+      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
+      const header = document.querySelector('.site-header') as HTMLElement;
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+    }
+  }
+
+  refineCodeContent();
+  document.addEventListener('astro:page-load', refineCodeContent);
+</script>
 
 <style>
   .code-layout {
     max-width: 100%;
-    background: var(--surface);
+    background: var(--page-bg, var(--surface));
     min-height: 100vh;
   }
 

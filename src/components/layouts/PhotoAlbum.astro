@@ -4,7 +4,7 @@ import Lightbox from "../ui/Lightbox.astro";
 import "../../styles/home.css";
 
 interface Props {
-  post: CollectionEntry<"photography">;
+  post: CollectionEntry<"photography" | "writing" | "datastories">;
 }
 
 const { post } = Astro.props;
@@ -26,9 +26,11 @@ const images = imagePaths.map((path) => ({
   src: path.replace("/public", ""),
   caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
 }));
+
+const backgroundColor = post.data.backgroundColor || "#f9e4e4";
 ---
 
-<div class="photo-album-layout">
+<div class="photo-album-layout" style={`--page-bg: ${backgroundColor};`}>
   <header class="album-header">
     <h1>{post.data.title}</h1>
     <p>{post.data.excerpt}</p>
@@ -51,11 +53,32 @@ const images = imagePaths.map((path) => ({
   <Lightbox selector=".album-grid" gallery={post.data.lightbox?.gallery} />
 </div>
 
+<script>
+  // Update menubar background
+  function refinePhotoAlbumContent() {
+    const layout = document.querySelector('.photo-album-layout') as HTMLElement;
+    if (layout) {
+      // Background Sync
+      const bgColor = getComputedStyle(layout).getPropertyValue('--page-bg');
+      const header = document.querySelector('.site-header') as HTMLElement;
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+    }
+  }
+
+  refinePhotoAlbumContent();
+  document.addEventListener('astro:page-load', refinePhotoAlbumContent);
+</script>
+
 <style>
   .photo-album-layout {
     min-height: 100vh;
-    background: #f9e4e4;
-    padding: 6rem 0;
+    background: var(--page-bg, #f9e4e4);
+    padding: 10rem 0 6rem;
   }
 
   .album-header {
@@ -79,17 +102,17 @@ const images = imagePaths.map((path) => ({
 
   /* Tight Masonry Grid */
   .album-grid {
-    column-count: 2;
+    column-count: 5;
     column-gap: 0px;
-    max-width: 1200px;
+    max-width: 80%;
     margin: 0 auto;
   }
 
   .album-item {
     break-inside: avoid;
-    margin: 0;
+    margin: 2px;
+    padding: 0px;
     background: none;
-    padding: 3px;
     line-height: 0;
     display: block;
   }

@@ -2,102 +2,197 @@
 import type { CollectionEntry } from "astro:content";
 
 interface Props {
-  post: CollectionEntry<"writing" | "essays">;
+  post: CollectionEntry<"writing" | "essays" | "datastories">;
 }
 
 const { post } = Astro.props;
 const { Content } = await post.render();
+
+const backgroundColor = post.data.backgroundColor || "var(--surface)";
 ---
 
-<article class="thread-layout">
-  <header class="thread-header">
-    <div class="avatar-placeholder"></div>
-    <div class="meta">
-      <h1>Mahesh Shantaram</h1>
-      <span class="handle">@thecontrarian</span>
+<article class="thread-layout" style={`--page-bg: ${backgroundColor};`}>
+  <!-- Thread Start / OP -->
+  <header class="thread-op">
+    <div class="avatar-column">
+      <div class="avatar"></div>
+      <div class="spine"></div>
+    </div>
+    <div class="tweet-content">
+      <div class="meta">
+        <span class="name">Mahesh Shantaram</span>
+        <span class="handle">@thecontrarian</span>
+      </div>
+      <h1 class="thread-title">{post.data.title}</h1>
+      {post.data.excerpt && <p class="thread-excerpt">{post.data.excerpt}</p>}
     </div>
   </header>
 
-  <div class="thread-content">
-    <!-- Intro Tweet -->
-    <div class="tweet main-tweet">
-      <p class="tweet-text lead">{post.data.title}</p>
-      {post.data.excerpt && <p class="tweet-text">{post.data.excerpt}</p>}
-    </div>
-
-    <!-- Thread line connector -->
-    <div class="thread-spine"></div>
-
-    <!-- Content rendered as thread items -->
-    <div class="tweet-stream">
-      <Content />
-    </div>
+  <!-- The Stream -->
+  <div class="thread-stream">
+    <Content />
   </div>
 </article>
+
+<script>
+  // Update menubar background
+  function refineThreadContent() {
+    const article = document.querySelector('.thread-layout') as HTMLElement;
+    if (article) {
+      // Background Sync
+      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
+      const header = document.querySelector('.site-header') as HTMLElement;
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+    }
+  }
+
+  refineThreadContent();
+  document.addEventListener('astro:page-load', refineThreadContent);
+</script>
 
 <style>
   .thread-layout {
     max-width: 600px;
-    margin: 6rem auto;
-    padding: 0 1.5rem;
+    margin: 0 auto;
+    padding: 10rem 1rem 8rem;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--page-bg, var(--surface));
+    min-height: 100vh;
   }
 
-  .thread-header {
+  /* OP Header */
+  .thread-op {
     display: flex;
-    align-items: center;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    position: relative;
   }
 
-  .avatar-placeholder {
+  .avatar-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 48px;
+  }
+
+  .avatar {
     width: 48px;
     height: 48px;
     background: #333;
     border-radius: 50%;
-    margin-right: 12px;
+    /* In a real app, use an img tag here */
   }
 
-  .meta h1 {
-    font-size: 1rem;
+  .spine {
+    flex: 1;
+    width: 2px;
+    background: var(--hairline-2);
+    margin-top: 0.5rem;
+    min-height: 2rem;
+  }
+
+  .tweet-content {
+    padding-bottom: 2rem;
+    flex: 1;
+  }
+
+  .meta {
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+  }
+
+  .name {
     font-weight: 700;
-    margin: 0;
+    margin-right: 0.25rem;
   }
 
   .handle {
-    font-size: 0.9rem;
     color: var(--muted);
   }
 
-  .tweet {
-    padding: 1rem 0;
+  .thread-title {
+    font-size: 1.5rem;
+    line-height: 1.3;
+    margin: 0.5rem 0;
+    font-weight: 700;
+  }
+
+  .thread-excerpt {
+    font-size: 1.2rem;
+    color: var(--ink);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  /* 
+     Stream Styling 
+  */
+
+  .thread-stream {
     position: relative;
-    background: var(--paper); /* Mask spine */
-    margin-bottom: 1rem;
+    padding-left: calc(48px + 1rem); /* Align with content column */
+    padding-bottom: 4rem;
   }
 
-  .tweet-text {
-    font-size: 1.25rem;
-    line-height: 1.5;
-    margin-bottom: 0.5rem;
+  /* The continuous spine line */
+  .thread-stream::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 23px; /* Center of 48px avatar column */
+    width: 2px;
+    height: 100%;
+    background: var(--hairline-2);
+    z-index: 0;
   }
 
-  .lead {
-    font-weight: 600;
-  }
-
-  /* Style paragraphs from markdown as individual tweets */
-  .tweet-stream :global(p) {
-    font-size: 1.15rem;
-    line-height: 1.5;
-    margin-bottom: 2rem;
+  /* Individual blocks (p, h2, etc) become tweets */
+  .thread-stream :global(> *) {
+    position: relative;
+    margin-bottom: 0;
     padding-bottom: 2rem;
-    border-bottom: 1px solid var(--hairline);
   }
 
-  .tweet-stream :global(img) {
+  /* Fake avatar dot for each tweet to connect to spine */
+  .thread-stream :global(> *)::before {
+    content: "";
+    position: absolute;
+    left: calc(-1rem - 24px - 6px); /* Backtrack to center of spine */
+    top: 0.6em; 
+    width: 12px;
+    height: 12px;
+    background: var(--hairline-2);
+    border-radius: 50%;
+    border: 4px solid var(--paper); /* Create gap effect */
+    box-sizing: content-box;
+    z-index: 1;
+  }
+
+  .thread-stream :global(p) {
+    font-size: 1.2rem;
+    line-height: 1.5;
+    margin-top: 0;
+    color: var(--ink);
+  }
+
+  .thread-stream :global(img) {
     width: 100%;
+    height: auto;
     border-radius: 12px;
     border: 1px solid var(--hairline-2);
     margin-top: 0.5rem;
+  }
+  
+  .thread-stream :global(blockquote) {
+    border-left: 4px solid var(--accent, #d04b36);
+    padding-left: 1rem;
+    font-style: italic;
+    color: var(--muted);
+    margin: 0 0 1rem;
   }
 </style>
