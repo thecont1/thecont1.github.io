@@ -57,7 +57,7 @@ const { selector = "main", gallery = true } = Astro.props;
 
 <script define:vars={{ selector, gallery }}>
   const lightbox = document.getElementById("lightbox");
-  const img = document.getElementById("lightbox-img");
+  const lightboxImages = document.querySelectorAll(".lightbox-img");
   const caption = document.getElementById("lightbox-caption");
   const closeBtn = document.getElementById("lightbox-close");
   const prevBtn = document.getElementById("lightbox-prev");
@@ -69,9 +69,10 @@ const { selector = "main", gallery = true } = Astro.props;
 
   let currentImages = [];
   let currentIndex = -1;
+  let activeImgIndex = 0; // Index of the currently visible <img> element (0 or 1)
   let isTransitioning = false;
 
-  if (lightbox && img && caption && closeBtn && overlay) {
+  if (lightbox && lightboxImages.length === 2 && caption && closeBtn && overlay) {
 
     const updateCaptionAndMeta = (target) => {
        // Look for figcaption if inside figure
@@ -103,53 +104,56 @@ const { selector = "main", gallery = true } = Astro.props;
 
       updateCaptionAndMeta(target);
 
+      const currentImgEl = lightboxImages[activeImgIndex];
+
       if (withTransition && !isTransitioning) {
         isTransitioning = true;
         
-        // 1. Fade Out
-        img.style.opacity = '0';
+        // Phase 1: Fade Out
+        currentImgEl.style.opacity = '0';
         
         setTimeout(() => {
-            // 2. Swap Source
-            img.src = target.src;
-            img.alt = target.alt || "";
+            // Phase 2: Swap Source (while invisible)
+            currentImgEl.src = target.src;
+            currentImgEl.alt = target.alt || "";
             
-            const onImageLoad = () => {
-                // 3. Fade In
+            // Preload next image while we wait
+            const lookaheadIndex = (index + 1) % currentImages.length;
+            if (lookaheadIndex !== index) {
+                const preloadImg = new Image();
+                preloadImg.src = currentImages[lookaheadIndex].src;
+            }
+
+            // Ensure image is loaded before fading in
+            const completeTransition = () => {
+                // Phase 3: Fade In
                 requestAnimationFrame(() => {
-                    img.style.opacity = '1';
+                    currentImgEl.style.opacity = '1';
                     setTimeout(() => {
                         isTransitioning = false;
-                        
-                        // Preload next image
-                        const lookaheadIndex = (index + 1) % currentImages.length;
-                        if (lookaheadIndex !== index) {
-                            const preloadImg = new Image();
-                            preloadImg.src = currentImages[lookaheadIndex].src;
-                        }
-                    }, 300);
+                    }, 300); // Match CSS transition
                 });
             };
 
-            if (img.complete) {
-                onImageLoad();
+            if (currentImgEl.complete) {
+                completeTransition();
             } else {
-                img.onload = onImageLoad;
-                img.onerror = () => {
+                currentImgEl.onload = completeTransition;
+                currentImgEl.onerror = () => {
                     console.error('Failed to load image');
                     isTransitioning = false;
                 };
             }
-        }, 300); // Wait for fade out
+        }, 300); // Wait for fade out to finish
 
       } else {
-        // Instant update
-        img.style.opacity = '0';
-        img.src = target.src;
-        img.alt = target.alt || "";
+        // Instant update (first load)
+        currentImgEl.style.opacity = '0'; // Start hidden to prevent flash
+        currentImgEl.src = target.src;
+        currentImgEl.alt = target.alt || "";
         
         const showImage = () => {
-            img.style.opacity = '1';
+            currentImgEl.style.opacity = '1';
             
             // Preload next
             const lookaheadIndex = (index + 1) % currentImages.length;
@@ -159,24 +163,28 @@ const { selector = "main", gallery = true } = Astro.props;
             }
         };
 
-        if (img.complete) {
+        if (currentImgEl.complete) {
             requestAnimationFrame(showImage);
         } else {
-            img.onload = showImage;
+            currentImgEl.onload = showImage;
         }
       }
 
       currentIndex = index;
     };
 
-    // Add click-to-next
-    img.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (gallery && currentImages.length > 1) {
-            nextImage();
-        }
+    // Add click-to-next on the images themselves
+    lightboxImages.forEach(imgEl => {
+        imgEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            // Only advance if gallery mode is active (single images shouldn't cycle endlessly unless desired)
+            if (gallery && currentImages.length > 1) {
+                nextImage();
+            }
+        });
+        // Add pointer cursor to indicate clickability
+        imgEl.style.cursor = gallery ? "pointer" : "default";
     });
-    img.style.cursor = gallery ? "pointer" : "default";
 
     if (toggleLightsBtn && metaContainer) {
       toggleLightsBtn.addEventListener("click", (e) => {
@@ -186,6 +194,7 @@ const { selector = "main", gallery = true } = Astro.props;
         
         if (isLightsOff) {
           lightbox.classList.add("lights-off");
+          // Keep meta active in both modes, CSS handles styling
           metaContainer.classList.add("is-active"); 
           toggleLightsBtn.classList.remove("active");
         } else {
@@ -197,21 +206,33 @@ const { selector = "main", gallery = true } = Astro.props;
     }
 
     const openLightbox = (imageElement) => {
+      console.log('openLightbox called', { gallery });
+      // If gallery is false, do nothing (should be handled by attachListeners not adding events, but safety check)
       if (!gallery) return;
 
       const container = document.querySelector(selector);
-      if (!container) return;
-      
+      if (!container) {
+          console.error('Lightbox container not found:', selector);
+          return;
+      }
       currentImages = Array.from(container.querySelectorAll("img")).filter(i => {
         return !i.closest("a") && !i.classList.contains("no-lightbox");
       });
+      console.log('Found images:', currentImages.length);
       currentIndex = currentImages.indexOf(imageElement);
+      console.log('Current index:', currentIndex);
 
-      if (currentIndex === -1) return;
+      if (currentIndex === -1) {
+          console.error('Clicked image not found in currentImages list');
+          return;
+      }
 
-      // Reset
-      img.style.opacity = '0';
-      img.removeAttribute('src');
+      // Reset state for clean open
+      lightboxImages.forEach(img => {
+        img.classList.remove('active', 'next');
+        img.removeAttribute('src'); // Use removeAttribute instead of src="" to avoid self-fetch
+      });
+      activeImgIndex = 0; // Reset to first slot
 
       updateLightbox(currentIndex, false); 
       lightbox.setAttribute("aria-hidden", "false");
@@ -219,7 +240,7 @@ const { selector = "main", gallery = true } = Astro.props;
       document.body.classList.add("lightbox-open");
       document.body.classList.add("toc-hidden");
       
-      // Default: Lights On
+      // Default state: Lights On
       lightbox.classList.add("lights-on");
       lightbox.classList.remove("lights-off");
       if (metaContainer) metaContainer.classList.add("is-active");
@@ -232,13 +253,17 @@ const { selector = "main", gallery = true } = Astro.props;
       document.body.classList.remove("lightbox-open");
       document.body.classList.remove("toc-hidden");
       
+      // Reset image state after close animation
       setTimeout(() => {
-          img.removeAttribute('src');
-          img.style.opacity = '0';
+          lightboxImages.forEach(img => {
+            img.removeAttribute('src');
+            img.classList.remove('active', 'next');
+          });
           isTransitioning = false;
       }, 300);
     };
 
+    // Close when clicking main area or overlay
     const mainArea = document.querySelector(".lightbox-main");
     if (mainArea) {
       mainArea.addEventListener("click", (e) => {
@@ -253,7 +278,7 @@ const { selector = "main", gallery = true } = Astro.props;
       if (currentIndex < currentImages.length - 1) {
         updateLightbox(currentIndex + 1, true);
       } else if (currentImages.length > 1) {
-        updateLightbox(0, true);
+        updateLightbox(0, true); // Loop to start
       }
     };
 
@@ -262,12 +287,12 @@ const { selector = "main", gallery = true } = Astro.props;
       if (currentIndex > 0) {
         updateLightbox(currentIndex - 1, true);
       } else if (currentImages.length > 1) {
-        updateLightbox(currentImages.length - 1, true);
+        updateLightbox(currentImages.length - 1, true); // Loop to end
       }
     };
 
     const attachListeners = () => {
-      if (!gallery) return;
+      if (!gallery) return; // Disable lightbox if gallery is false
 
       const container = document.querySelector(selector);
       if (!container) return;
