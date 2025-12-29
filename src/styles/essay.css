@@ -123,7 +123,7 @@ html {
   color: white;
   z-index: 999999;
   transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
-  box-shadow: 20px 0 80px rgba(0,0,0,0.3);
+  box-shadow: none;
   padding: 6rem 2rem 0rem 4rem;
   display: flex;
   flex-direction: column;
@@ -168,7 +168,7 @@ html {
   transition: color 0.3s ease, background-color 0.3s ease;
   border-radius: 0 16px 16px 0;
   pointer-events: auto;
-  box-shadow: 5px 0 20px rgba(0,0,0,0.15);
+  box-shadow: none;
   z-index: 1000000;
 }
 
@@ -224,6 +224,30 @@ html {
   display: block !important;
   text-transform: none !important;
   letter-spacing: normal !important;
+  transition: color 0.2s ease !important;
+  transform: none !important;
+}
+
+.editorial-post .toc-title-link {
+  text-decoration: none !important;
+  display: block;
+  width: 100%;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.editorial-post .toc-title-link:hover .toc-title,
+.editorial-post .toc-header:hover .toc-title {
+  color: #d04b36 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: color 0.2s ease !important;
+}
+
+.editorial-post .toc-title-link:hover {
+  background: none !important;
+  text-decoration: none !important;
+  opacity: 1 !important;
 }
 
 .sticky-toc {
@@ -256,34 +280,46 @@ html {
   display: none !important;
 }
 
-.editorial-post .sticky-toc a {
-  text-decoration: none;
-  color: white;
+.editorial-post .sticky-toc ul a {
+  text-decoration: none !important;
+  color: white !important;
   font-family: "Fraunces", serif;
   font-size: 1.6rem;
-  transition: all 0.3s;
   line-height: 1.3;
   display: block;
   font-weight: 400;
   position: relative;
-  pointer-events: auto !important; /* Force clickability */
+  pointer-events: auto !important;
 }
 
-.editorial-post .sticky-toc a::before {
+.editorial-post .sticky-toc ul a::before {
   content: counter(chapter) ". ";
   font-family: "Inter", sans-serif;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--accent);
+  color: #d04b36;
   margin-right: 0.5rem;
   display: inline-block;
   vertical-align: middle;
-  transform: translateY(-2px);
 }
 
-.editorial-post .sticky-toc a:hover {
-  color: var(--accent);
-  transform: translateX(10px);
+/* Force TOC Hover Colors and Disable Animations */
+.editorial-post .sticky-toc a:hover,
+.editorial-post .sticky-toc li:hover a,
+.editorial-post .sticky-toc a:hover::before,
+.editorial-post .toc-title-link:hover .toc-title,
+.editorial-post .toc-header:hover .toc-title {
+  color: #d04b36 !important;
+  opacity: 1 !important;
+  transform: none !important;
+  transition: color 0.2s ease !important;
+  animation: none !important;
+}
+
+.editorial-post .sticky-toc li:hover,
+.editorial-post .toc-title-link:hover {
+  transform: none !important;
+  background: none !important;
 }
 
 /* Anchor targets (H2) - Restore functionality but keep invisible if desired */
@@ -464,7 +500,8 @@ html {
 .post-meta-top,
 .post-title,
 .post-lead,
-.post-author-line {
+.post-author-line,
+.site-footer {
   position: relative;
   z-index: 1;
   transition: transform 0.6s ease;
@@ -485,7 +522,7 @@ body::after {
   transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
   pointer-events: none;
   will-change: transform;
-  box-shadow: 20px 0 50px rgba(0, 0, 0, 0.05); /* Soft leading edge */
+  box-shadow: none; /* Soft leading edge removed */
 }
 
 body.screen-mode::after {
@@ -499,10 +536,12 @@ body.screen-mode .editorial-post,
 body.screen-mode .post-layout-container,
 body.screen-mode .post-header,
 body.screen-mode .post-body,
+body.screen-mode .site-footer,
 body.screen-mode-exiting .editorial-post,
 body.screen-mode-exiting .post-layout-container,
 body.screen-mode-exiting .post-header,
-body.screen-mode-exiting .post-body {
+body.screen-mode-exiting .post-body,
+body.screen-mode-exiting .site-footer {
   z-index: auto !important;
 }
 
@@ -513,20 +552,22 @@ body.screen-mode .post-meta-top,
 body.screen-mode .post-title,
 body.screen-mode .post-lead,
 body.screen-mode .post-author-line,
+body.screen-mode .site-footer,
 body.screen-mode-exiting figure,
 body.screen-mode-exiting img,
 body.screen-mode-exiting figcaption,
 body.screen-mode-exiting .post-meta-top,
 body.screen-mode-exiting .post-title,
 body.screen-mode-exiting .post-lead,
-body.screen-mode-exiting .post-author-line {
+body.screen-mode-exiting .post-author-line,
+body.screen-mode-exiting .site-footer {
   position: relative;
   z-index: 9001 !important;
   transition: transform 0.6s ease;
 }
 
-body.screen-mode figure:hover {
-  transform: scale(1.02);
+body.screen-mode figure {
+  transform: scale(1.15);
 }
 
 /* Keep only the screen toggle on top */
