@@ -5,8 +5,8 @@ html {
 
 .editorial-post {
   width: 100%;
-  margin: 0;
-  padding: 10rem 0 8rem;
+  margin: 0rem;
+  padding: 10rem 5rem 8rem;
   background: var(--page-bg, #f9e4e4);
   min-height: 100vh;
   position: relative;
@@ -121,7 +121,7 @@ html {
   min-width: 250px;
   background: #1a1f2c;
   color: white;
-  z-index: 999999;
+  z-index: 1000;
   transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
   box-shadow: none;
   padding: 6rem 2rem 0rem 4rem;
@@ -147,6 +147,7 @@ html {
 .editorial-post .toggle-btn {
   position: fixed;
   left: 0;
+  top: 50%;
   transform: translateY(-50%);
   background: #1a1f2c;
   border: none;
@@ -169,7 +170,7 @@ html {
   border-radius: 0 16px 16px 0;
   pointer-events: auto;
   box-shadow: none;
-  z-index: 1000000;
+  z-index: 1100;
 }
 
 .editorial-post .toggle-btn:hover,
@@ -500,10 +501,21 @@ html {
 .post-meta-top,
 .post-title,
 .post-lead,
-.post-author-line,
-.site-footer {
+.post-author-line {
   position: relative;
   z-index: 1;
+  transition: transform 0.6s ease;
+}
+
+/* Global Header/Footer Overrides for Essay Layering */
+.site-header {
+  z-index: 5000 !important;
+}
+
+.site-footer {
+  position: relative;
+  z-index: 5000 !important;
+  background: var(--page-bg, #f9e4e4) !important;
   transition: transform 0.6s ease;
 }
 
