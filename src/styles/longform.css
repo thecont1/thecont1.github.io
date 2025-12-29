@@ -106,7 +106,7 @@
   transform: translateX(-100%);
 }
 
-.toc-toggle-btn {
+.longform-post .toc-toggle-btn {
   position: absolute;
   left: 100%;
   top: 50%;
@@ -135,13 +135,13 @@
   z-index: 1000001;
 }
 
-.toc-toggle-btn:hover {
+.longform-post .toc-toggle-btn:hover {
   color: var(--accent, #d04b36);
   padding-right: 1.5rem;
   background: #242b3d;
 }
 
-.toc-toggle-btn .dot {
+.longform-post .toc-toggle-btn .dot {
   width: 8px;
   height: 8px;
   background: var(--accent);

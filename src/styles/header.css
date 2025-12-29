@@ -16,7 +16,7 @@
   grid-template-columns: auto 1fr auto;
   align-items: center;
   height: var(--site-header-height);
-  padding: 0 2.5vw;
+  padding: 0 2rem; /* Stable fixed padding instead of vw */
   background: rgba(255, 255, 255, var(--nav-bg-alpha));
   transition: background 220ms linear;
 }
@@ -79,6 +79,12 @@
   border: none;
   padding: 0;
   cursor: pointer;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px; /* Optional: adds subtle rounded corner if background is ever added */
 }
 
 .icon-btn svg {

@@ -12,7 +12,7 @@ const { Content, headings } = await post.render();
 
 const backgroundColor = post.data.backgroundColor || "#f9e4e4";
 
-// TOC logic: Filter for H2s
+// TOC logic: Filter for H2s - Keep original text as requested
 const toc = headings.filter((h) => h.depth === 2);
 
 // Formatting date
@@ -52,13 +52,9 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   <div class="post-layout-container">
     {toc.length > 0 && (
       <aside class="post-sidebar" id="toc-sidebar">
-        <button id="toc-toggle" class="toc-toggle-btn" aria-label="Toggle Table of Contents">
-          <span class="dot"></span>
-          <span class="label">Contents</span>
-        </button>
         <nav class="sticky-toc">
           <div class="toc-header">
-            <span class="toc-title">Contents</span>
+            <span class="toc-title">{post.data.title}</span>
           </div>
           <ul>
             {toc.map((h) => (
@@ -83,6 +79,18 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </div>
 
   <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
+
+  {toc.length > 0 && (
+    <button id="toc-toggle" class="toc-toggle-btn toggle-btn" aria-label="Toggle Table of Contents">
+      <span class="dot"></span>
+      <span class="label">Contents</span>
+    </button>
+  )}
+
+  <button id="screen-toggle" class="screen-toggle-btn toggle-btn" aria-label="Toggle Screen Mode">
+    <span class="dot"></span>
+    <span class="label">Screen</span>
+  </button>
 </article>
 
 <script>
@@ -112,13 +120,21 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     const article = document.querySelector('.editorial-post') as HTMLElement;
     if (article) {
       // Background Sync
-      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
+      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg').trim();
       const header = document.querySelector('.site-header') as HTMLElement;
       if (header) {
-        header.style.backgroundColor = bgColor;
-        header.style.transition = 'background-color 0.3s ease';
+        // Use a translucent version of the page background if possible, otherwise fallback to translucent white
+        header.style.backgroundColor = 'rgba(249, 228, 228, 0.0)'; 
+        header.style.backdropFilter = 'blur(6px)';
+        header.style.webkitBackdropFilter = 'blur(6px)';
+        header.style.borderBottom = '1px solid rgba(0,0,0,0.1)';
+        header.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        
         const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
-        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+        if (headerInner) {
+          headerInner.style.backgroundColor = 'transparent';
+          headerInner.style.backdropFilter = 'none';
+        }
       }
 
       // Auto-captions from alt text
@@ -153,7 +169,35 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
         toggle.addEventListener('click', () => {
           sidebar.classList.toggle('is-open');
         });
+        
         toggle.dataset.hasTocListener = 'true';
+      }
+    }
+
+    // Screen Mode Toggle
+    const screenToggle = document.getElementById('screen-toggle');
+    if (screenToggle) {
+      if (!screenToggle.dataset.hasScreenListener) {
+        screenToggle.addEventListener('click', () => {
+          const isMsgMode = document.body.classList.contains('screen-mode');
+          
+          if (isMsgMode) {
+            // Turning OFF: Add exiting class first
+            document.body.classList.add('screen-mode-exiting');
+            document.body.classList.remove('screen-mode');
+            screenToggle.classList.remove('active');
+            
+            // Remove exiting class after animation matches CSS (0.8s) + buffer
+            setTimeout(() => {
+              document.body.classList.remove('screen-mode-exiting');
+            }, 1000);
+          } else {
+            // Turning ON
+            document.body.classList.add('screen-mode');
+            screenToggle.classList.add('active');
+          }
+        });
+        screenToggle.dataset.hasScreenListener = 'true';
       }
     }
 
