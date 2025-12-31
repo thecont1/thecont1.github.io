@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/home.css";
 
 interface Props {
@@ -51,6 +52,7 @@ const backgroundColor = post.data.backgroundColor || "#f9e4e4";
   </div>
 
   <Lightbox selector=".album-grid" gallery={post.data.lightbox?.gallery} />
+  <C2PAOverlay />
 </div>
 
 <script>

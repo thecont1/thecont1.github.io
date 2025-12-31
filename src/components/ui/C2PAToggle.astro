@@ -1,0 +1,51 @@
+---
+/**
+ * C2PAToggle.astro
+ * A small, discreet tab or icon that sits on an image to indicate Content Credentials.
+ */
+import "../../styles/c2pa.css";
+import { SHIELD_CHECK_SVG } from "../icons/cr-logo-svg";
+
+interface Props {
+  imgSrc: string;
+  className?: string;
+}
+
+const { imgSrc, className = "" } = Astro.props;
+---
+
+<button 
+  class={`c2pa-indicator c2pa-toggle ${className}`} 
+  data-img-src={imgSrc}
+  aria-label="View Content Credentials"
+  title="Content Credentials"
+  set:html={SHIELD_CHECK_SVG}
+>
+</button>
+
+<script>
+  function initC2PAToggles() {
+    const toggles = document.querySelectorAll('.c2pa-indicator');
+    
+    toggles.forEach(toggle => {
+      if ((toggle as HTMLElement).dataset.hasListener) return;
+      
+      toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const imgSrc = (toggle as HTMLElement).dataset.imgSrc;
+        if (imgSrc) {
+          window.dispatchEvent(new CustomEvent('open-c2pa', { 
+            detail: { imgSrc } 
+          }));
+        }
+      });
+      
+      (toggle as HTMLElement).dataset.hasListener = 'true';
+    });
+  }
+
+  initC2PAToggles();
+  document.addEventListener('astro:page-load', initC2PAToggles);
+</script>

@@ -1,6 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
+import ScreenToggle from "../ui/ScreenToggle.astro";
+import ContentsToggle from "../ui/ContentsToggle.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/essay.css";
 
 interface Props {
@@ -50,22 +53,13 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </header>
 
   <div class="post-layout-container">
-    {toc.length > 0 && (
-      <aside class="post-sidebar" id="toc-sidebar">
-        <nav class="sticky-toc">
-          <div class="toc-header">
-            <a href="#top" class="toc-title-link">
-              <span class="toc-title">{post.data.title}</span>
-            </a>
-          </div>
-          <ul>
-            {toc.map((h) => (
-              <li><a href={`#${h.slug}`}>{h.text}</a></li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-    )}
+    <ContentsToggle title={post.data.title}>
+      <ul>
+        {toc.map((h) => (
+          <li><a href={`#${h.slug}`}>{h.text}</a></li>
+        ))}
+      </ul>
+    </ContentsToggle>
 
     <div class="post-body">
       <Content />
@@ -82,17 +76,8 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
   <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
 
-  {toc.length > 0 && (
-    <button id="toc-toggle" class="toc-toggle-btn toggle-btn" aria-label="Toggle Table of Contents">
-      <span class="dot"></span>
-      <span class="label">Contents</span>
-    </button>
-  )}
-
-  <button id="screen-toggle" class="screen-toggle-btn toggle-btn" aria-label="Toggle Screen Mode">
-    <span class="dot"></span>
-    <span class="label">Screen</span>
-  </button>
+  <ScreenToggle />
+  <C2PAOverlay />
 </article>
 
 <script>
@@ -164,57 +149,6 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     if (!article) {
       console.warn('initEditorialFeatures: .editorial-post not found');
       return;
-    }
-
-    // TOC Title Click - Smooth Scroll to Top
-    const tocTitleLink = article.querySelector('.toc-title-link') as HTMLElement;
-    if (tocTitleLink && !tocTitleLink.dataset.hasTitleListener) {
-      tocTitleLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        });
-        history.pushState(null, '', '#top');
-      });
-      tocTitleLink.dataset.hasTitleListener = 'true';
-    }
-
-    // TOC Toggle Logic
-    const sidebar = document.getElementById('toc-sidebar');
-    const toggle = document.getElementById('toc-toggle');
-    if (sidebar && toggle && !toggle.dataset.hasTocListener) {
-      toggle.addEventListener('click', () => {
-        sidebar.classList.toggle('is-open');
-      });
-      toggle.dataset.hasTocListener = 'true';
-    }
-
-    // Screen Mode Toggle
-    const screenToggle = document.getElementById('screen-toggle');
-    if (screenToggle) {
-      if (!screenToggle.dataset.hasScreenListener) {
-        screenToggle.addEventListener('click', () => {
-          const isMsgMode = document.body.classList.contains('screen-mode');
-          
-          if (isMsgMode) {
-            // Turning OFF: Add exiting class first
-            document.body.classList.add('screen-mode-exiting');
-            document.body.classList.remove('screen-mode');
-            screenToggle.classList.remove('active');
-            
-            // Remove exiting class after animation matches CSS (0.8s) + buffer
-            setTimeout(() => {
-              document.body.classList.remove('screen-mode-exiting');
-            }, 1000);
-          } else {
-            // Turning ON
-            document.body.classList.add('screen-mode');
-            screenToggle.classList.add('active');
-          }
-        });
-        screenToggle.dataset.hasScreenListener = 'true';
-      }
     }
 
     // Over-the-top Dropcaps

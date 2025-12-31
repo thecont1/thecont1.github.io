@@ -1,0 +1,216 @@
+---
+/**
+ * ScreenToggle.astro
+ * A reusable component that toggles "Screen Mode" - a focused viewing mode
+ * that dims the page and highlights key content like images and titles.
+ */
+---
+
+<button id="screen-toggle" class="screen-toggle-btn toggle-btn" aria-label="Toggle Screen Mode">
+  <span class="dot"></span>
+  <span class="label">Screen</span>
+</button>
+
+<style is:global>
+  /* Shared Toggle Button Styles (copied for independence) */
+  .toggle-btn {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a1f2c;
+    border: none;
+    width: 2.8rem;
+    height: 180px;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-family: "Inter", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-size: 0.75rem !important;
+    font-weight: 600;
+    color: white !important;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    border-radius: 0 16px 16px 0;
+    pointer-events: auto;
+    box-shadow: none;
+    z-index: 9500; /* Increased base to stay above curtain (9000) when not explicitly pushed under */
+  }
+
+  .toggle-btn:hover,
+  .toggle-btn.active {
+    color: var(--accent, #d04b36) !important;
+  }
+
+  .toggle-btn .label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: block;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .toggle-btn .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent, #d04b36);
+    border-radius: 50%;
+    transition: opacity 0.3s;
+    flex-shrink: 0;
+  }
+
+  /* Screen Toggle Specific Position */
+  .screen-toggle-btn {
+    top: 78% !important;
+  }
+
+  .screen-toggle-btn .dot {
+    opacity: 0.5;
+  }
+
+  .screen-toggle-btn:hover .dot,
+  .screen-toggle-btn.active .dot {
+    opacity: 1;
+  }
+
+  /* Screen Mode - The Magic Curtain */
+  body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.85); /* Milky translucent */
+    backdrop-filter: blur(12px);
+    z-index: 9000;
+    transform: translate3d(-100%, 0, 0);
+    transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    pointer-events: none;
+    will-change: transform;
+    box-shadow: none;
+  }
+
+  body.screen-mode::after {
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
+  }
+
+  /* Ensure sidebar transitions smoothly behind the curtain */
+  .post-sidebar {
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.5s ease !important;
+  }
+
+  /* Lifting elements above the curtain */
+  body.screen-mode .editorial-post,
+  body.screen-mode .simple-post,
+  body.screen-mode .longform-post,
+  body.screen-mode .post-layout-container,
+  body.screen-mode .longform-layout-container,
+  body.screen-mode .post-header,
+  body.screen-mode .post-body,
+  body.screen-mode .site-footer,
+  body.screen-mode-exiting .editorial-post,
+  body.screen-mode-exiting .simple-post,
+  body.screen-mode-exiting .longform-post,
+  body.screen-mode-exiting .post-layout-container,
+  body.screen-mode-exiting .longform-layout-container,
+  body.screen-mode-exiting .post-header,
+  body.screen-mode-exiting .post-body,
+  body.screen-mode-exiting .site-footer {
+    z-index: auto !important;
+  }
+
+  body.screen-mode figure,
+  body.screen-mode img,
+  body.screen-mode figcaption,
+  body.screen-mode .post-meta-top,
+  body.screen-mode .post-title,
+  body.screen-mode .post-lead,
+  body.screen-mode .post-author-line,
+  body.screen-mode .site-footer,
+  body.screen-mode-exiting figure,
+  body.screen-mode-exiting img,
+  body.screen-mode-exiting figcaption,
+  body.screen-mode-exiting .post-meta-top,
+  body.screen-mode-exiting .post-title,
+  body.screen-mode-exiting .post-lead,
+  body.screen-mode-exiting .post-author-line,
+  body.screen-mode-exiting .site-footer {
+    position: relative;
+    z-index: 9001 !important;
+    transition: transform 0.6s ease;
+  }
+
+  body.screen-mode figure {
+    transform: scale(1.15);
+  }
+
+  /* Keep Screen toggle ALWAYS on top to prevent vanishing during transitions */
+  .screen-toggle-btn {
+    z-index: 11000 !important;
+  }
+
+  /* Handle TOC tab and Sidebar layering during Screen Mode */
+  body.screen-mode .toc-toggle-btn,
+  body.screen-mode .post-sidebar,
+  body.screen-mode-exiting .toc-toggle-btn,
+  body.screen-mode-exiting .post-sidebar {
+    z-index: 8000 !important; /* Slide UNDER the curtain (9000) */
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto;
+  }
+
+  /* Transition for liftable elements */
+  figure,
+  img,
+  figcaption,
+  .post-meta-top,
+  .post-title,
+  .post-lead,
+  .post-author-line {
+    transition: transform 0.6s ease;
+  }
+</style>
+
+<script>
+  function initScreenMode() {
+    const screenToggle = document.getElementById('screen-toggle');
+    if (!screenToggle || screenToggle.dataset.hasScreenListener) return;
+
+    screenToggle.addEventListener('click', () => {
+      const isScreenMode = document.body.classList.contains('screen-mode');
+      
+      if (isScreenMode) {
+        // Turning OFF
+        document.body.classList.add('screen-mode-exiting');
+        document.body.classList.remove('screen-mode');
+        screenToggle.classList.remove('active');
+        
+        setTimeout(() => {
+          document.body.classList.remove('screen-mode-exiting');
+        }, 1000);
+      } else {
+        // Turning ON
+        document.body.classList.add('screen-mode');
+        screenToggle.classList.add('active');
+      }
+    });
+    
+    screenToggle.dataset.hasScreenListener = 'true';
+  }
+
+  // Initialize on load
+  initScreenMode();
+
+  // Re-initialize on Astro page navigation
+  document.addEventListener('astro:page-load', initScreenMode);
+</script>
