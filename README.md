@@ -6,7 +6,8 @@ This is the source code for the personal website of **Mahesh Shantaram** — doc
 
 - **Framework**: [Astro 5.x](https://astro.build/)
 - **Frontend**: [React 19](https://react.dev/) for interactive components
-- **Styling**: Vanilla CSS3
+- **Styling**: Vanilla CSS3 (Custom modules for C2PA, Lightbox, etc.)
+- **Content Credentials**: [C2PA](https://c2pa.org/) integration with live extraction via Python-based API
 - **Data & Computation**: [DuckDB](https://duckdb.org/) and [Marimo](https://marimo.io/) notebooks
 - **Content**: Git-backed Markdown with [Astro Content Collections](https://docs.astro.build/en/guides/content-collections/)
 
@@ -14,7 +15,8 @@ This is the source code for the personal website of **Mahesh Shantaram** — doc
 
 - `src/content/`: Markdown files for photography, writing, and data stories.
 - `src/components/`: Astro and React components.
-- `src/pages/`: File-based routing for the website.
+- `src/pages/`: File-based routing for the website, including live API endpoints.
+- `scripts/`: System scripts, including C2PA extraction tools.
 - `public/library/`: High-resolution media assets.
 
 ## 🧞 Commands
