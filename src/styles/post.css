@@ -1,214 +1,173 @@
-/* Post.astro styles */
+/* Post.astro styles - Economist daily blog style */
+
 .simple-post {
   max-width: 100%;
   margin: 0;
-  padding: 10rem 2rem 8rem;
-  background: var(--page-bg, #fff);
+  padding: 6rem 2rem 4rem;
+  min-height: 100vh;
 }
 
-/* Header Design */
-.post-header {
-  max-width: 680px; /* Medium-like narrow header */
-  margin: 0 auto 4rem;
+/* Header Design - Plain blog style */
+.simple-post .post-header {
+  max-width: 720px;
+  margin: 0 auto 2rem;
   text-align: left;
 }
 
-.post-meta-top {
-  display: flex;
-  justify-content: flex-start;
-  gap: 1rem;
+.simple-post .post-meta-top {
   font-family: "Inter", sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--muted);
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.post-meta-top .category {
+.simple-post .post-meta-top .category {
   color: var(--accent, #d04b36);
-  font-weight: 500;
+  font-weight: 600;
 }
 
-.post-title {
-  font-family: "Fraunces", serif;
-  font-size: clamp(2.5rem, 6vw, 3.5rem);
-  line-height: 1.1;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
+.simple-post .post-title {
+  font-family: "Inter", sans-serif;
+  font-size: 1.75rem;
+  line-height: 1.25;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
   letter-spacing: -0.01em;
 }
 
-.post-lead {
+.simple-post .post-lead {
   font-family: "Inter", sans-serif;
-  font-size: 1.25rem;
+  font-size: 1rem;
   line-height: 1.5;
   font-style: normal;
   color: var(--muted);
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
-.post-author-line {
+/* Economist-style byline: date | location */
+.simple-post .post-byline {
   font-family: "Inter", sans-serif;
-  font-size: 0.95rem;
-  color: var(--ink);
-  border-bottom: 1px solid var(--hairline);
-  padding-bottom: 2rem;
-}
-
-.post-author-line .by {
-  font-style: normal;
+  font-size: 0.75rem;
   color: var(--muted);
-  margin-right: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--hairline);
 }
 
-/* Hero Image styling (contained) */
-.post-hero {
-  margin: 2rem auto;
-  max-width: 680px;
-  width: 100%;
+.simple-post .post-byline .separator {
+  margin: 0 0.4rem;
+  color: var(--hairline);
 }
 
-.post-hero img {
-  width: 100%;
-  height: auto;
+.simple-post .post-byline .location {
+  font-weight: 500;
 }
 
 /* Layout Structure */
-.post-layout-container {
-  max-width: 680px;
+.simple-post .post-layout-container {
+  max-width: 720px;
   margin: 0 auto;
 }
 
-/* Sticky Sidebar/TOC visibility based on frontmatter */
-.post-sidebar {
-  display: block; /* Managed by Astro conditional rendering */
-}
-
-/* Post Body Content */
-.post-body {
-  font-family: "Merriweather", "Georgia", serif;
-  font-size: 1.25rem;
-  line-height: 1.8;
+/* Post Body Content - Tight, serious */
+.simple-post .post-body {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
   color: var(--ink);
 }
 
-/* Over-the-top Dropcaps - Refined for "Inside" effect */
-.post-body .dropcap {
-  position: relative;
-  z-index: 1;
-  margin-top: 6rem;
-  margin-bottom: 4rem;
-  padding-left: 10%;
-}
-
-.post-body .dropcap::before {
-  content: attr(data-letter);
-  position: absolute;
-  top: -8rem;
-  left: -2rem;
-  font-family: "Fraunces", serif;
-  font-size: 50rem;
-  line-height: 1;
-  font-weight: 100;
-  color: var(--accent);
-  opacity: 0.08;
-  z-index: -1;
-  pointer-events: none;
-  text-transform: uppercase;
-}
-
-@media (max-width: 768px) {
-  .post-body .dropcap {
-    padding-left: 0;
-    margin-top: 4rem;
-  }
-  .post-body .dropcap::before {
-    font-size: 25rem;
-    top: -4rem;
-  }
-}
-
-.post-body .dropcap::first-letter {
-  initial-letter: normal;
-  float: none;
-  font-size: inherit;
-  color: inherit;
-  margin: 0;
+/* Dropcap in Post - only first letter, no extra styling on paragraph */
+.simple-post .post-body p.dropcap {
+  margin-top: 0;
+  margin-bottom: 1rem;
   padding: 0;
 }
 
-.post-body h2 {
-  font-family: "Inter", sans-serif;
-  font-size: 1.75rem;
-  margin: 3rem 0 1rem;
-  font-weight: 600;
-}
-
-.post-body p {
-  margin-bottom: 1.5rem;
-}
-
-/* Pull Quotes simplified */
-.post-body blockquote.pull-quote {
-  margin: 2rem 0;
-  padding-left: 1.5rem;
-  border-left: 3px solid var(--accent);
-  font-family: "Merriweather", serif;
-  font-size: 1.3rem;
-  line-height: 1.5;
-  font-style: italic;
+.simple-post .post-body p.dropcap::first-letter {
+  float: left;
+  font-family: "Fraunces", serif;
+  font-size: 3.5rem;
+  line-height: 0.8;
+  font-weight: 400;
   color: var(--ink);
-  text-align: left;
+  margin-right: 0.5rem;
+  margin-top: 0.15rem;
 }
 
-/* Images & Figures (contained, no borders) */
+.simple-post .post-body h2 {
+  font-family: "Inter", sans-serif;
+  font-size: 1.25rem;
+  margin: 2rem 0 0.75rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.simple-post .post-body h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  margin: 1.5rem 0 0.5rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.simple-post .post-body p {
+  margin-bottom: 1rem;
+}
+
+/* Blockquotes - simple left border */
+.post-body blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--accent);
+  font-style: italic;
+  color: var(--muted);
+}
+
+/* Images - minimal, no fancy borders */
 .post-body img,
 .post-body figure {
   display: block;
   margin: 2rem 0;
   max-width: 100%;
-  border: none;
-  box-shadow: none;
-  background: transparent;
-  padding: 0;
 }
 
-/* Caption handling for Post */
-.post-body figcaption,
-.post-body .image-caption {
-  display: block;
+.post-body figcaption {
   font-family: "Inter", sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--muted);
-  text-align: left;
   margin-top: 0.5rem;
   line-height: 1.4;
 }
 
 /* Footer Section */
 .post-footer {
-  margin-top: 8rem;
-  padding-top: 3rem;
+  margin-top: 4rem;
+  padding-top: 2rem;
   border-top: 1px solid var(--hairline);
 }
 
 .post-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .tag {
   font-family: "Inter", sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
 }
 
 /* Dividers */
 .post-body hr {
-  margin: 5rem auto;
+  margin: 3rem auto;
   border: none;
   border-top: 1px solid var(--hairline);
-  width: 80px;
+  width: 60px;
 }

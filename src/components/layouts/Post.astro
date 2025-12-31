@@ -1,9 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
-import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
-import ContentsToggle from "../ui/ContentsToggle.astro";
 import "../../styles/post.css";
 
 interface Props {
@@ -11,17 +9,15 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await post.render();
+const { Content } = await post.render();
 
-const backgroundColor = post.data.backgroundColor || "#ffffff";
+const backgroundColor = post.data.backgroundColor || post.data['background-color'] || "#ffffff";
+console.log(`Rendering Post: ${post.data.title}, BG: ${backgroundColor}`);
 
-// TOC logic: Filter for H2s
-const toc = headings.filter((h) => h.depth === 2);
-
-// Formatting date
-const formattedDate = post.data.date?.toLocaleDateString("en-US", {
+// Formatting date - Economist style: "Mar 29th 2024"
+const formattedDate = post.data.date?.toLocaleDateString("en-GB", {
   year: "numeric",
-  month: "long",
+  month: "short",
   day: "numeric",
 });
 
@@ -29,40 +25,49 @@ const formattedDate = post.data.date?.toLocaleDateString("en-US", {
 const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 ---
 
-<article class="simple-post" style={`--page-bg: ${backgroundColor};`}>
+<style is:global define:vars={{ backgroundColor }}>
+  /* Very aggressive override */
+  :root {
+    --page-bg: var(--backgroundColor);
+  }
+
+  html, 
+  body, 
+  main,
+  #app, 
+  #root, 
+  .post-layout-container, 
+  .simple-post {
+    background: var(--backgroundColor) !important;
+    background-color: var(--backgroundColor) !important;
+  }
+  
+  /* Ensure header also gets the background color */
+  .site-header {
+    background-color: var(--backgroundColor) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+  
+  .site-header-inner {
+    background-color: transparent !important;
+  }
+</style>
+
+<article class="simple-post" data-bg={backgroundColor} style={`--page-bg: ${backgroundColor};`}>
   <header class="post-header">
-    <div class="post-meta-top">
-      {post.data.category && <span class="category">{post.data.category}</span>}
-      {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
-    </div>
-    
     <h1 class="post-title">{post.data.title}</h1>
     
     {post.data.excerpt && <p class="post-lead">{post.data.excerpt}</p>}
 
-    <div class="post-author-line">
-      <span class="by">by</span>
-      <span class="author-name">Mahesh Shantaram</span>
+    <div class="post-byline">
+      {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
+      <span class="separator">|</span>
+      <span class="location">MAHESH SHANTARAM</span>
     </div>
-
-    {post.data.showhero !== false && post.data.heroImage && (
-      <figure class="post-hero">
-        <img src={post.data.heroImage} alt={post.data.title} />
-      </figure>
-    )}
   </header>
 
   <div class="post-layout-container">
-    {post.data.toc && toc.length > 0 && (
-      <ContentsToggle title={post.data.title}>
-        <ul>
-          {toc.map((h) => (
-            <li><a href={`#${h.slug}`}>{h.text}</a></li>
-          ))}
-        </ul>
-      </ContentsToggle>
-    )}
-
     <div class="post-body">
       <Content />
       
@@ -76,39 +81,44 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     </div>
   </div>
 
-  <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
-  <ScreenToggle />
+  {post.data.lightbox?.gallery && (
+    <Lightbox selector=".post-body" gallery={true} />
+  )}
   <C2PAOverlay />
 </article>
 
 <script>
-  function tagImageOrientation() {
-    const images = document.querySelectorAll('.post-body img');
-    images.forEach(img => {
-      const imgElement = img as HTMLImageElement;
-      if (imgElement.complete) {
-        setOrientation(imgElement);
-      } else {
-        imgElement.onload = () => setOrientation(imgElement);
-      }
-    });
-  }
-
-  function setOrientation(img: HTMLImageElement) {
-    const isHorizontal = img.naturalWidth > img.naturalHeight;
-    img.classList.add(isHorizontal ? 'is-horizontal' : 'is-vertical');
-    const figure = img.closest('figure');
-    if (figure) {
-      figure.classList.add(isHorizontal ? 'is-horizontal' : 'is-vertical');
-    }
-  }
-
-  // Update menubar background and auto-captions
+  // Sync header background with page background
   function refinePostContent() {
     const article = document.querySelector('.simple-post') as HTMLElement;
+    console.log('Post Layout: refining content');
     if (article) {
-      // Background Sync
-      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
+      const bgColor = article.style.getPropertyValue('--page-bg').trim() || 
+                      getComputedStyle(article).getPropertyValue('--page-bg').trim();
+      
+      console.log('Post Layout: applying bgColor', bgColor);
+      if (bgColor) {
+        // Direct injection to HTML and Body
+        document.documentElement.style.backgroundColor = bgColor;
+        document.body.style.backgroundColor = bgColor;
+        
+        // Force important on all potential containers
+        const styleId = 'dynamic-post-bg';
+        let style = document.getElementById(styleId);
+        if (!style) {
+          style = document.createElement('style');
+          style.id = styleId;
+          document.head.appendChild(style);
+        }
+        style.textContent = `
+          html, body, main, #app, #root, .post-layout-container, .simple-post { 
+            background-color: ${bgColor} !important; 
+          }
+        `;
+        
+        document.body.classList.add('simple-post-active');
+      }
+
       const header = document.querySelector('.site-header') as HTMLElement;
       if (header) {
         header.style.backgroundColor = bgColor;
@@ -116,49 +126,9 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
         const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
         if (headerInner) headerInner.style.backgroundColor = 'transparent';
       }
-
-      // Auto-captions from alt text
-      const images = article.querySelectorAll('.post-body img');
-      images.forEach(img => {
-        const imgEl = img as HTMLImageElement;
-        if (imgEl.alt && !imgEl.closest('figure')?.querySelector('figcaption')) {
-          const figure = imgEl.closest('figure') || document.createElement('figure');
-          if (!imgEl.closest('figure')) {
-            imgEl.parentNode?.insertBefore(figure, imgEl);
-            figure.appendChild(imgEl);
-          }
-          const caption = document.createElement('figcaption');
-          caption.className = 'image-caption';
-          caption.textContent = imgEl.alt;
-          figure.appendChild(caption);
-        }
-      });
     }
   }
 
-  // Handle dropcaps and header sync
-  function initPostFeatures() {
-    const article = document.querySelector('.simple-post') as HTMLElement;
-    if (!article) return;
-
-    // Over-the-top Dropcaps
-    const dropcaps = article.querySelectorAll('.dropcap');
-    dropcaps.forEach(p => {
-      const text = p.textContent || "";
-      if (text.length > 0) {
-        const firstLetter = text.charAt(0);
-        p.setAttribute('data-letter', firstLetter);
-      }
-    });
-  }
-
-  tagImageOrientation();
   refinePostContent();
-  initPostFeatures();
-  
-  document.addEventListener('astro:page-load', () => {
-    tagImageOrientation();
-    refinePostContent();
-    initPostFeatures();
-  });
+  document.addEventListener('astro:page-load', refinePostContent);
 </script>

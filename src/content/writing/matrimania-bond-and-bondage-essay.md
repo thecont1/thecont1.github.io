@@ -8,7 +8,7 @@ date: 2018-08-18
 container: matrimania
 backgroundColor: "#f9e4e4"
 heroImage: /library/originals/matrimania/MS201306-BipashaAashish0192.jpg
-showhero: false
+showhero: true
 toc: true
 lightbox:
   gallery: true
@@ -26,7 +26,9 @@ And a posse of bodyguards just for me.
 
 ## Kalindi: Marriage made in tax haven
 
-<p class="dropcap">Kalindi’s marriage was made in tax haven. Her big day was actually a strategic joint venture between two business magnates, the kind who, if they sneezed, could give the Sensex a slipped disc. Kalindi’s father got an early foothold into the CCTV industry. As Indians became more insecure, his business grew by leaps and bounds. She will marry into the family that owns exclusive rights to sell sugar doughnuts and deep-fried chicken to half the population. Needless to say, in the diabetes capital of the world, business is booming.</p>  
+Kalindi’s marriage was made in tax haven. Her big day was actually a strategic joint venture between two business magnates, the kind who, if they sneezed, could give the Sensex a slipped disc. Kalindi’s father got an early foothold into the CCTV industry. As Indians became more insecure, his business grew by leaps and bounds. She will marry into the family that owns exclusive rights to sell sugar doughnuts and deep-fried chicken to half the population. Needless to say, in the diabetes capital of the world, business is booming.
+
+<blockquote class="pull-quote">The great Indian wedding, like the great Indian waistline, has bloated to keep up with great Indian aspirations.</blockquote>
 
 The great Indian wedding, like the great Indian waistline, has bloated to keep up with great Indian aspirations. A yuppie investment banker-type with a switched-on accent is trying on a tuxedo for the first time. This is momentous and must be captured by the official photographer, he believes. He does that action—how shall I put it? The equivalent of snapping fingers at a waiter in a restaurant—and snaps me out of my reverie of how I’m creating important work that will one day end up at the MoMA or some such. “Take a picture,” he commands. I decline the invitation. “You're a photographer, right? Then what’s the problem?” Earlier, I would have mumbled something about how I’m a documentary photographer and so on. But that’s just bullshit. I feel like a brain surgeon who has to each time explain what a brain is.  
 
@@ -45,16 +47,14 @@ The priest then pronounces the couple woman and saviour. He declares Kalindi’s
 <p class="dropcap">Sakshi and her fiancé were both upper-middle-class Indians with their heads firmly on their shoulders and the world at their feet. They met at a mutual friend’s party in New York. She studied design at Parsons before getting a job at a startup. He got lapped up by Wall Street soon after graduating from Carnegie Mellon. She was a vegan-by-birth Jain. He, a one-fish-a-day Bengali. And yet, all they could see was how perfect they were for each other. A match made in USA. After five years of being “really good friends”, they were ready to embark on the transatlantic pilgrimage that thousands of Indians make every year—much like the March of the Penguins—to get married in the august presence of their families.</p>
 
 <blockquote class="pull-quote">
-
-![As much as Sakshi wanted to keep it limited to their closest friends and family, her mother had veto power.](/library/originals/matrimania/MS201211-NupoorArijit1559.jpg)
-
 An Indian couple typically gets married twice in their lifetime. The first is their own wedding. The second time is by proxy when they marry their kids off.
-
 </blockquote>
 
 An Indian couple typically gets married twice in their lifetime. The first is their own wedding, where they have no clue what to expect. The second time is by proxy when they marry their kids off. In that sense, it was Sakshi’s first wedding though not her mother’s. As much as Sakshi wanted to keep it limited to their closest friends and family, her mother had veto power.  
 
 In the heart of Delhi’s Cantonment is an auditorium with a large garden. You can’t miss it, thanks to the Hawker Hunter fighter jet that hangs prominently above the adjacent Air Force School. This haunting tribute to settling differences with neighbours will form the backdrop of today’s wedding. Sakshi’s mother, who taught mathematics at the school for 27 years, was able to use her influence with the Principal to rent the garden for a reasonable price.
+
+![As much as Sakshi wanted to keep it limited to their closest friends and family, her mother had veto power.](/library/originals/matrimania/MS201211-NupoorArijit1559.jpg)
 
 The beat of drums gets louder. They announce the arrival of the man of the moment, who inches his way through city traffic on a horse—always a mare, to be precise, deaf, dumb, and blindfolded to cope with the violence around her. The baraat procession is led by a wedding band whose professional ancestors must have served Maharajas in the times of the British Raj. Tonight, they have just one job: to stir up men, women, and children into an electric frenzy with their rehearsed cacophony. To make sure they stay motivated to the task, uncles and cousins jump in the fray, gyrate their hips, and fling 10 or 20 rupee notes at the bandwallahs or stuff it in their drums or into the drummers’ mouths.  
 

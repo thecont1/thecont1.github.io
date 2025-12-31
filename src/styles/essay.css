@@ -132,8 +132,8 @@ html {
 .editorial-post .post-body .dropcap {
   position: relative;
   z-index: 1;
-  margin-top: 8rem;
-  margin-bottom: 6rem;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
   padding-left: 0 !important;
 }
 

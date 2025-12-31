@@ -8,7 +8,7 @@ date: 2025-12-31
 backgroundColor: "#e4f9e4"
 heroImage: /library/originals/collection/MS202512-Karishma@40_0729.jpg
 showhero: false
-toc: true
+toc: false
 lightbox:
   gallery: true
 ---
