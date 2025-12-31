@@ -6,6 +6,7 @@
 */
 import "../../styles/lightbox.css";
 import IconBulb from "../icons/IconBulb.astro";
+import IconCR from "../icons/IconCR.astro";
 
 interface Props {
   selector?: string; // CSS selector to scope image listeners (e.g., '.post-content')
@@ -15,12 +16,13 @@ interface Props {
 const { selector = "main", gallery = true } = Astro.props;
 ---
 
-<div id="lightbox" class="lightbox" aria-hidden="true" data-gallery={gallery.toString()}>
+<div id="lightbox" class="lightbox" aria-hidden="true" data-selector={selector} data-gallery={gallery.toString()}>
   <div class="lightbox-overlay"></div>
   
   <div class="lightbox-main">
     <figure class="lightbox-figure">
       <img id="lightbox-img" class="lightbox-img" src="" alt="" />
+      <img id="lightbox-img-2" class="lightbox-img" src="" alt="" />
     </figure>
   </div>
 
@@ -47,6 +49,9 @@ const { selector = "main", gallery = true } = Astro.props;
         <button id="toggle-lights" class="icon-btn" aria-label="Toggle Lights">
           <IconBulb />
         </button>
+        <button id="lightbox-c2pa" class="icon-btn" aria-label="View Content Credentials">
+          <IconCR width="20" height="20" />
+        </button>
         <button id="lightbox-close" class="icon-btn" aria-label="Close">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
@@ -55,8 +60,12 @@ const { selector = "main", gallery = true } = Astro.props;
   </aside>
 </div>
 
-<script define:vars={{ selector, gallery }}>
+<script>
+  import ExifReader from 'exifreader';
+
   const lightbox = document.getElementById("lightbox");
+  const gallery = lightbox?.dataset.gallery === "true";
+  const selector = lightbox?.dataset.selector || "main";
   const lightboxImages = document.querySelectorAll(".lightbox-img");
   const caption = document.getElementById("lightbox-caption");
   const closeBtn = document.getElementById("lightbox-close");
@@ -66,30 +75,93 @@ const { selector = "main", gallery = true } = Astro.props;
   const toggleLightsBtn = document.getElementById("toggle-lights");
   const metaContainer = document.getElementById("lightbox-meta");
   const exifContainer = document.getElementById("lightbox-exif");
+  const c2paBtn = document.getElementById("lightbox-c2pa");
 
   let currentImages = [];
   let currentIndex = -1;
-  let activeImgIndex = 0; // Index of the currently visible <img> element (0 or 1)
+  let activeImgIndex = 0;
   let isTransitioning = false;
+
+  const getMetadata = async (imgUrl) => {
+    try {
+      const response = await fetch(imgUrl);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const buffer = await response.arrayBuffer();
+      const tags = ExifReader.load(buffer);
+      return tags;
+    } catch (e) {
+      console.warn('ExifReader error:', e);
+      return {};
+    }
+  };
+
+  const formatShutterSpeed = (exposureTime) => {
+    if (!exposureTime) return '';
+    const val = exposureTime.value || exposureTime;
+    if (typeof val === 'number') {
+      if (val >= 1) return val.toFixed(1) + 's';
+      const denominator = Math.round(1 / val);
+      return denominator > 0 ? `1/${denominator}s` : `${val}s`;
+    }
+    return exposureTime.description || String(val);
+  };
 
   if (lightbox && lightboxImages.length === 2 && caption && closeBtn && overlay) {
 
-    const updateCaptionAndMeta = (target) => {
-       // Look for figcaption if inside figure
+    const updateCaptionAndMeta = async (targetImgEl) => {
+      // 1. Basic Title/Caption from figure or alt
       let capText = "";
-      const fig = target.closest("figure");
+      const fig = targetImgEl.closest("figure");
       if (fig) {
         const cap = fig.querySelector("figcaption");
         if (cap) capText = cap.textContent;
       }
-      caption.textContent = capText || target.alt || "";
+      caption.textContent = capText || targetImgEl.alt || "Untitled";
 
-      // Placeholder for EXIF - could be expanded to fetch real EXIF
+      // 2. EXIF/IPTC Metadata
       if (exifContainer) {
-        exifContainer.innerHTML = `
-          <p>Dimensions: ${target.naturalWidth} x ${target.naturalHeight}</p>
-          <p>Format: ${target.src.split('.').pop().toUpperCase()}</p>
-        `;
+        exifContainer.innerHTML = '<p class="loading-meta">Fetching metadata...</p>';
+        
+        try {
+          const data = await getMetadata(targetImgEl.src);
+          
+          if (data && Object.keys(data).length > 0) {
+            // ExifReader returns objects with .description or .value properties
+            const getVal = (tag) => tag?.description || tag?.value || '';
+            
+            const model = getVal(data.Model) || getVal(data.Make) || '';
+            const lens = getVal(data.LensModel) || getVal(data.Lens) || '';
+            const iso = getVal(data.ISOSpeedRatings) || getVal(data.ISO) || '';
+            const fnumber = data.FNumber ? `${getVal(data.FNumber)}` : '';
+            const exposure = formatShutterSpeed(data.ExposureTime);
+            const focalLength = data.FocalLength ? `${getVal(data.FocalLength)}` : '';
+            
+            // IPTC fields
+            const artist = getVal(data.Artist) || getVal(data['By-line']) || '';
+            const copyright = getVal(data.Copyright) || getVal(data.CopyrightNotice) || '';
+
+            let exifHtml = '';
+            if (model) exifHtml += `<p class="exif-row"><strong>Camera:</strong> ${model}</p>`;
+            if (lens) exifHtml += `<p class="exif-row"><strong>Lens:</strong> ${lens}</p>`;
+            
+            const settings = [exposure, fnumber, iso ? `ISO ${iso}` : '', focalLength].filter(Boolean).join('  •  ');
+            if (settings) exifHtml += `<p class="exif-row"><strong>Settings:</strong> ${settings}</p>`;
+            
+            if (artist) exifHtml += `<p class="exif-row"><strong>Artist:</strong> ${artist}</p>`;
+            if (copyright) exifHtml += `<p class="exif-row"><strong>Copyright:</strong> ${copyright}</p>`;
+            
+            exifContainer.innerHTML = exifHtml || `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} x ${targetImgEl.naturalHeight}</p>`;
+          } else {
+            // Fallback to basic info
+            exifContainer.innerHTML = `
+              <p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} x ${targetImgEl.naturalHeight}</p>
+              <p class="exif-row"><strong>Format:</strong> ${targetImgEl.src.split('.').pop().toUpperCase()}</p>
+            `;
+          }
+        } catch (err) {
+          console.error('Metadata update error:', err);
+          exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
+        }
       }
     };
 
@@ -101,8 +173,6 @@ const { selector = "main", gallery = true } = Astro.props;
       // Determine orientation for sizing
       const isVertical = target.naturalHeight > target.naturalWidth;
       lightbox.setAttribute("data-orientation", isVertical ? "vertical" : "horizontal");
-
-      updateCaptionAndMeta(target);
 
       const currentImgEl = lightboxImages[activeImgIndex];
 
@@ -124,8 +194,11 @@ const { selector = "main", gallery = true } = Astro.props;
                 preloadImg.src = currentImages[lookaheadIndex].src;
             }
 
-            // Ensure image is loaded before fading in
+            // Ensure image is loaded before fading in and updating meta
             const completeTransition = () => {
+                // Important: Metadata must be extracted from the element that has the source
+                updateCaptionAndMeta(currentImgEl);
+                
                 // Phase 3: Fade In
                 requestAnimationFrame(() => {
                     currentImgEl.style.opacity = '1';
@@ -153,6 +226,7 @@ const { selector = "main", gallery = true } = Astro.props;
         currentImgEl.alt = target.alt || "";
         
         const showImage = () => {
+            updateCaptionAndMeta(currentImgEl);
             currentImgEl.style.opacity = '1';
             
             // Preload next
@@ -324,6 +398,17 @@ const { selector = "main", gallery = true } = Astro.props;
       nextBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         nextImage();
+      });
+    }
+
+    if (c2paBtn) {
+      c2paBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const currentImgEl = lightboxImages[activeImgIndex];
+        const imgSrc = currentImgEl?.src;
+        if (imgSrc) {
+          window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc } }));
+        }
       });
     }
 

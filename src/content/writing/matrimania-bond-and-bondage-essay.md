@@ -8,8 +8,10 @@ date: 2018-08-18
 container: matrimania
 backgroundColor: "#f9e4e4"
 heroImage: /library/originals/matrimania/MS201306-BipashaAashish0192.jpg
+showhero: false
+toc: true
 lightbox:
-  gallery: false
+  gallery: true
 ---
 
 <div style="text-align: right; font-style: italic;">

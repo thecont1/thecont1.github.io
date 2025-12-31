@@ -66,12 +66,18 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
     // Automatically find images in content and add indicators
     injectIndicators() {
-      // "Major photographs" only: Post body, Post hero, Album items, Lightbox
+      // "Major photographs" and other relevant images
       const selectors = [
         '.post-body img',
         '.post-hero img',
         '.album-item img',
-        '.lightbox-figure img'
+        '.lightbox-figure img',
+        '.notebook-wrapper img',
+        '.project-layout img',
+        '.datastory-layout img',
+        '.code-layout img',
+        '.thread-layout img',
+        '.timeline-layout img'
       ];
       
       const contentImages = document.querySelectorAll(selectors.join(', '));
@@ -126,27 +132,25 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
     }
 
     async open(imgSrc: string) {
+      const startTime = Date.now();
       this.overlay?.classList.add('is-active');
       document.body.style.overflow = 'hidden';
       
       if (this.content) {
-        this.content.innerHTML = '<div class="c2pa-loading">Generating credentials live...</div>';
+        this.content.innerHTML = '<div class="c2pa-loading">Verifying credentials. Please wait...</div>';
       }
 
       try {
-        // Ensure imgSrc is just the pathname if it's an absolute URL
+        // ... (fetch logic remains the same)
         let cleanSrc = imgSrc;
         try {
           const u = new URL(imgSrc, window.location.origin);
           cleanSrc = u.pathname;
         } catch (e) {}
 
-        // Primary attempt: GET with query param and custom header
         const origin = window.location.origin;
         const fetchUrl = new URL('/api/c2pa', origin);
         fetchUrl.searchParams.set('img', cleanSrc);
-        
-        console.log('[C2PA] Fetching (GET):', fetchUrl.toString());
         
         let response = await fetch(fetchUrl.toString(), {
           method: 'GET',
@@ -156,9 +160,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           }
         });
 
-        // Fallback: POST with JSON body and custom header
         if (!response.ok && response.status !== 404 && response.status !== 403) {
-          console.warn('[C2PA] GET failed with status', response.status, 'trying POST fallback');
           const postUrl = new URL('/api/c2pa', origin);
           response = await fetch(postUrl.toString(), {
             method: 'POST',
@@ -171,8 +173,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           });
         }
         
-        console.log('[C2PA] Response status:', response.status);
-        
         let data;
         const contentType = response.headers.get("content-type");
         if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -182,8 +182,15 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           throw new Error(`Server returned non-JSON response: ${text.slice(0, 100)}`);
         }
 
+        // Ensure minimum 1.0s loading delay
+        const elapsed = Date.now() - startTime;
+        if (elapsed < 1000) {
+          await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
+        }
+
         if (!response.ok) {
           const errorMsg = data.details || data.message || data.error || 'Credentials generation failed';
+          // ... (rest of error handling)
           const debugInfo = data.debug ? `
             <div class="c2pa-debug-technical">
               <div class="c2pa-debug-header">Technical Debug Info</div>
@@ -330,14 +337,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           </div>
 
           <div class="c2pa-section">
-            <h3 class="c2pa-section-title">Process & History</h3>
-            <div class="c2pa-actions-list">
-              ${uniqueActions.map(action => `<span class="c2pa-action-pill">${action}</span>`).join('')}
-              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded in manifest.</p>' : ''}
-            </div>
-          </div>
-
-          <div class="c2pa-section">
             <h3 class="c2pa-section-title">Provenance Comparison</h3>
             <div class="c2pa-image-comparison">
               <div class="c2pa-image-card">
@@ -358,6 +357,14 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
                   <p class="c2pa-card-title">${data.title || 'Exported Version'}</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <div class="c2pa-section">
+            <h3 class="c2pa-section-title">Process & History</h3>
+            <div class="c2pa-actions-list">
+              ${uniqueActions.map(action => `<span class="c2pa-action-pill">${action}</span>`).join('')}
+              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded in manifest.</p>' : ''}
             </div>
           </div>
         </div>
