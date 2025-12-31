@@ -111,17 +111,21 @@ html {
   z-index: 1;
 }
 
-/* Anchor targets (H2) - Restore functionality but keep invisible if desired */
+.post-body p {
+  margin-bottom: 1.5rem;
+}
+
+/* Anchor targets (H2) - Now always visible as requested */
 .post-body h2 {
-  display: block !important; /* Override any global display:none */
-  visibility: hidden;
-  height: 0;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  scroll-margin-top: 6rem; /* Offset for fixed header */
+  display: block !important;
+  font-family: "Fraunces", serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  margin: 3rem 0 1.5rem -2rem;
+  line-height: 1.2;
+  scroll-margin-top: 6rem;
   position: relative;
-  z-index: -1;
+  z-index: 1;
 }
 
 /* Over-the-top Dropcaps - Refined for "Inside" effect */

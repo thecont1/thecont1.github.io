@@ -45,7 +45,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       <span class="author-name">Mahesh Shantaram</span>
     </div>
 
-    {post.data.heroImage && (
+    {post.data.showhero !== false && post.data.heroImage && (
       <figure class="post-hero">
         <img src={post.data.heroImage} alt={post.data.title} />
       </figure>
@@ -53,13 +53,15 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </header>
 
   <div class="post-layout-container">
-    <ContentsToggle title={post.data.title}>
-      <ul>
-        {toc.map((h) => (
-          <li><a href={`#${h.slug}`}>{h.text}</a></li>
-        ))}
-      </ul>
-    </ContentsToggle>
+    {post.data.toc && toc.length > 0 && (
+      <ContentsToggle title={post.data.title}>
+        <ul>
+          {toc.map((h) => (
+            <li><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+        </ul>
+      </ContentsToggle>
+    )}
 
     <div class="post-body">
       <Content />

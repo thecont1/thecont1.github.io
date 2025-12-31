@@ -33,7 +33,13 @@ const baseSchema = z.object({
   // Lightbox settings
   lightbox: z.object({
     gallery: z.boolean().optional().default(true),
-  }).optional().default({ gallery: true })
+  }).optional().default({ gallery: true }),
+
+  // Table of Contents control
+  toc: z.boolean().optional().default(false),
+
+  // Hero Image visibility control
+  showhero: z.boolean().optional().default(true)
 });
 
 export const collections = {

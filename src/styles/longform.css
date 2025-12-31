@@ -178,8 +178,17 @@
   line-height: 1.4;
 }
 
+/* Anchor targets (H2) - Now always visible as requested */
 .post-body h2 {
-  display: none; /* We use them for titles but they are in the nav */
+  display: block !important;
+  font-family: "Fraunces", serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  margin: 4rem 0 2rem;
+  line-height: 1.2;
+  scroll-margin-top: 6rem;
+  position: relative;
+  z-index: 1;
 }
 
 .post-body p.dropcap::first-letter {

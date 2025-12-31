@@ -154,7 +154,21 @@
   letter-spacing: 0.05em;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
+}
+
+.exif-row {
+  margin: 0;
+}
+
+.exif-row strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.loading-meta {
+  font-style: italic;
+  opacity: 0.6;
 }
 
 .sidebar-footer {
@@ -200,7 +214,7 @@
 
 .lightbox .icon-btn.active {
   color: var(--ink, #111);
-  background: rgba(0,0,0,0.05);
+  background: transparent;
 }
 
 .lightbox .icon-btn svg {

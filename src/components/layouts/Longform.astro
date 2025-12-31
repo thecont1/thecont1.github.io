@@ -44,7 +44,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       <span class="author-name">Mahesh Shantaram</span>
     </div>
 
-    {post.data.heroImage && (
+    {post.data.showhero !== false && post.data.heroImage && (
       <figure class="post-hero">
         <img src={post.data.heroImage} alt={post.data.title} />
       </figure>
@@ -52,7 +52,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </header>
 
   <div class="longform-layout-container">
-    {sections.length > 0 && (
+    {post.data.toc && sections.length > 0 && (
       <ContentsToggle title={post.data.title} label="Chapters">
         <ul>
           <li class="active" data-section="intro"><a href="#intro">Introduction</a></li>
@@ -81,6 +81,15 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     if (!content) return;
 
     const navItems = document.querySelectorAll('.sticky-toc li');
+    
+    // Only run pagination logic if TOC is present
+    if (navItems.length === 0) {
+      // If no TOC, ensure all section wrappers are visible
+      const wrappers = content.querySelectorAll('.section-wrapper');
+      wrappers.forEach(sw => sw.classList.add('active'));
+      return;
+    }
+
     let currentWrapper = document.getElementById('section-intro');
     if (!currentWrapper) return;
 

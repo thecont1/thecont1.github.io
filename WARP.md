@@ -32,7 +32,7 @@ npm run astro            # Access Astro CLI directly
   - Required: `title`, `excerpt`, `status` (private/draft/published)
   - Taxonomy: `category`, `layout`, `geography[]`, `theme[]`, `container`
   - Layouts: post, essay, longform, photo-album, timeline, thread, code, datastory, project
-  - Optional: `date`, `heroImage`, `notebook` (for marimo/jupyter), `lightbox` settings
+  - Optional: `date`, `heroImage`, `notebook` (for marimo/jupyter), `lightbox` settings, `toc` (boolean)
 
 ### Content Credentials (C2PA)
 - **Live Extraction**: Managed via `src/pages/api/c2pa.ts`, which calls a Python extraction script.

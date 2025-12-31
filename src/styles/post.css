@@ -78,9 +78,9 @@
   margin: 0 auto;
 }
 
-/* Sticky Sidebar/TOC REMOVED for Post */
+/* Sticky Sidebar/TOC visibility based on frontmatter */
 .post-sidebar {
-  display: none;
+  display: block; /* Managed by Astro conditional rendering */
 }
 
 /* Post Body Content */
