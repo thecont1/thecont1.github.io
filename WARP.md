@@ -16,7 +16,7 @@ npm run build            # Build production site to ./dist/
 npm run preview          # Preview production build locally
 npm run astro check      # Run Astro type checking
 ```
-
+    
 ### Direct Astro CLI
 ```bash
 npm run astro            # Access Astro CLI directly
@@ -33,6 +33,12 @@ npm run astro            # Access Astro CLI directly
   - Taxonomy: `category`, `layout`, `geography[]`, `theme[]`, `container`
   - Layouts: post, essay, longform, photo-album, timeline, thread, code, datastory, project
   - Optional: `date`, `heroImage`, `notebook` (for marimo/jupyter), `lightbox` settings
+
+### Content Credentials (C2PA)
+- **Live Extraction**: Managed via `src/pages/api/c2pa.ts`, which calls a Python extraction script.
+- **Tools**: Requires `c2patool` in a sibling directory (`../c2patool/.venv/bin/python3`).
+- **Styles**: Custom overlay and indicator styles in `src/styles/c2pa.css`.
+- **Scripts**: Core extraction logic lives in `scripts/c2pa_xtract.py`.
 
 ### Routing & Pages
 - **File-based routing**: `src/pages/` directory
@@ -51,8 +57,13 @@ npm run astro            # Access Astro CLI directly
 - **Processed assets**: `src/assets/` for build-time optimization
 
 ### Styling
-- **Vanilla CSS3**: No CSS framework
-- **Global styles**: `src/styles/`
+- **Vanilla CSS3**: No CSS framework.
+- **Global styles**: `src/styles/global.css` (variables and core styles).
+- **Z-Index Hierarchy**:
+  - `SiteHeader`: 100
+  - `ContentsToggle` Sidebar: 500
+  - `SiteFooter`: 2000 (Ensures visibility over sliding panels)
+  - `C2PAOverlay`: 20000
 - **Layout system**: `src/layouts/` for page templates
 
 ## Data Science Integration
