@@ -38,6 +38,10 @@ const baseSchema = z.object({
   // Table of Contents control
   toc: z.boolean().optional().default(false),
 
+  // Appearance
+  backgroundColor: z.string().optional(),
+  "background-color": z.string().optional(),
+
   // Hero Image visibility control
   showhero: z.boolean().optional().default(true)
 });

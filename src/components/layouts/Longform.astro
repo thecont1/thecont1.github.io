@@ -15,8 +15,29 @@ const { Content, headings } = await post.render();
 
 const backgroundColor = post.data.backgroundColor || "#ffffff";
 
-// TOC logic: Filter for H2s for pagination
-const sections = headings.filter((h) => h.depth === 2);
+// Build chapter structure: H2s are chapters, H3s are sections within chapters
+const chapters = headings.filter((h) => h.depth === 2);
+const allHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
+
+// Build nested TOC structure
+interface TocItem {
+  slug: string;
+  text: string;
+  depth: number;
+  sections?: TocItem[];
+}
+
+const tocStructure: TocItem[] = [];
+let currentChapter: TocItem | null = null;
+
+allHeadings.forEach((h) => {
+  if (h.depth === 2) {
+    currentChapter = { slug: h.slug, text: h.text, depth: 2, sections: [] };
+    tocStructure.push(currentChapter);
+  } else if (h.depth === 3 && currentChapter) {
+    currentChapter.sections?.push({ slug: h.slug, text: h.text, depth: 3 });
+  }
+});
 
 // Formatting date
 const formattedDate = post.data.date?.toLocaleDateString("en-US", {
@@ -26,9 +47,10 @@ const formattedDate = post.data.date?.toLocaleDateString("en-US", {
 });
 
 const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
+const totalChapters = chapters.length;
 ---
 
-<article class="longform-post" style={`--page-bg: ${backgroundColor};`}>
+<article class="longform-post" style={`--page-bg: ${backgroundColor};`} data-total-chapters={totalChapters}>
   <header class="post-header">
     <div class="post-meta-top">
       {post.data.category && <span class="category">{post.data.category}</span>}
@@ -52,22 +74,42 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </header>
 
   <div class="longform-layout-container">
-    {post.data.toc && sections.length > 0 && (
+    {post.data.toc !== false && tocStructure.length > 0 && (
       <ContentsToggle title={post.data.title} label="Chapters">
         <ul>
-          <li class="active" data-section="intro"><a href="#intro">Introduction</a></li>
-          {sections.map((h) => (
-            <li data-section={h.slug}><a href={`#${h.slug}`}>{h.text}</a></li>
+          {tocStructure.map((chapter, idx) => (
+            <li class={idx === 0 ? 'active' : ''} data-chapter={chapter.slug}>
+              <a href={`#${chapter.slug}`}>{chapter.text}</a>
+            </li>
           ))}
         </ul>
       </ContentsToggle>
     )}
 
     <div class="post-body" id="longform-content">
-      <div class="section-wrapper active" id="section-intro">
-         <Content />
-      </div>
+      <Content />
     </div>
+
+    <!-- Chapter Navigation -->
+    {chapters.length > 1 && (
+      <nav class="chapter-nav" aria-label="Chapter navigation">
+        <button class="chapter-nav-btn prev" disabled aria-label="Previous chapter">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span class="nav-label">Previous</span>
+        </button>
+        <div class="chapter-progress">
+          <span class="current-chapter">1</span> / <span class="total-chapters">{totalChapters}</span>
+        </div>
+        <button class="chapter-nav-btn next" aria-label="Next chapter">
+          <span class="nav-label">Next</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+        </button>
+      </nav>
+    )}
   </div>
 
   <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
@@ -78,131 +120,174 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 <script>
   function setupLongformPagination() {
     const content = document.getElementById('longform-content');
-    if (!content) return;
+    const article = document.querySelector('.longform-post') as HTMLElement;
+    if (!content || !article) return;
 
-    const navItems = document.querySelectorAll('.sticky-toc li');
+    // Check if already processed
+    if (content.querySelector('.chapter-page')) return;
+
+    // Get all direct children as an array (before modifying DOM)
+    const children = Array.from(content.children) as HTMLElement[];
     
-    // Only run pagination logic if TOC is present
-    if (navItems.length === 0) {
-      // If no TOC, ensure all section wrappers are visible
-      const wrappers = content.querySelectorAll('.section-wrapper');
-      wrappers.forEach(sw => sw.classList.add('active'));
-      return;
-    }
+    // Find all H2s to determine chapter count
+    const h2Elements = children.filter(el => el.tagName === 'H2');
+    if (h2Elements.length === 0) return;
 
-    let currentWrapper = document.getElementById('section-intro');
-    if (!currentWrapper) return;
+    let currentChapterIndex = 0;
 
-    // Over-the-top Dropcaps
-    const dropcaps = content.querySelectorAll('.dropcap');
-    dropcaps.forEach(p => {
+    // Chapter navigation elements
+    const prevBtn = document.querySelector('.chapter-nav-btn.prev') as HTMLButtonElement;
+    const nextBtn = document.querySelector('.chapter-nav-btn.next') as HTMLButtonElement;
+    const currentChapterEl = document.querySelector('.current-chapter');
+    const chapterItems = document.querySelectorAll('.sticky-toc ul > li');
+
+    // Build chapter pages by grouping elements between H2s
+    const chapterPages: HTMLDivElement[] = [];
+    let currentChapterDiv: HTMLDivElement | null = null;
+    let introElements: HTMLElement[] = [];
+
+    children.forEach(el => {
+      if (el.tagName === 'H2') {
+        // Start a new chapter
+        currentChapterDiv = document.createElement('div');
+        currentChapterDiv.className = 'chapter-page';
+        currentChapterDiv.dataset.chapterSlug = el.id;
+        
+        // If this is the first chapter and we have intro content, add it first
+        if (chapterPages.length === 0 && introElements.length > 0) {
+          const introWrapper = document.createElement('div');
+          introWrapper.className = 'chapter-intro';
+          introElements.forEach(introEl => introWrapper.appendChild(introEl));
+          currentChapterDiv.appendChild(introWrapper);
+        }
+        
+        currentChapterDiv.appendChild(el);
+        chapterPages.push(currentChapterDiv);
+      } else if (currentChapterDiv) {
+        // Add to current chapter
+        currentChapterDiv.appendChild(el);
+      } else {
+        // Content before first H2 - store for later
+        introElements.push(el);
+      }
+    });
+
+    // Clear content and add chapter pages
+    content.innerHTML = '';
+    chapterPages.forEach(page => content.appendChild(page));
+    
+    // Dropcaps setup
+    content.querySelectorAll('.dropcap').forEach(p => {
       const text = p.textContent || "";
       if (text.length > 0) {
-        const firstLetter = text.charAt(0);
-        p.setAttribute('data-letter', firstLetter);
+        p.setAttribute('data-letter', text.charAt(0));
       }
     });
 
-    // Group content between H2s if not already grouped
-    if (content.querySelectorAll('.section-wrapper').length <= 1) {
-      const allNodes = Array.from(currentWrapper.childNodes);
-      currentWrapper.innerHTML = '';
-
-      allNodes.forEach(node => {
-        if (node.nodeName === 'H2') {
-          const h2 = node as HTMLElement;
-          const sectionId = h2.id || h2.textContent?.toLowerCase().replace(/\s+/g, '-');
-          h2.id = sectionId || '';
-          
-          const newWrapper = document.createElement('div');
-          newWrapper.className = 'section-wrapper';
-          newWrapper.id = `section-${sectionId}`;
-          newWrapper.appendChild(h2);
-          content.appendChild(newWrapper);
-          currentWrapper = newWrapper;
-        } else if (currentWrapper) {
-          currentWrapper.appendChild(node);
-        }
-      });
-    }
-
-    // Handle navigation
-    function showSection(sectionId: string) {
-      const wrappers = document.querySelectorAll('.section-wrapper');
-      wrappers.forEach(sw => sw.classList.remove('active'));
+    // Show only current chapter
+    function showChapter(index: number) {
+      if (index < 0 || index >= chapterPages.length) return;
       
-      const target = document.getElementById(`section-${sectionId}`);
-      if (target) {
-        target.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      navItems.forEach(item => {
-        item.classList.remove('active');
-        if (item.getAttribute('data-section') === sectionId) {
-          item.classList.add('active');
+      currentChapterIndex = index;
+      
+      // Hide all chapters, show current
+      chapterPages.forEach((page, idx) => {
+        if (idx === index) {
+          page.classList.add('active');
+        } else {
+          page.classList.remove('active');
         }
       });
-    }
 
-    navItems.forEach(item => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const sectionId = item.getAttribute('data-section');
-        if (sectionId) {
-          showSection(sectionId);
-          history.pushState(null, '', `#${sectionId}`);
-        }
+      // Update nav buttons
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index >= chapterPages.length - 1;
+      if (currentChapterEl) currentChapterEl.textContent = String(index + 1);
+
+      // Update TOC active state
+      chapterItems.forEach((item, idx) => {
+        item.classList.toggle('active', idx === index);
       });
-    });
 
-    // Initial load from hash
-    const hash = window.location.hash.replace('#', '');
-    if (hash) {
-      showSection(hash);
-    }
-  }
-
-  function setOrientation(img: HTMLImageElement) {
-    const isHorizontal = img.naturalWidth > img.naturalHeight;
-    img.classList.add(isHorizontal ? 'is-horizontal' : 'is-vertical');
-    const figure = img.closest('figure');
-    if (figure) figure.classList.add(isHorizontal ? 'is-horizontal' : 'is-vertical');
-  }
-
-  // Update menubar background and auto-captions
-  function refineLongformContent() {
-    const article = document.querySelector('.longform-post') as HTMLElement;
-    if (article) {
-      // Background Sync
-      const bgColor = getComputedStyle(article).getPropertyValue('--page-bg');
-      const header = document.querySelector('.site-header') as HTMLElement;
-      if (header) {
-        header.style.backgroundColor = bgColor;
-        header.style.transition = 'background-color 0.3s ease';
-        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
-        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      // Update URL hash
+      const currentPage = chapterPages[index];
+      if (currentPage?.dataset.chapterSlug) {
+        history.replaceState(null, '', `#${currentPage.dataset.chapterSlug}`);
       }
 
-      // Auto-captions from alt text
-      const content = document.getElementById('longform-content');
-      if (content) {
-        const images = content.querySelectorAll('img');
-        images.forEach(img => {
-          const imgEl = img as HTMLImageElement;
-          if (imgEl.alt && !imgEl.closest('figure')?.querySelector('figcaption')) {
-            const figure = imgEl.closest('figure') || document.createElement('figure');
-            if (!imgEl.closest('figure')) {
-              imgEl.parentNode?.insertBefore(figure, imgEl);
-              figure.appendChild(imgEl);
-            }
-            const caption = document.createElement('figcaption');
-            caption.className = 'image-caption';
-            caption.textContent = imgEl.alt;
-            figure.appendChild(caption);
-          }
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Button handlers
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => showChapter(currentChapterIndex - 1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => showChapter(currentChapterIndex + 1));
+    }
+
+    // TOC click handlers
+    chapterItems.forEach((item, idx) => {
+      const link = item.querySelector('a');
+      if (link) {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          showChapter(idx);
+          // Close sidebar after selection
+          const sidebar = document.getElementById('toc-sidebar');
+          const toggle = document.getElementById('toc-toggle');
+          if (sidebar) sidebar.classList.remove('is-open');
+          if (toggle) toggle.classList.remove('active');
         });
       }
+    });
+
+    // Initial state from hash
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      const targetIdx = chapterPages.findIndex(page => page.dataset.chapterSlug === hash);
+      if (targetIdx !== -1) {
+        currentChapterIndex = targetIdx;
+      }
+    }
+
+    // Show first chapter (or from hash)
+    showChapter(currentChapterIndex);
+  }
+
+  // Sync header background and auto-captions
+  function refineLongformContent() {
+    const article = document.querySelector('.longform-post') as HTMLElement;
+    if (!article) return;
+
+    // Background Sync - ensure it reads the CSS variable correctly
+    const bgColor = getComputedStyle(article).getPropertyValue('--page-bg').trim();
+    const header = document.querySelector('.site-header') as HTMLElement;
+    if (header && bgColor) {
+      header.style.backgroundColor = bgColor;
+      header.style.transition = 'background-color 0.3s ease';
+      const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+      if (headerInner) headerInner.style.backgroundColor = 'transparent';
+    }
+
+    // Auto-captions from alt text
+    const content = document.getElementById('longform-content');
+    if (content) {
+      content.querySelectorAll('img').forEach(img => {
+        const imgEl = img as HTMLImageElement;
+        if (imgEl.alt && !imgEl.closest('figure')?.querySelector('figcaption')) {
+          const figure = imgEl.closest('figure') || document.createElement('figure');
+          if (!imgEl.closest('figure')) {
+            imgEl.parentNode?.insertBefore(figure, imgEl);
+            figure.appendChild(imgEl);
+          }
+          const caption = document.createElement('figcaption');
+          caption.className = 'image-caption';
+          caption.textContent = imgEl.alt;
+          figure.appendChild(caption);
+        }
+      });
     }
   }
 

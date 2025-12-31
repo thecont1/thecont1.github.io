@@ -1,19 +1,12 @@
 ---
 import HeroStatement from "./Statement.astro";
 import Carousel from "../carousel/Carousel.tsx";
+import { CAROUSEL_IMAGES } from "../../data/carousel";
 import "../../styles/home.css";
 
-const modules = import.meta.glob(
-  "/public/library/originals/collection/*.{jpg,jpeg,png,webp,avif}"
-);
-
-const imagePaths = Object.keys(modules).sort((a, b) =>
-  a.localeCompare(b)
-);
-
-const images = imagePaths.map((path) => ({
-  src: path.replace("/public", ""),
-  caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
+const images = CAROUSEL_IMAGES.map((img) => ({
+  src: img.src,
+  caption: img.caption,
 }));
 ---
 
