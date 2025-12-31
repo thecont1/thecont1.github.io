@@ -1,6 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
+import ContentsToggle from "../ui/ContentsToggle.astro";
+import ScreenToggle from "../ui/ScreenToggle.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/longform.css";
 
 interface Props {
@@ -50,23 +53,14 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
   <div class="longform-layout-container">
     {sections.length > 0 && (
-      <aside class="longform-sidebar" id="toc-sidebar">
-        <button id="toc-toggle" class="toc-toggle-btn" aria-label="Toggle Navigation">
-          <span class="dot"></span>
-          <span class="label">Chapters</span>
-        </button>
-        <nav class="sticky-toc">
-          <div class="toc-header">
-            <span class="toc-title">Chapters</span>
-          </div>
-          <ul>
-            <li class="active" data-section="intro"><a href="#intro">Introduction</a></li>
-            {sections.map((h) => (
-              <li data-section={h.slug}><a href={`#${h.slug}`}>{h.text}</a></li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
+      <ContentsToggle title={post.data.title} label="Chapters">
+        <ul>
+          <li class="active" data-section="intro"><a href="#intro">Introduction</a></li>
+          {sections.map((h) => (
+            <li data-section={h.slug}><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+        </ul>
+      </ContentsToggle>
     )}
 
     <div class="post-body" id="longform-content">
@@ -77,6 +71,8 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </div>
 
   <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
+  <ScreenToggle />
+  <C2PAOverlay />
 </article>
 
 <script>
@@ -87,18 +83,6 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     const navItems = document.querySelectorAll('.sticky-toc li');
     let currentWrapper = document.getElementById('section-intro');
     if (!currentWrapper) return;
-
-    const sidebar = document.getElementById('toc-sidebar');
-    const toggle = document.getElementById('toc-toggle');
-    if (sidebar && toggle) {
-      // Avoid duplicate listeners
-      if (!toggle.dataset.hasTocListener) {
-        toggle.addEventListener('click', () => {
-          sidebar.classList.toggle('is-open');
-        });
-        toggle.dataset.hasTocListener = 'true';
-      }
-    }
 
     // Over-the-top Dropcaps
     const dropcaps = content.querySelectorAll('.dropcap');

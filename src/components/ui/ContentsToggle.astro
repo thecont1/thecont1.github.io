@@ -1,0 +1,277 @@
+---
+/**
+ * ContentsToggle.astro
+ * A reusable component that provides a slide-out sidebar (Table of Contents, Chapters, etc.).
+ */
+interface Props {
+  title: string;
+  label?: string; // The text on the vertical toggle tab (e.g., "Contents", "Chapters")
+}
+
+const { title, label = "Contents" } = Astro.props;
+---
+
+<aside class="post-sidebar" id="toc-sidebar">
+  <nav class="sticky-toc">
+    <div class="toc-header">
+      <a href="#top" class="toc-title-link">
+        <span class="toc-title">{title}</span>
+      </a>
+    </div>
+    <slot />
+  </nav>
+</aside>
+
+<button id="toc-toggle" class="toc-toggle-btn toggle-btn" aria-label={`Toggle ${label}`}>
+  <span class="dot"></span>
+  <span class="label">{label}</span>
+</button>
+
+<style is:global>
+  /* Sidebar Design - Dark Theme Left Drawer */
+  .post-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 18vw;
+    min-width: 250px;
+    background: #1a1f2c;
+    color: white;
+    z-index: 500; /* Reduced to sit below the site-footer (z-index 2000) */
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    box-shadow: none;
+    padding: 6rem 2rem 10rem 4rem; /* Bottom padding for content safety */
+    display: flex;
+    flex-direction: column;
+    visibility: visible;
+    pointer-events: auto;
+    overflow-y: auto;
+  }
+
+  @media (max-width: 768px) {
+    .post-sidebar {
+      width: 85vw;
+      min-width: auto;
+      padding: 6rem 2rem;
+    }
+  }
+
+  .post-sidebar:not(.is-open) {
+    transform: translateX(-100%);
+  }
+
+  /* Shared Toggle Button Styles (ensuring availability) */
+  .toggle-btn {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a1f2c;
+    border: none;
+    width: 2.8rem;
+    height: 180px;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-family: "Inter", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    font-size: 0.75rem !important;
+    font-weight: 600;
+    color: white !important;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    border-radius: 0 16px 16px 0;
+    pointer-events: auto;
+    box-shadow: none;
+    z-index: 1100;
+  }
+
+  .toggle-btn:hover,
+  .toggle-btn.active {
+    color: var(--accent, #d04b36) !important;
+  }
+
+  .toggle-btn .label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    display: block;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .toggle-btn .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent, #d04b36);
+    border-radius: 50%;
+    transition: opacity 0.3s;
+    flex-shrink: 0;
+  }
+
+  /* Vertical Position for Contents Tab */
+  .toc-toggle-btn {
+    top: 61% !important;
+  }
+
+  .toc-toggle-btn .dot {
+    opacity: 0.5;
+  }
+
+  .toc-toggle-btn:hover .dot,
+  .toc-toggle-btn.active .dot {
+    opacity: 1;
+  }
+
+  .toc-title {
+    font-family: "Fraunces", serif !important;
+    font-size: 2.2rem !important;
+    font-weight: 300 !important;
+    color: white !important;
+    margin-bottom: 4rem !important;
+    line-height: 1.1 !important;
+    display: block !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    transition: color 0.2s ease !important;
+    transform: none !important;
+  }
+
+  .toc-title-link {
+    text-decoration: none !important;
+    display: block;
+    width: 100%;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+  }
+
+  .toc-title-link:hover .toc-title,
+  .toc-header:hover .toc-title {
+    color: #d04b36 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: color 0.2s ease !important;
+  }
+
+  .toc-title-link:hover {
+    background: none !important;
+    text-decoration: none !important;
+    opacity: 1 !important;
+  }
+
+  .sticky-toc {
+    background: transparent;
+    padding: 0;
+    height: auto;
+    width: 100%;
+    box-shadow: none;
+    border: none;
+  }
+
+  /* TOC Styling */
+  .sticky-toc ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: chapter;
+  }
+
+  .sticky-toc li {
+    margin-bottom: 2rem;
+    counter-increment: chapter;
+    display: block;
+    position: relative;
+  }
+
+  .sticky-toc li::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  .sticky-toc ul a {
+    text-decoration: none !important;
+    color: white !important;
+    font-family: "Fraunces", serif;
+    font-size: 1.6rem;
+    line-height: 1.3;
+    display: block;
+    font-weight: 400;
+    position: relative;
+    pointer-events: auto !important;
+  }
+
+  .sticky-toc ul a::before {
+    content: counter(chapter) ". ";
+    font-family: "Inter", sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #d04b36;
+    margin-right: 0.5rem;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  /* Force TOC Hover Colors and Disable Animations */
+  .sticky-toc a:hover,
+  .sticky-toc li:hover a,
+  .sticky-toc a:hover::before,
+  .toc-title-link:hover .toc-title,
+  .toc-header:hover .toc-title {
+    color: #d04b36 !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: color 0.2s ease !important;
+    animation: none !important;
+  }
+
+  .sticky-toc li:hover,
+  .toc-title-link:hover {
+    transform: none !important;
+    background: none !important;
+  }
+</style>
+
+<script>
+  function initContentsToggle() {
+    const sidebar = document.getElementById('toc-sidebar');
+    const toggle = document.getElementById('toc-toggle');
+    const tocTitleLink = document.querySelector('.toc-title-link') as HTMLElement;
+
+    if (sidebar && toggle && !toggle.dataset.hasTocListener) {
+      toggle.addEventListener('click', () => {
+        const isOpen = sidebar.classList.toggle('is-open');
+        toggle.classList.toggle('active', isOpen);
+      });
+      toggle.dataset.hasTocListener = 'true';
+    }
+
+    if (tocTitleLink && !tocTitleLink.dataset.hasTitleListener) {
+      tocTitleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+        history.pushState(null, '', '#top');
+        // Close sidebar on title click
+        if (sidebar) {
+          sidebar.classList.remove('is-open');
+          if (toggle) toggle.classList.remove('active');
+        }
+      });
+      tocTitleLink.dataset.hasTitleListener = 'true';
+    }
+  }
+
+  // Initialize on load
+  initContentsToggle();
+
+  // Re-initialize on Astro page navigation
+  document.addEventListener('astro:page-load', initContentsToggle);
+</script>

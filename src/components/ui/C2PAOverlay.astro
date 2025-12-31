@@ -1,0 +1,380 @@
+---
+/**
+ * C2PAOverlay.astro
+ * An overlay screen that displays C2PA Content Credentials for an image.
+ */
+import IconCR from "../icons/IconCR.astro";
+import "../../styles/c2pa.css";
+import { CLOSE_SVG } from "../icons/cr-logo-svg";
+---
+
+<div id="c2pa-overlay" class="c2pa-overlay" aria-hidden="true">
+  <div class="c2pa-overlay-backdrop"></div>
+  
+  <div class="c2pa-container">
+    <header class="c2pa-header">
+      <div class="c2pa-title-group">
+        <IconCR class="c2pa-icon" width="32" height="32" />
+        <h2>Content Credentials</h2>
+      </div>
+      <button id="c2pa-close" class="c2pa-close-btn" aria-label="Close credentials" set:html={CLOSE_SVG}>
+      </button>
+    </header>
+
+    <div id="c2pa-content" class="c2pa-content">
+      <div class="c2pa-loading">Loading credentials...</div>
+    </div>
+
+    <footer class="c2pa-footer">
+      <p>This image contains Content Credentials, which provide information about its origin and history. <a href="https://contentauthenticity.org" target="_blank" rel="noopener">Learn more</a></p>
+    </footer>
+  </div>
+</div>
+
+<script>
+  import "../../styles/c2pa.css";
+  import { CR_LOGO_SVG, CHECKMARK_SVG, SHIELD_CHECK_SVG, SHIELD_X_SVG } from "../icons/cr-logo-svg";
+
+  class C2PAManager {
+    constructor() {
+      this.overlay = document.getElementById('c2pa-overlay');
+      this.content = document.getElementById('c2pa-content');
+      this.closeBtn = document.getElementById('c2pa-close');
+      this.backdrop = document.querySelector('.c2pa-overlay-backdrop');
+      
+      this.init();
+      this.injectIndicators();
+    }
+
+    init() {
+      if (!this.overlay) return;
+
+      this.closeBtn?.addEventListener('click', () => this.close());
+      this.backdrop?.addEventListener('click', () => this.close());
+      
+      // Listen for custom event to open
+      window.addEventListener('open-c2pa', (e: any) => {
+        this.open(e.detail.imgSrc);
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && this.overlay?.classList.contains('is-active')) {
+          this.close();
+        }
+      });
+    }
+
+    // Automatically find images in content and add indicators
+    injectIndicators() {
+      // "Major photographs" only: Post body, Post hero, Album items, Lightbox
+      const selectors = [
+        '.post-body img',
+        '.post-hero img',
+        '.album-item img',
+        '.lightbox-figure img'
+      ];
+      
+      const contentImages = document.querySelectorAll(selectors.join(', '));
+      
+      contentImages.forEach(img => {
+        const imgEl = img as HTMLImageElement;
+        
+        const updateIndicator = () => {
+          const src = imgEl.getAttribute('src');
+          if (!src || !src.includes('/library/originals/')) return;
+
+          const container = imgEl.closest('figure') || imgEl.closest('.album-item') || imgEl.closest('.lightbox-figure');
+          if (container && !container.querySelector('.c2pa-indicator')) {
+            const containerEl = container as HTMLElement;
+            containerEl.setAttribute('data-c2pa-container', 'true');
+            if (getComputedStyle(containerEl).position === 'static') {
+              containerEl.style.position = 'relative';
+            }
+            
+            const btn = document.createElement('button');
+            btn.className = 'c2pa-indicator c2pa-injected';
+            btn.setAttribute('aria-label', 'View Content Credentials');
+            // Official Content Credentials (CR) logo SVG
+            btn.innerHTML = `
+              ${CR_LOGO_SVG}
+              <span class="c2pa-indicator-label">content credentials</span>
+            `;
+            
+            btn.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const currentSrc = imgEl.getAttribute('src');
+              if (currentSrc) this.open(currentSrc);
+            });
+            
+            container.appendChild(btn);
+          }
+        };
+
+        updateIndicator();
+
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+              updateIndicator();
+            }
+          });
+        });
+        
+        observer.observe(imgEl, { attributes: true });
+      });
+    }
+
+    async open(imgSrc: string) {
+      this.overlay?.classList.add('is-active');
+      document.body.style.overflow = 'hidden';
+      
+      if (this.content) {
+        this.content.innerHTML = '<div class="c2pa-loading">Generating credentials live...</div>';
+      }
+
+      try {
+        // Ensure imgSrc is just the pathname if it's an absolute URL
+        let cleanSrc = imgSrc;
+        try {
+          const u = new URL(imgSrc, window.location.origin);
+          cleanSrc = u.pathname;
+        } catch (e) {}
+
+        // Primary attempt: GET with query param and custom header
+        const origin = window.location.origin;
+        const fetchUrl = new URL('/api/c2pa', origin);
+        fetchUrl.searchParams.set('img', cleanSrc);
+        
+        console.log('[C2PA] Fetching (GET):', fetchUrl.toString());
+        
+        let response = await fetch(fetchUrl.toString(), {
+          method: 'GET',
+          headers: { 
+            'Accept': 'application/json',
+            'X-C2PA-Img': cleanSrc 
+          }
+        });
+
+        // Fallback: POST with JSON body and custom header
+        if (!response.ok && response.status !== 404 && response.status !== 403) {
+          console.warn('[C2PA] GET failed with status', response.status, 'trying POST fallback');
+          const postUrl = new URL('/api/c2pa', origin);
+          response = await fetch(postUrl.toString(), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'X-C2PA-Img': cleanSrc
+            },
+            body: JSON.stringify({ img: cleanSrc })
+          });
+        }
+        
+        console.log('[C2PA] Response status:', response.status);
+        
+        let data;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          throw new Error(`Server returned non-JSON response: ${text.slice(0, 100)}`);
+        }
+
+        if (!response.ok) {
+          const errorMsg = data.details || data.message || data.error || 'Credentials generation failed';
+          const debugInfo = data.debug ? `
+            <div class="c2pa-debug-technical">
+              <div class="c2pa-debug-header">Technical Debug Info</div>
+              <strong>Endpoint:</strong> /api/c2pa<br/>
+              <strong>Method:</strong> ${data.method || response.statusText || 'Unknown'}<br/>
+              <strong>Status:</strong> ${response.status}<br/>
+              <strong>Source:</strong> ${data.debug.extractionSource || 'N/A'}<br/>
+              <strong>Raw Body:</strong> ${data.debug.rawBody || 'empty'}<br/>
+              <strong>Req URL:</strong> ${data.debug.reqUrl || 'N/A'}<br/>
+              <strong>Headers:</strong> <pre style="margin:0; font-size:0.7rem; white-space:pre-wrap;">${JSON.stringify(data.debug.headers, null, 2)}</pre>
+            </div>
+          ` : '';
+          throw new Error(`${errorMsg}${debugInfo}`);
+        }
+
+        // Handle case where API returns 200 but no credentials found
+        if (data.error === 'No Credentials Found') {
+          if (this.content) {
+            this.content.innerHTML = `
+              <div class="c2pa-no-results">
+                <div class="c2pa-no-results-watermark">
+                  ${CR_LOGO_SVG}
+                </div>
+                
+                <div class="c2pa-status c2pa-status-missing">
+                  ${SHIELD_X_SVG}
+                  Not Found
+                </div>
+
+                <p class="c2pa-message">This image does not contain embedded Content Credentials.</p>
+                
+                <div class="c2pa-info-box">
+                  <p><strong>What does this mean?</strong></p>
+                  <p>Content Credentials provide transparency about how an image was created and edited. Many images do not yet have this information embedded, or it may have been removed during processing.</p>
+                </div>
+              </div>
+            `;
+          }
+          return;
+        }
+        
+        this.render(data, cleanSrc);
+      } catch (err: any) {
+        console.error('C2PA Fetch Error:', err);
+        if (this.content) {
+          this.content.innerHTML = `
+            <div class="c2pa-error">
+              <h3 class="c2pa-error-title">Live Extraction Failed</h3>
+              <p class="c2pa-error-message">${err.message}</p>
+              <div class="c2pa-debug-info">
+                <strong>Debug Info:</strong><br/>
+                Requested Path: ${imgSrc}<br/>
+                Status: ${err.status || 'Error'}
+              </div>
+              <button onclick="location.reload()" class="c2pa-retry-btn">Retry</button>
+            </div>
+          `;
+        }
+      }
+    }
+
+    close() {
+      this.overlay?.classList.remove('is-active');
+      document.body.style.overflow = '';
+    }
+
+    render(data: any, currentImgSrc: string) {
+      if (!this.content) return;
+
+      // Extract authors
+      let authors: any[] = [];
+      const assertions = data.assertions || [];
+      const creativeWork = assertions.find((a: any) => a.label === "stds.schema-org.CreativeWork");
+      if (creativeWork) {
+        authors = creativeWork.data?.author || [];
+      }
+
+      // Extract actions
+      let actions: any[] = [];
+      const actionsAssertion = assertions.find((a: any) => a.label === "c2pa.actions.v2");
+      if (actionsAssertion) {
+        actions = actionsAssertion.data?.actions || [];
+      }
+
+      // Format actions for display
+      const formattedActions = actions.map((a: any) => {
+        const type = a.action;
+        const params = a.parameters || {};
+        if (type === "c2pa.color_adjustments") {
+          return params["com.adobe.acr"] || "Color Adjustments";
+        }
+        if (type === "c2pa.edited") {
+          return params["com.adobe.acr"] || "Edited";
+        }
+        return type.replace("c2pa.", "").replace(/_/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase());
+      });
+
+      // Filter unique actions
+      const uniqueActions = Array.from(new Set(formattedActions));
+
+      // Ingredient info
+      const ingredient = data.ingredients?.[0] || {};
+      
+      // Signature info
+      const signature = data.signature_info || {};
+      const dateStr = signature.time ? new Date(signature.time).toLocaleDateString(undefined, { 
+        year: 'numeric', month: 'long', day: 'numeric' 
+      }) : null;
+
+      this.content.innerHTML = `
+        <div class="c2pa-verified-results">
+          <div class="c2pa-no-results-watermark">
+            ${CR_LOGO_SVG}
+          </div>
+
+          <div class="c2pa-section c2pa-status-section">
+            <div class="c2pa-status">
+              ${SHIELD_CHECK_SVG}
+              Verified
+            </div>
+            <p class="c2pa-trust-message">This image has cryptographically signed credentials that verify its creator and history.</p>
+          </div>
+
+          <div class="c2pa-info-grid">
+            <div class="c2pa-section">
+              <h3 class="c2pa-section-title">Creator</h3>
+              <div class="c2pa-info-item">
+                <p>${authors[0]?.name || 'Mahesh Shantaram'}</p>
+              </div>
+              ${authors[1] ? `
+                <div class="c2pa-info-item" style="margin-top: 0.5rem">
+                  <p><a href="${authors[1]['@id']}" target="_blank" class="c2pa-author-link">${authors[1].name}</a></p>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="c2pa-section">
+              <h3 class="c2pa-section-title">Signed By</h3>
+              <div class="c2pa-info-item">
+                <p>${signature.issuer || 'Content Authenticity'}</p>
+                ${dateStr ? `<span class="c2pa-date-badge">${dateStr}</span>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div class="c2pa-section">
+            <h3 class="c2pa-section-title">Process & History</h3>
+            <div class="c2pa-actions-list">
+              ${uniqueActions.map(action => `<span class="c2pa-action-pill">${action}</span>`).join('')}
+              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded in manifest.</p>' : ''}
+            </div>
+          </div>
+
+          <div class="c2pa-section">
+            <h3 class="c2pa-section-title">Provenance Comparison</h3>
+            <div class="c2pa-image-comparison">
+              <div class="c2pa-image-card">
+                <div class="c2pa-thumb-wrapper">
+                  ${ingredient.thumbnail?.data ? `<img src="data:${ingredient.thumbnail.format};base64,${ingredient.thumbnail.data}" alt="Original image" />` : '<div class="c2pa-no-thumb">No original thumbnail available</div>'}
+                </div>
+                <div class="c2pa-card-meta">
+                  <span class="c2pa-card-badge">Original</span>
+                  <p class="c2pa-card-title">${ingredient.title || 'Source File'}</p>
+                </div>
+              </div>
+              <div class="c2pa-image-card">
+                <div class="c2pa-thumb-wrapper">
+                  ${data.thumbnail?.data ? `<img src="data:${data.thumbnail.format};base64,${data.thumbnail.data}" alt="Current image" />` : `<img src="${currentImgSrc}" alt="Current image" />`}
+                </div>
+                <div class="c2pa-card-meta">
+                  <span class="c2pa-card-badge c2pa-card-badge-current">This Image</span>
+                  <p class="c2pa-card-title">${data.title || 'Exported Version'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Initialize on page load
+  function initC2PA() {
+    const manager = new C2PAManager();
+    // Run injection again on any DOM changes to catch late-loading images
+    const observer = new MutationObserver(() => {
+      manager.injectIndicators();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  initC2PA();
+  document.addEventListener('astro:page-load', initC2PA);
+</script>

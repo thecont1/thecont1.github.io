@@ -1,6 +1,8 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
+import ScreenToggle from "../ui/ScreenToggle.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/post.css";
 
 interface Props {
@@ -77,6 +79,8 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </div>
 
   <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
+  <ScreenToggle />
+  <C2PAOverlay />
 </article>
 
 <script>
