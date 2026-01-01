@@ -1,0 +1,16 @@
+---
+import { getCollection } from "astro:content";
+import Code from "../../components/layouts/Code.astro";
+
+export async function getStaticPaths() {
+  const codeProjects = await getCollection("code");
+  return codeProjects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+---
+
+<Code post={project} />

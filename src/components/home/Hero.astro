@@ -3,11 +3,105 @@ import HeroStatement from "./Statement.astro";
 import Carousel from "../carousel/Carousel.tsx";
 import { CAROUSEL_IMAGES } from "../../data/carousel";
 import "../../styles/home.css";
+import ExifReader from "exifreader";
+import fs from "node:fs";
+import path from "node:path";
 
-const images = CAROUSEL_IMAGES.map((img) => ({
-  src: img.src,
-  caption: img.caption,
-}));
+async function getSmartCaption(imgSrc: string) {
+  // Only process local images in public folder
+  if (imgSrc.startsWith("http")) return "";
+
+  const fullPath = path.join(process.cwd(), "public", imgSrc);
+  const filename = path.basename(imgSrc, path.extname(imgSrc));
+  let iptcCaption = "";
+  let dateStr = "";
+  let placeStr = "";
+
+  try {
+    if (fs.existsSync(fullPath)) {
+      const fileBuffer = fs.readFileSync(fullPath);
+      const tags = ExifReader.load(fileBuffer);
+      
+      // 1. Try IPTC/EXIF Caption or Description
+      iptcCaption = tags["Description"]?.description || 
+                    tags["ImageDescription"]?.description || 
+                    tags["Caption/Abstract"]?.description || 
+                    tags["Headline"]?.description || "";
+
+      // 2. Date of capture
+      const exifDate = tags["DateTimeOriginal"]?.description || 
+                       tags["DateTime"]?.description || 
+                       tags["DateCreated"]?.description;
+      
+      if (exifDate) {
+        // EXIF format is usually YYYY:MM:DD HH:MM:SS
+        const datePart = exifDate.split(" ")[0];
+        const parts = datePart.split(/[:\-]/);
+        if (parts.length >= 3) {
+          const [y, m, d] = parts;
+          dateStr = new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+          });
+        }
+      }
+
+      // 3. Place of capture
+      const city = tags["City"]?.description || "";
+      const state = tags["Province-State"]?.description || "";
+      const country = tags["Country/Primary Location Name"]?.description || "";
+      placeStr = [city, state, country].filter(Boolean).join(", ");
+    }
+  } catch (e) {
+    console.error(`Error reading metadata for ${imgSrc}:`, e);
+  }
+
+  // If we found a full caption in IPTC, use it
+  if (iptcCaption) return iptcCaption;
+
+  // Otherwise construct: file name, date of capture, and place of capture
+  const components = [];
+  
+  // A. File name
+  components.push(filename);
+
+  // B. Date of capture (Fallback to filename parsing if metadata missing)
+  if (!dateStr) {
+    const dateMatch = filename.match(/^MS(\d{4})(\d{2})/);
+    if (dateMatch) {
+      const [, y, m] = dateMatch;
+      dateStr = new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString("en-GB", {
+        month: "short",
+        year: "numeric"
+      });
+    }
+  }
+  if (dateStr) components.push(dateStr);
+
+  // C. Place of capture (Fallback to filename parsing if metadata missing)
+  if (!placeStr) {
+    // Look for everything after the date (MSYYYYMM-)
+    const placeMatch = filename.match(/^MS\d{6}-(.+?)(?=_?\d{4}$|$)/);
+    if (placeMatch) {
+      placeStr = placeMatch[1]
+        .replace(/[-_]/g, " ")
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+  }
+  if (placeStr) components.push(placeStr);
+
+  return components.join(", ");
+}
+
+const images = await Promise.all(
+  CAROUSEL_IMAGES.map(async (img) => ({
+    src: img.src,
+    caption: img.caption || (await getSmartCaption(img.src)),
+  }))
+);
 ---
 
 <section class="home-hero">
