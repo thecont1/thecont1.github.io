@@ -26,13 +26,21 @@ npm run astro            # Access Astro CLI directly
 
 ### Content System
 - **Content Collections**: Defined in `src/content/config.ts` with strict typing via Zod schemas
-- **Collections**: `photography`, `writing`, `datastories`, `lab0`
+- **Collections**: `photography`, `writing`, `datastories`, `lab0`, `code`
 - **Content Location**: Markdown files in `src/content/{collection-name}/`
 - **Schema Structure**:
   - Required: `title`, `excerpt`, `status` (private/draft/published)
   - Taxonomy: `category`, `layout`, `geography[]`, `theme[]`, `container`
   - Layouts: post, essay, longform, photo-album, timeline, thread, code, datastory, project
   - Optional: `date`, `heroImage`, `notebook` (for marimo/jupyter), `lightbox` settings, `toc` (boolean)
+
+### GitHub Integration (Code Layout)
+- **Integration**: `src/integrations/github.ts` - GitHub API utilities for fetching repo data
+- **Content Generator**: `src/integrations/github-content.ts` - Astro integration for auto-generating code content
+- **Layout**: `src/components/layouts/Code.astro` - Display template for GitHub repositories
+- **Component**: `src/components/ui/GitHubRepo.astro` - Reusable component for embedding repos
+- **Styles**: `src/styles/code.css` - Code layout styling
+- **Collection**: `src/content/code/` - Generated markdown files for repositories
 
 ### Content Credentials (C2PA)
 - **Live Extraction**: Managed via `src/pages/api/c2pa.ts`, which calls a Python extraction script.
@@ -42,7 +50,7 @@ npm run astro            # Access Astro CLI directly
 
 ### Routing & Pages
 - **File-based routing**: `src/pages/` directory
-- **Main sections**: `/photography`, `/writing`, `/datascience`
+- **Main sections**: `/photography`, `/writing`, `/datascience`, `/code`
 - **Dynamic routes**: Collections generate pages via `[...slug].astro` pattern
 - **Index**: Home page at `src/pages/index.astro`
 

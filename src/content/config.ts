@@ -46,9 +46,51 @@ const baseSchema = z.object({
   showhero: z.boolean().optional().default(true)
 });
 
+// Code collection schema for GitHub repositories
+const codeSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  excerpt: z.string().optional(),
+  status: z.enum(["private", "draft", "published"]).default("published"),
+  
+  // Repository metadata
+  repoUrl: z.string().url(),
+  repoOwner: z.string(),
+  repoName: z.string(),
+  language: z.string().optional(),
+  stars: z.number().optional(),
+  forks: z.number().optional(),
+  license: z.string().optional(),
+  homepage: z.string().url().optional(),
+  
+  // Dates
+  date: z.date().optional(),
+  lastUpdated: z.date().optional(),
+  
+  // Tags and topics
+  tags: z.array(z.string()).default([]),
+  topics: z.array(z.string()).default([]),
+  
+  // Dependencies and tech stack
+  dependencies: z.array(z.string()).default([]),
+  devDependencies: z.array(z.string()).default([]),
+  
+  // Appearance
+  backgroundColor: z.string().optional(),
+  
+  // GitHub API data cache
+  apiData: z.object({
+    fetchedAt: z.date(),
+    readme: z.string().optional(),
+    fileTree: z.array(z.string()).default([]),
+    languages: z.record(z.number()).optional(),
+  }).optional(),
+});
+
 export const collections = {
   photography: defineCollection({ schema: baseSchema }),
   writing: defineCollection({ schema: baseSchema }),
   datastories: defineCollection({ schema: baseSchema }),
-  lab0: defineCollection({ schema: baseSchema })  
+  lab0: defineCollection({ schema: baseSchema }),
+  code: defineCollection({ schema: codeSchema })
 };

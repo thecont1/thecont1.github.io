@@ -1,0 +1,196 @@
+---
+import { getCollection } from "astro:content";
+import SiteHeader from "../../components/SiteHeader.astro";
+import SiteFooter from "../../components/SiteFooter.astro";
+import C2PAOverlay from "../../components/ui/C2PAOverlay.astro";
+import "../../styles/global.css";
+import "../../styles/header.css";
+import "../../styles/footer.css";
+
+const codeProjects = await getCollection("code", ({ data }) => data.status === "published");
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Code Projects | Mahesh Shantaram</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <SiteHeader />
+    
+    <main class="code-index">
+      <header class="page-header">
+        <h1>Code Projects</h1>
+        <p>Open source projects and creative coding experiments</p>
+      </header>
+
+      <div class="projects-grid">
+        {codeProjects.map((project) => (
+          <article class="project-card">
+            <a href={`/code/${project.slug}`}>
+              <div class="card-header">
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" class="github-icon">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                <h2>{project.data.repoOwner}/{project.data.repoName}</h2>
+              </div>
+              
+              <p class="description">{project.data.description}</p>
+              
+              <div class="project-meta">
+                {project.data.language && <span class="language">{project.data.language}</span>}
+                {project.data.stars !== undefined && project.data.stars > 0 && <span class="stars">⭐ {project.data.stars}</span>}
+                {project.data.license && <span class="license">{project.data.license}</span>}
+              </div>
+              
+              {project.data.tags && project.data.tags.length > 0 && (
+                <div class="tags">
+                  {project.data.tags.slice(0, 3).map(tag => (
+                    <span class="tag">#{tag}</span>
+                  ))}
+                </div>
+              )}
+            </a>
+          </article>
+        ))}
+      </div>
+    </main>
+
+    <SiteFooter />
+    <C2PAOverlay />
+  </body>
+</html>
+
+<style>
+  .code-index {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 8rem 2rem 4rem;
+    font-family: "Inter", sans-serif;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .page-header h1 {
+    font-family: "Fraunces", serif;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+  }
+
+  .page-header p {
+    font-size: 1.2rem;
+    color: var(--muted);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+  }
+
+  .project-card {
+    background: var(--paper);
+    border: 1px solid var(--hairline);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 0.2s ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--accent);
+  }
+
+  .project-card a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .github-icon {
+    color: var(--muted);
+  }
+
+  .card-header h2 {
+    font-family: "Fraunces", serif;
+    font-size: 1.4rem;
+    margin: 0;
+    color: var(--text);
+  }
+
+  .description {
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .language,
+  .stars,
+  .license {
+    background: var(--surface);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: var(--surface);
+    color: var(--muted);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 768px) {
+    .code-index {
+      padding: 6rem 1rem 2rem;
+    }
+
+    .page-header h1 {
+      font-size: 2.5rem;
+    }
+
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .project-card {
+      padding: 1.5rem;
+    }
+  }
+</style>

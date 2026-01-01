@@ -1,0 +1,189 @@
+---
+import { fetchRepoData, parseRepoIdentifier } from '../../integrations/github';
+import Code from '../layouts/Code.astro';
+
+interface Props {
+  repo: string;
+  githubToken?: string;
+}
+
+const { repo, githubToken = import.meta.env.GITHUB_TOKEN } = Astro.props;
+
+// Fetch repository data at build time
+let repoData;
+let error;
+
+try {
+  repoData = await fetchRepoData(repo, githubToken);
+} catch (e) {
+  error = e;
+  console.error(`Failed to fetch repository data for ${repo}:`, e);
+}
+
+// Create a mock post object that matches the CollectionEntry interface
+const mockPost = repoData ? {
+  id: `${repoData.repoOwner}-${repoData.repoName}`,
+  slug: `${repoData.repoOwner}-${repoData.repoName}`.toLowerCase(),
+  body: '', // Will be populated by the Content component
+  collection: 'code' as const,
+  data: {
+    title: repoData.title,
+    description: repoData.description,
+    status: 'published' as const,
+    layout: 'code' as const,
+    repoUrl: repoData.repoUrl,
+    repoOwner: repoData.repoOwner,
+    repoName: repoData.repoName,
+    language: repoData.language,
+    stars: repoData.stars,
+    forks: repoData.forks,
+    license: repoData.license,
+    homepage: repoData.homepage,
+    date: repoData.lastUpdated,
+    lastUpdated: repoData.lastUpdated,
+    tags: repoData.tags,
+    topics: repoData.topics,
+    dependencies: repoData.dependencies,
+    devDependencies: repoData.devDependencies,
+    apiData: {
+      fetchedAt: new Date(),
+      readme: repoData.readme ? 'cached' : null,
+      fileTree: repoData.fileTree,
+      languages: repoData.languages
+    }
+  },
+  render: async () => ({
+    Content: () => {
+      // Generate content body similar to generateContentBody
+      let body = '';
+
+      // Repository overview
+      body += `## Repository Overview\n\n`;
+      
+      const badges = [];
+      if (repoData.stars > 0) badges.push(`⭐ ${repoData.stars} stars`);
+      if (repoData.forks > 0) badges.push(`🍴 ${repoData.forks} forks`);
+      if (repoData.language) badges.push(`📝 ${repoData.language}`);
+      if (repoData.license) badges.push(`📄 ${repoData.license}`);
+      
+      if (badges.length > 0) {
+        body += `${badges.join(' • ')}\n\n`;
+      }
+
+      body += `**Repository:** [${repoData.repoOwner}/${repoData.repoName}](${repoData.repoUrl})\n`;
+      if (repoData.homepage) {
+        body += `**Homepage:** [${repoData.homepage}](${repoData.homepage})\n`;
+      }
+      body += `**Last Updated:** ${repoData.lastUpdated.toLocaleDateString()}\n\n`;
+
+      // Tech stack
+      if (repoData.dependencies.length > 0 || repoData.devDependencies.length > 0) {
+        body += `## Tech Stack\n\n`;
+        
+        if (repoData.dependencies.length > 0) {
+          body += `### Dependencies\n`;
+          body += repoData.dependencies.map(dep => `- ${dep}`).join('\n') + '\n\n';
+        }
+        
+        if (repoData.devDependencies.length > 0) {
+          body += `### Development Dependencies\n`;
+          body += repoData.devDependencies.map(dep => `- ${dep}`).join('\n') + '\n\n';
+        }
+      }
+
+      // File structure
+      if (repoData.fileTree.length > 0) {
+        body += `## Project Structure\n\n`;
+        body += '```\n';
+        body += repoData.fileTree.map(dir => `📁 ${dir}/`).join('\n');
+        body += '\n```\n\n';
+      }
+
+      // Languages
+      if (Object.keys(repoData.languages).length > 0) {
+        const total = Object.values(repoData.languages).reduce((sum, bytes) => sum + bytes, 0);
+        body += `## Languages\n\n`;
+        
+        Object.entries(repoData.languages)
+          .sort(([,a], [,b]) => b - a)
+          .forEach(([lang, bytes]) => {
+            const percentage = ((bytes / total) * 100).toFixed(1);
+            body += `- **${lang}**: ${percentage}%\n`;
+          });
+        
+        body += '\n';
+      }
+
+      // README
+      if (repoData.readme) {
+        body += `## README\n\n${repoData.readme}\n`;
+      }
+
+      return body;
+    }
+  })
+} : null;
+---
+
+{error ? (
+  <div class="error-container">
+    <h1>Error Loading Repository</h1>
+    <p>Failed to load repository data for: <code>{repo}</code></p>
+    <p class="error-message">{error.message}</p>
+    <p class="error-help">
+      Make sure the repository exists and is public, or provide a valid GitHub token for private repositories.
+    </p>
+  </div>
+) : mockPost ? (
+  <Code post={mockPost} />
+) : (
+  <div class="loading-container">
+    <h1>Loading Repository...</h1>
+    <p>Fetching data for: <code>{repo}</code></p>
+  </div>
+)}
+
+<style>
+  .error-container,
+  .loading-container {
+    max-width: 800px;
+    margin: 4rem auto;
+    padding: 2rem;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+  }
+
+  .error-container {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #991b1b;
+  }
+
+  .error-message {
+    font-family: "Fira Code", monospace;
+    background: #fee2e2;
+    padding: 1rem;
+    border-radius: 4px;
+    margin: 1rem 0;
+  }
+
+  .error-help {
+    font-size: 0.9rem;
+    color: #7f1d1d;
+  }
+
+  .loading-container {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    color: #0c4a6e;
+  }
+
+  code {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: "Fira Code", monospace;
+  }
+</style>

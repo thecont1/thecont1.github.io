@@ -189,13 +189,16 @@
 .carousel-caption {
   position: fixed;
   bottom: var(--caption-bottom);
-  right: var(--controls-right);
+  left: var(--controls-right); /* Using the same margin but on the left */
   font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.6);
   padding: 0.4rem 0.6rem;
-  text-align: right;
-  max-width: min(70vw, 360px);
+  text-align: left;
+  max-width: min(70vw, 480px);
   transition: opacity 300ms ease;
+  z-index: 5;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 /* Once curtain is gone */
