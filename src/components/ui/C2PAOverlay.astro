@@ -77,7 +77,9 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         '.datastory-layout img',
         '.code-layout img',
         '.thread-layout img',
-        '.timeline-layout img'
+        '.timeline-layout img',
+        '.photogallery-oneup .gallery-item img',
+        '.photogallery-grid .gallery-item img'
       ];
       
       const contentImages = document.querySelectorAll(selectors.join(', '));
@@ -89,7 +91,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           const src = imgEl.getAttribute('src');
           if (!src || !src.includes('/library/originals/')) return;
 
-          const container = imgEl.closest('figure') || imgEl.closest('.album-item') || imgEl.closest('.lightbox-figure');
+          const container = imgEl.closest('figure') || imgEl.closest('.album-item') || imgEl.closest('.lightbox-figure') || imgEl.closest('.gallery-item');
           if (container && !container.querySelector('.c2pa-indicator')) {
             const containerEl = container as HTMLElement;
             containerEl.setAttribute('data-c2pa-container', 'true');

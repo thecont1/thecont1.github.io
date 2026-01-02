@@ -15,7 +15,6 @@ images:
     - src: /library/originals/TheAfricanPortraits/MS201606-RacismStories0008.jpg
     - src: /library/originals/TheAfricanPortraits/MS201705-AfricanPortraits0036.jpg
     - src: /library/originals/TheAfricanPortraits/MS201609-KhojResidency0058.jpg
-    - src: /library/originals/TheAfricanPortraits/3MS_7892.jpg
     - src: /library/originals/TheAfricanPortraits/MS201701-Portraits0004.jpg
     - src: /library/originals/TheAfricanPortraits/MS201602-Soladevanahalli0119.jpg
     - src: /library/originals/TheAfricanPortraits/MS201602-Soladevanahalli0108.jpg
@@ -25,7 +24,6 @@ images:
     - src: /library/originals/TheAfricanPortraits/MS201608-AfricanPortraits0024.jpg
     - src: /library/originals/TheAfricanPortraits/MS201608-AfricanPortraits0043.jpg
     - src: /library/originals/TheAfricanPortraits/MS201705-AfricanPortraits0097.jpg
-    - src: /library/originals/TheAfricanPortraits/MS201606-RacismStories0080.jpg
     - src: /library/originals/TheAfricanPortraits/MS201606-RacismStories0094.jpg
     - src: /library/originals/TheAfricanPortraits/MS201606-RacismStories0056.jpg
     - src: /library/originals/TheAfricanPortraits/MS201608-AfricanPortraits0081.jpg

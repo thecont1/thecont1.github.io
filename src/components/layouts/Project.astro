@@ -6,6 +6,8 @@ import Carousel from "../carousel/Carousel.tsx";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/home.css";
+import fs from 'node:fs';
+import path from 'node:path';
 
 interface Props {
   post: CollectionEntry<"photography" | "writing" | "datascience">;
@@ -44,10 +46,30 @@ const imagePaths = Object.keys(allImages)
   .filter((path) => path.includes(filterPath))
   .sort((a, b) => a.localeCompare(b));
 
-const carouselImages = imagePaths.map((path) => ({
-  src: path.replace("/public", ""),
-  caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
-}));
+// Load metadata for carousel images
+let imageMetadata: Record<string, any> = {};
+if (imagePaths.length > 0) {
+  const metadataPath = path.join(process.cwd(), 'public', 'library', 'originals', container, 'metadata.json');
+  
+  try {
+    if (fs.existsSync(metadataPath)) {
+      const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
+      imageMetadata = JSON.parse(metadataContent);
+    }
+  } catch (e) {
+    console.warn('Could not load metadata.json for project carousel:', e);
+  }
+}
+
+const carouselImages = imagePaths.map((path) => {
+  const filename = path.split('/').pop() || '';
+  const meta = imageMetadata[filename]?.photography || {};
+  return {
+    src: path.replace("/public", ""),
+    caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
+    metadata: meta
+  };
+});
 
 const backgroundColor = post.data.backgroundColor || "var(--paper)";
 ---

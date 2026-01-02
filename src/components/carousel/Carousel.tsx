@@ -1,18 +1,36 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
+import InfoPanel from "./InfoPanel";
+
+type ImageMetadata = {
+  camera_make?: string;
+  camera_model?: string;
+  lens_model?: string;
+  aperture?: string;
+  shutter_speed?: string;
+  iso?: number;
+  focal_length?: string;
+  date_original?: string;
+  artist?: string;
+  copyright?: string;
+  description?: string;
+  title?: string;
+};
 
 type Image = {
   src: string;
   caption?: string;
+  metadata?: ImageMetadata;
 };
 
 export default function Carousel({ images }: { images: Image[] }) {
   const [index, setIndex] = useState(0);
-  const [showCaption, setShowCaption] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [userTookControl, setUserTookControl] = useState(false);
-  const [curtainVisible, setCurtainVisible] = useState(true);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const isAutoScrollingRef = useRef(false);
+  const skipNextScrollRef = useRef(false);
 
   useEffect(() => {
     if (index >= images.length) setIndex(0);
@@ -22,72 +40,124 @@ export default function Carousel({ images }: { images: Image[] }) {
     slideRefs.current = slideRefs.current.slice(0, images.length);
   }, [images.length]);
 
-  // Watch for controls-visible class to detect when curtain is pulled/lifted
+  // Resume autoplay when user scrolls back to curtain (scroll position near top)
   useEffect(() => {
-    const checkCurtainState = () => {
-      const controlsVisible = document.body.classList.contains('controls-visible');
-      const wasCurtainVisible = curtainVisible;
-      const isCurtainVisible = !controlsVisible;
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const vh = window.innerHeight;
       
-      setCurtainVisible(isCurtainVisible);
-      
-      // If curtain just became visible (user scrolled back up), reset user control
-      if (!wasCurtainVisible && isCurtainVisible) {
-        setUserTookControl(false); // Reset - autoplay resumes
+      // Curtain is visible when scroll is less than 80% of viewport height
+      if (scrollY < vh * 0.8) {
+        setUserTookControl(false);
       }
     };
 
-    // Check initially
-    checkCurtainState();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-    // Use MutationObserver to watch for class changes on body
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          checkCurtainState();
-        }
-      });
-    });
-
-    observer.observe(document.body, { attributes: true });
-
-    return () => observer.disconnect();
-  }, [curtainVisible]);
-
-  // Autoplay effect - only stops if user manually clicked prev/next
+  // Autoplay effect
   useEffect(() => {
-    // Don't autoplay if user took control or if there are less than 2 images
     if (userTookControl || images.length < 2) return;
 
-    const timer = window.setInterval(() => {
+    const timer = window.setTimeout(() => {
       setIndex((i) => (i + 1) % images.length);
     }, 5000);
 
-    return () => window.clearInterval(timer);
-  }, [userTookControl, images.length]);
+    return () => window.clearTimeout(timer);
+  }, [userTookControl, images.length, index]);
 
+  // Scroll to current slide
   useEffect(() => {
+    // Skip if this index change came from user drag (they're already at the right position)
+    if (skipNextScrollRef.current) {
+      skipNextScrollRef.current = false;
+      return;
+    }
+    
+    isAutoScrollingRef.current = true;
     const el = slideRefs.current[index];
     el?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    
+    // Reset flag after scroll animation completes
+    const timer = setTimeout(() => {
+      isAutoScrollingRef.current = false;
+    }, 800);
+    
+    return () => clearTimeout(timer);
   }, [index]);
+
+  // Detect user interaction: trackpad scroll, drag, or keyboard on the track
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    let lastScrollLeft = track.scrollLeft;
+
+    // Detect horizontal scroll (trackpad two-finger swipe)
+    const handleWheel = (e: WheelEvent) => {
+      // If there's horizontal scroll intent, user is taking control
+      if (Math.abs(e.deltaX) > 10) {
+        setUserTookControl(true);
+      }
+    };
+
+    // Detect scroll changes on the track (catches all scroll methods)
+    const handleScroll = () => {
+      const currentScrollLeft = track.scrollLeft;
+      const scrollDelta = Math.abs(currentScrollLeft - lastScrollLeft);
+      
+      // If scroll changed and we're not auto-scrolling, user did it
+      if (scrollDelta > 5 && !isAutoScrollingRef.current) {
+        setUserTookControl(true);
+        
+        // Sync index to the currently visible slide (skip the scroll effect)
+        const slideWidth = track.scrollWidth / images.length;
+        const newIndex = Math.round(currentScrollLeft / slideWidth);
+        if (newIndex >= 0 && newIndex < images.length && newIndex !== index) {
+          skipNextScrollRef.current = true;
+          setIndex(newIndex);
+        }
+      }
+      
+      lastScrollLeft = currentScrollLeft;
+    };
+
+    // Detect keyboard navigation (arrow keys)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        setUserTookControl(true);
+      }
+    };
+
+    track.addEventListener('wheel', handleWheel, { passive: true });
+    track.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      track.removeEventListener('wheel', handleWheel);
+      track.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [images.length, index]);
 
   if (!images.length) return null;
 
-  const caption = images[index]?.caption?.trim();
-  const captionText = caption ? caption : "No caption available.";
+  const currentImage = images[index];
+  const metadata = currentImage?.metadata;
 
   const onPrev = () => {
-    setUserTookControl(true); // User clicked - stop autoplay
+    setUserTookControl(true);
     setIndex((i) => (i - 1 + images.length) % images.length);
   };
 
   const onNext = () => {
-    setUserTookControl(true); // User clicked - stop autoplay
+    setUserTookControl(true);
     setIndex((i) => (i + 1) % images.length);
   };
 
   const onToggleInfo = () => {
-    setShowCaption((s) => !s);
+    setShowInfo((s) => !s);
   };
 
   return (
@@ -120,7 +190,7 @@ export default function Carousel({ images }: { images: Image[] }) {
           </span>
         </button>
         
-        <CaptionToggle enabled={showCaption} onToggle={onToggleInfo} />
+        <CaptionToggle enabled={showInfo} onToggle={onToggleInfo} />
         
         <button type="button" aria-label="Next image" onClick={onNext}>
           <span className="carousel-glyph" aria-hidden="true">
@@ -129,7 +199,7 @@ export default function Carousel({ images }: { images: Image[] }) {
         </button>
       </div>
 
-      {showCaption && <div className="carousel-caption">{captionText}</div>}
+      {showInfo && metadata && <InfoPanel metadata={metadata} imageSrc={currentImage.src} />}
     </div>
   );
 }

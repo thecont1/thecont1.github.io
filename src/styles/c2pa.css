@@ -439,15 +439,18 @@
   z-index: 100;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-  overflow: hidden;
+  overflow: visible; /* Allow fine-tuning to show */
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
+  padding: 0; /* Ensure no padding interferes with centering */
+  box-sizing: border-box;
+  line-height: 1; /* Remove line-height that might affect centering */
 }
 
 .c2pa-indicator.c2pa-injected {
   top: 15px;
-  right: -5px;
+  right: 5px; /* Just slightly inside the edge */
 }
 
 /* Show indicator in ochre when hovering the image container (exclude lightbox) */
@@ -456,7 +459,7 @@
 body.screen-mode .c2pa-indicator.c2pa-injected {
   opacity: 1 !important;
   visibility: visible !important;
-  right: -5px;
+  right: 5px; /* Keep consistent positioning on hover */
   color: #d04b36 !important;
   background: rgba(255, 255, 255, 0.85) !important;
 }
@@ -467,9 +470,14 @@ body.screen-mode .c2pa-indicator.c2pa-injected {
 }
 
 .c2pa-indicator svg {
-  width: 20px;
-  height: 20px;
+  width: 18px; /* Slightly smaller for better centering */
+  height: 18px;
   flex-shrink: 0;
+  margin: 0; /* Remove any default margins to center properly */
+  display: block; /* Ensure block display for proper centering */
+  position: relative;
+  left: 1px; /* Fine-tune horizontal centering */
+  top: 1px; /* Fine-tune vertical centering */
 }
 
 .c2pa-indicator-label {
@@ -482,21 +490,26 @@ body.screen-mode .c2pa-indicator.c2pa-injected {
   overflow: hidden;
   opacity: 0;
   margin-left: 0;
-  transition: all 0.3s ease;
+  display: none; /* Hide immediately when not hovering */
+  transition: opacity 0.3s ease, max-width 0.3s ease;
 }
 
 /* Expand to show label when hovering the indicator itself */
 .c2pa-indicator:hover {
   width: auto !important;
-  padding: 0 12px 0 8px !important;
-  gap: 6px !important;
+  padding: 0 12px 0 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
   border-radius: 20px;
 }
 
 .c2pa-indicator:hover .c2pa-indicator-label {
+  display: inline-block; /* Show when hovering */
   max-width: 150px;
   opacity: 1;
-  margin-left: 0px;
+  margin-left: 0;
 }
 
 /* Screen mode: always show indicator in ochre */

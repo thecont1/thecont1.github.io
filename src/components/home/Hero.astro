@@ -8,6 +8,24 @@ import ExifReader from "exifreader";
 import fs from "node:fs";
 import path from "node:path";
 
+// Load metadata for carousel images
+let imageMetadata: Record<string, any> = {};
+if (CAROUSEL_IMAGES.length > 0) {
+  // Extract folder path from first image
+  const firstImagePath = CAROUSEL_IMAGES[0].src;
+  const folderPath = firstImagePath.substring(0, firstImagePath.lastIndexOf('/'));
+  const metadataPath = path.join(process.cwd(), 'public', folderPath, 'metadata.json');
+  
+  try {
+    if (fs.existsSync(metadataPath)) {
+      const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
+      imageMetadata = JSON.parse(metadataContent);
+    }
+  } catch (e) {
+    console.warn('Could not load metadata.json for homepage carousel:', e);
+  }
+}
+
 async function getSmartCaption(imgSrc: string) {
   // Only process local images in public folder
   if (imgSrc.startsWith("http")) return "";
@@ -97,10 +115,15 @@ async function getSmartCaption(imgSrc: string) {
 }
 
 const images = await Promise.all(
-  CAROUSEL_IMAGES.map(async (img) => ({
-    src: img.src,
-    caption: img.caption || (await getSmartCaption(img.src)),
-  }))
+  CAROUSEL_IMAGES.map(async (img) => {
+    const filename = img.src.split('/').pop() || '';
+    const meta = imageMetadata[filename]?.photography || {};
+    return {
+      src: img.src,
+      caption: img.caption || (await getSmartCaption(img.src)),
+      metadata: meta
+    };
+  })
 );
 ---
 

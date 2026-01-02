@@ -63,20 +63,37 @@ npm run astro            # Access Astro CLI directly
 - **Supports**: Flat list or grouped sections layout
 - **Override Options**: Custom display title, excerpt, image, and labels per item
 
-### Routing & Pages
+### Components
+- **Location**: `src/components/`
+- **Mixed stack**: Astro components (.astro) + React components (.tsx)
+- **React integration**: Via `@astrojs/react` for interactive features
 - **File-based routing**: `src/pages/` directory
 - **Main sections**: `/photogallery`, `/essay`, `/longform`, `/post`, `/datastory`, `/code`, `/project`
 - **Dynamic routes**: Collections generate pages via `[...slug].astro` pattern
 - **Index**: Home page at `src/pages/index.astro`
 
-### Components
-- **Location**: `src/components/`
-- **Mixed stack**: Astro components (.astro) + React components (.tsx)
-- **React integration**: Via `@astrojs/react` for interactive features
+### Carousel System
+- **Components**: 
+  - `src/components/carousel/Carousel.tsx` - Main carousel component with autoplay, drag detection, and metadata support
+  - `src/components/carousel/InfoPanel.tsx` - Metadata display panel with C2PA integration
+  - `src/components/carousel/CaptionToggle.tsx` - Info button toggle component
+- **Features**:
+  - **Smart Autoplay**: 5-second intervals, stops on user interaction (drag, navigation), resumes when curtain returns
+  - **User Interaction Detection**: Trackpad scrolling, mouse drag, keyboard arrows, navigation buttons
+  - **Metadata Integration**: Loads `metadata.json` from image folders, displays camera settings, descriptions, copyright
+  - **C2PA Integration**: Content Credentials verification via existing C2PA overlay system
+  - **Responsive Design**: Adapts info panel position for mobile devices
+- **Usage**: Homepage hero, photogallery carousel layout, project carousels
+- **Styling**: `src/styles/carousel.css` - All carousel-related styles including info panel
 
-### Assets & Media
+### Routing & Pages
+- **File-based routing**: `src/pages/` directory
+- **Main sections**: `/photogallery`, `/essay`, `/longform`, `/post`, `/datastory`, `/code`, `/project`
+- **Dynamic routes**: Collections generate pages via `[...slug].astro` pattern
+- **Index**: Home page at `src/pages/index.astro`
 - **Static assets**: `public/` directory (served as-is)
 - **High-resolution media**: `public/library/` for photography and visual content
+- **Metadata**: `metadata.json` files in image folders contain EXIF data, descriptions, and technical details
 
 ### Styling
 - **Vanilla CSS3**: No CSS framework.

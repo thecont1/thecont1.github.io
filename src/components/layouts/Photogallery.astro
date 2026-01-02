@@ -6,6 +6,8 @@ import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import Carousel from "../carousel/Carousel.tsx";
 import "../../styles/photogallery.css";
 import "../../styles/carousel.css";
+import fs from 'node:fs';
+import path from 'node:path';
 
 interface Props {
   post: CollectionEntry<"photogallery">;
@@ -33,6 +35,24 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
   month: 'long',
   day: 'numeric'
 }).format(post.data.date) : null;
+
+// Load metadata for carousel images
+let imageMetadata: Record<string, any> = {};
+if (layoutType === "carousel" && images.length > 0) {
+  // Extract folder path from first image
+  const firstImagePath = images[0].src;
+  const folderPath = firstImagePath.substring(0, firstImagePath.lastIndexOf('/'));
+  const metadataPath = path.join(process.cwd(), 'public', folderPath, 'metadata.json');
+  
+  try {
+    if (fs.existsSync(metadataPath)) {
+      const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
+      imageMetadata = JSON.parse(metadataContent);
+    }
+  } catch (e) {
+    console.warn('Could not load metadata.json:', e);
+  }
+}
 ---
 
 {layoutType === "carousel" ? (
@@ -42,10 +62,15 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
       <!-- Fixed carousel layer -->
       <div class="carousel-hero-fixed">
         <Carousel 
-          images={images.map(img => ({
-            src: img.src,
-            caption: img.caption
-          }))}
+          images={images.map(img => {
+            const filename = img.src.split('/').pop() || '';
+            const meta = imageMetadata[filename]?.photography || {};
+            return {
+              src: img.src,
+              caption: img.caption,
+              metadata: meta
+            };
+          })}
           client:load
         />
       </div>
@@ -231,6 +256,26 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
         
         const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
         if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+      
+      // Auto-scroll to position category in header center for tile/one-up layouts
+      const category = document.querySelector('.photogallery-meta-top .category') as HTMLElement;
+      if (category && header) {
+        // Wait a bit for page to fully load
+        setTimeout(() => {
+          const headerHeight = header.offsetHeight;
+          const categoryRect = category.getBoundingClientRect();
+          const categoryTop = categoryRect.top + window.scrollY;
+          
+          // Calculate scroll position to center category in header
+          const targetScroll = categoryTop - (headerHeight / 2) + (categoryRect.height / 2);
+          
+          // Smooth scroll to position
+          window.scrollTo({
+            top: Math.max(0, targetScroll),
+            behavior: 'smooth'
+          });
+        }, 100);
       }
     }
   }
