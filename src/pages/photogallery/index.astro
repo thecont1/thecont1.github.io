@@ -1,0 +1,22 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const photogalleries = await getCollection("photogallery", ({ data }) => data.status === "published");
+---
+
+<Layout title="Photo Galleries">
+  <main>
+    <h1>Photo Galleries</h1>
+    <div class="collection-grid">
+      {photogalleries.map((gallery) => (
+        <article class="collection-item">
+          <a href={`/photogallery/${gallery.slug}`}>
+            <h2>{gallery.data.title}</h2>
+            <p>{gallery.data.excerpt}</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </main>
+</Layout>

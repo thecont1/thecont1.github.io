@@ -1,0 +1,18 @@
+---
+import { getCollection, getEntry } from "astro:content";
+import Photogallery from "../../components/layouts/Photogallery.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const photogalleries = await getCollection("photogallery");
+  return photogalleries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+---
+
+<Photogallery post={entry} />

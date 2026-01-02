@@ -1,0 +1,11 @@
+[project]
+name = "thecontrarian-exif"
+version = "0.1.0"
+description = "EXIF extraction utilities for thecontrarian.in"
+requires-python = ">=3.8"
+dependencies = [
+    "Pillow>=10.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["scripts"]

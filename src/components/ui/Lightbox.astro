@@ -61,7 +61,7 @@ const { selector = "main", gallery = true } = Astro.props;
 </div>
 
 <script>
-  import ExifReader from 'exifreader';
+  console.log('=== LIGHTBOX SCRIPT STARTING ===');
 
   const lightbox = document.getElementById("lightbox");
   const gallery = lightbox?.dataset.gallery === "true";
@@ -83,14 +83,53 @@ const { selector = "main", gallery = true } = Astro.props;
   let isTransitioning = false;
 
   const getMetadata = async (imgUrl) => {
+    console.log('Getting comprehensive metadata for:', imgUrl);
+    
     try {
-      const response = await fetch(imgUrl);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const buffer = await response.arrayBuffer();
-      const tags = ExifReader.load(buffer);
-      return tags;
+      // Extract the path from the URL (remove domain/port)
+      const url = new URL(imgUrl);
+      const imagePath = url.pathname;
+      
+      console.log('Looking up pre-extracted EXIF data for path:', imagePath);
+      
+      // Parse the directory structure from the path
+      // e.g., /library/originals/TheAfricanPortraits/image.jpg -> TheAfricanPortraits
+      const pathParts = imagePath.split('/');
+      const filename = pathParts[pathParts.length - 1];
+      
+      // Find the directory (should be the part after 'originals')
+      const originalsIndex = pathParts.indexOf('originals');
+      if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) {
+        console.log('Could not determine directory from path:', imagePath);
+        return {};
+      }
+      
+      const directory = pathParts[originalsIndex + 1];
+      console.log('Determined directory:', directory, 'filename:', filename);
+      
+      // Fetch the co-located metadata JSON from the same directory as the images
+      const metadataUrl = `/library/originals/${directory}/metadata.json`;
+      console.log('Fetching metadata from:', metadataUrl);
+      
+      const response = await fetch(metadataUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to load metadata from ${metadataUrl}: ${response.status}`);
+      }
+      
+      const directoryMetadata = await response.json();
+      const metadata = directoryMetadata[filename];
+      
+      if (metadata) {
+        console.log('Found pre-extracted metadata:', Object.keys(metadata));
+        return metadata;
+      } else {
+        console.log('No pre-extracted metadata found for:', filename);
+        console.log('Available files in directory (first 5):', Object.keys(directoryMetadata).slice(0, 5));
+        return {};
+      }
+      
     } catch (e) {
-      console.warn('ExifReader error:', e);
+      console.warn('Metadata lookup error:', e);
       return {};
     }
   };
@@ -107,6 +146,10 @@ const { selector = "main", gallery = true } = Astro.props;
   };
 
   if (lightbox && lightboxImages.length === 2 && caption && closeBtn && overlay) {
+    console.log('=== LIGHTBOX SCRIPT LOADED ===');
+    console.log('Lightbox script initialized successfully');
+    console.log('Gallery mode:', gallery);
+    console.log('Selector:', selector);
 
     const updateCaptionAndMeta = async (targetImgEl) => {
       // 1. Basic Title/Caption from figure or alt
@@ -116,7 +159,10 @@ const { selector = "main", gallery = true } = Astro.props;
         const cap = fig.querySelector("figcaption");
         if (cap) capText = cap.textContent;
       }
-      caption.textContent = capText || targetImgEl.alt || "Untitled";
+      
+      // If no figcaption, we'll try to get it from EXIF ImageDescription later
+      let initialCaption = capText || targetImgEl.alt || "Untitled";
+      caption.textContent = initialCaption;
 
       // 2. EXIF/IPTC Metadata
       if (exifContainer) {
@@ -125,32 +171,71 @@ const { selector = "main", gallery = true } = Astro.props;
         try {
           const data = await getMetadata(targetImgEl.src);
           
-          if (data && Object.keys(data).length > 0) {
-            // ExifReader returns objects with .description or .value properties
-            const getVal = (tag) => tag?.description || tag?.value || '';
-            
-            const model = getVal(data.Model) || getVal(data.Make) || '';
-            const lens = getVal(data.LensModel) || getVal(data.Lens) || '';
-            const iso = getVal(data.ISOSpeedRatings) || getVal(data.ISO) || '';
-            const fnumber = data.FNumber ? `${getVal(data.FNumber)}` : '';
-            const exposure = formatShutterSpeed(data.ExposureTime);
-            const focalLength = data.FocalLength ? `${getVal(data.FocalLength)}` : '';
-            
-            // IPTC fields
-            const artist = getVal(data.Artist) || getVal(data['By-line']) || '';
-            const copyright = getVal(data.Copyright) || getVal(data.CopyrightNotice) || '';
-
+          // Update caption with EXIF ImageDescription if no figcaption was found
+          if (!capText && data && data.exif && data.exif.ImageDescription) {
+            const imageDesc = data.exif.ImageDescription;
+            if (imageDesc && imageDesc.length > 10) { // Only use if it's substantial
+              caption.textContent = imageDesc;
+            }
+          }
+          
+          if (data && !data.error && (data.exif || data.photography)) {
             let exifHtml = '';
-            if (model) exifHtml += `<p class="exif-row"><strong>Camera:</strong> ${model}</p>`;
-            if (lens) exifHtml += `<p class="exif-row"><strong>Lens:</strong> ${lens}</p>`;
             
-            const settings = [exposure, fnumber, iso ? `ISO ${iso}` : '', focalLength].filter(Boolean).join('  •  ');
-            if (settings) exifHtml += `<p class="exif-row"><strong>Settings:</strong> ${settings}</p>`;
+            // Display photography data (processed/formatted)
+            if (data.photography) {
+              const photo = data.photography;
+              
+              if (photo.camera_make || photo.camera_model) {
+                let cameraInfo = '';
+                if (photo.camera_make && photo.camera_model) {
+                  cameraInfo = `${photo.camera_make} ${photo.camera_model}`;
+                } else {
+                  cameraInfo = photo.camera_make || photo.camera_model;
+                }
+                exifHtml += `<p class="exif-row"><strong>Camera:</strong> ${cameraInfo}</p>`;
+              }
+              
+              if (photo.lens_model) {
+                exifHtml += `<p class="exif-row"><strong>Lens:</strong> ${photo.lens_model}</p>`;
+              }
+              
+              // Camera settings
+              const settings = [
+                photo.shutter_speed,
+                photo.aperture,
+                photo.iso ? `ISO ${photo.iso}` : '',
+                photo.focal_length
+              ].filter(Boolean).join('  •  ');
+              
+              if (settings) {
+                exifHtml += `<p class="exif-row"><strong>Settings:</strong> ${settings}</p>`;
+              }
+              
+              if (photo.date_taken || photo.date_original) {
+                const date = photo.date_original || photo.date_taken;
+                exifHtml += `<p class="exif-row"><strong>Date Taken:</strong> ${date}</p>`;
+              }
+              
+              if (photo.artist) {
+                exifHtml += `<p class="exif-row"><strong>Artist:</strong> ${photo.artist}</p>`;
+              }
+              
+              if (photo.copyright) {
+                exifHtml += `<p class="exif-row"><strong>Copyright:</strong> ${photo.copyright}</p>`;
+              }
+            }
             
-            if (artist) exifHtml += `<p class="exif-row"><strong>Artist:</strong> ${artist}</p>`;
-            if (copyright) exifHtml += `<p class="exif-row"><strong>Copyright:</strong> ${copyright}</p>`;
+            // Add basic image info
+            if (data.width && data.height) {
+              exifHtml += `<p class="exif-row"><strong>Dimensions:</strong> ${data.width} × ${data.height}</p>`;
+            }
             
-            exifContainer.innerHTML = exifHtml || `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} x ${targetImgEl.naturalHeight}</p>`;
+            if (data.format) {
+              exifHtml += `<p class="exif-row"><strong>Format:</strong> ${data.format}</p>`;
+            }
+            
+            exifContainer.innerHTML = exifHtml || `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} × ${targetImgEl.naturalHeight}</p>`;
           } else {
             // Fallback to basic info
             exifContainer.innerHTML = `
@@ -366,22 +451,34 @@ const { selector = "main", gallery = true } = Astro.props;
     };
 
     const attachListeners = () => {
+      console.log('=== LIGHTBOX ATTACH LISTENERS ===');
+      console.log('Gallery enabled:', gallery);
+      console.log('Selector:', selector);
+      
       if (!gallery) return; // Disable lightbox if gallery is false
 
       const container = document.querySelector(selector);
+      console.log('Container found:', !!container);
       if (!container) return;
 
       const images = container.querySelectorAll("img");
-      images.forEach((image) => {
+      console.log('Images to attach listeners to:', images.length);
+      
+      images.forEach((image, index) => {
         if (image.closest("a")) return;
         if (image.classList.contains("no-lightbox")) return;
 
+        console.log(`Attaching click listener to image ${index}`);
         image.style.cursor = "zoom-in";
         image.addEventListener("click", (e) => {
+          console.log('=== LIGHTBOX CLICK DETECTED ===');
+          console.log('Clicked image:', image.src);
           e.stopPropagation();
           openLightbox(image);
         });
       });
+      
+      console.log('=== LIGHTBOX LISTENERS ATTACHED ===');
     };
 
     attachListeners();
@@ -404,12 +501,19 @@ const { selector = "main", gallery = true } = Astro.props;
     if (c2paBtn) {
       c2paBtn.addEventListener("click", (e) => {
         e.stopPropagation();
+        console.log('=== C2PA BUTTON CLICKED ===');
         const currentImgEl = lightboxImages[activeImgIndex];
         const imgSrc = currentImgEl?.src;
+        console.log('Current image src:', imgSrc);
         if (imgSrc) {
+          console.log('Dispatching open-c2pa event');
           window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc } }));
+        } else {
+          console.log('No image src found');
         }
       });
+    } else {
+      console.log('C2PA button not found');
     }
 
     document.addEventListener("keydown", (e) => {
