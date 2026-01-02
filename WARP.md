@@ -32,15 +32,15 @@ npm run astro            # Access Astro CLI directly
   - `longform` - Multi-page essay with parts
   - `code` - GitHub repository presentation
   - `datastory` - Jupyter/Marimo notebook presentation
-  - `photogallery` - Photo/video collection with explicit image lists and layout options (tile/one-up)
+  - `photogallery` - Photo/video collection with explicit image lists and layout options (tile/one-up/carousel)
   - `project` - Collection of related content using Collection References
 - **Content Location**: Markdown files in `src/content/{collection-name}/`
 - **Schema Structure**:
   - Required: `title`, `excerpt`, `status` (private/draft/published)
   - Taxonomy: `geography[]`, `theme[]`
-  - Optional: `date`, `heroImage`, `lightbox` settings
+  - Optional: `date`, `heroImage`, `lightbox` settings, `backgroundColor` (for page background)
   - Datastory: requires `notebook` object with `engine` (marimo/jupyter) and `entry`
-  - Photogallery: `images[]` array with `src`, `caption`, `alt`; `layout` (tile/one-up)
+  - Photogallery: `images[]` array with `src`, `caption`, `alt`; `layoutType` (tile/one-up/carousel)
   - Project: Collection References to `photogalleries`, `essays`, `longforms`, `posts`, `datastories`, `code`
 
 ### GitHub Integration (Code Layout)
@@ -81,6 +81,18 @@ npm run astro            # Access Astro CLI directly
 ### Styling
 - **Vanilla CSS3**: No CSS framework.
 - **Global styles**: `src/styles/global.css` (variables and core styles).
+- **Component styles**: 
+  - `src/styles/carousel.css` - All carousel-related styles (homepage hero, photogallery carousel layout, controls, animations, curtain effects)
+  - `src/styles/hero.css` - Homepage hero-specific styles (minimal after carousel refactor)
+  - `src/styles/photogallery.css` - Photogallery layouts (tile, one-up)
+  - `src/styles/code.css` - Code layout styling
+  - `src/styles/c2pa.css` - C2PA overlay and indicator styles
+- **Carousel Layout Features**:
+  - **Curtain System**: Title/subtitle overlay with backgroundColor transparency and blur effects
+  - **Scroll-driven Animations**: CSS `animation-timeline: scroll()` with JavaScript fallbacks
+  - **Smart Autoplay**: Pauses when user takes control, resumes when curtain returns
+  - **Responsive Controls**: Navigation buttons appear/disappear based on scroll position
+  - **Footer Integration**: Carousel shifts up minimally to accommodate footer without overlap
 - **Z-Index Hierarchy**:
   - `SiteHeader`: 100
   - `ContentsToggle` Sidebar: 500

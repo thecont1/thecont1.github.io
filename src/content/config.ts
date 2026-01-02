@@ -164,7 +164,7 @@ const photogallerySchema = z.object({
   date: z.date().optional(),
   
   // Layout style
-  layoutType: z.enum(["tile", "one-up"]).default("tile"),
+  layoutType: z.enum(["tile", "one-up", "carousel"]).default("tile"),
   
   // Taxonomy
   geography: z.array(geographyEnum).max(2).optional().default([]),
