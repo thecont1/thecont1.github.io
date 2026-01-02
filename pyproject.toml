@@ -1,10 +1,11 @@
 [project]
-name = "thecontrarian-exif"
+name = "thecontrarian-scripts"
 version = "0.1.0"
-description = "EXIF extraction utilities for thecontrarian.in"
+description = "Python utilities for thecontrarian.in (EXIF extraction and C2PA credentials)"
 requires-python = ">=3.8"
 dependencies = [
     "Pillow>=10.0.0",
+    "c2pa-python>=0.27.0",
 ]
 
 [tool.hatch.build.targets.wheel]
