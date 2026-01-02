@@ -149,7 +149,6 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   function initEditorialFeatures() {
     const article = document.querySelector('.editorial-post') as HTMLElement;
     if (!article) {
-      console.warn('initEditorialFeatures: .editorial-post not found');
       return;
     }
 

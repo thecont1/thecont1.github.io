@@ -17,7 +17,6 @@ try {
   repoData = await fetchRepoData(repo, githubToken);
 } catch (e) {
   error = e;
-  console.error(`Failed to fetch repository data for ${repo}:`, e);
 }
 
 // Create a mock post object that matches the CollectionEntry interface

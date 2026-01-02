@@ -15,7 +15,6 @@ const { post } = Astro.props;
 const { Content } = await post.render();
 
 const backgroundColor = post.data.backgroundColor || post.data['background-color'] || "#ffffff";
-console.log(`Rendering Post: ${post.data.title}, BG: ${backgroundColor}`);
 
 // Formatting date - Economist style: "Mar 29th 2024"
 const formattedDate = post.data.date?.toLocaleDateString("en-GB", {
@@ -94,12 +93,10 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   // Sync header background with page background
   function refinePostContent() {
     const article = document.querySelector('.simple-post') as HTMLElement;
-    console.log('Post Layout: refining content');
     if (article) {
       const bgColor = article.style.getPropertyValue('--page-bg').trim() || 
                       getComputedStyle(article).getPropertyValue('--page-bg').trim();
       
-      console.log('Post Layout: applying bgColor', bgColor);
       if (bgColor) {
         // Direct injection to HTML and Body
         document.documentElement.style.backgroundColor = bgColor;

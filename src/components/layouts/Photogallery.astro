@@ -27,10 +27,6 @@ const lightboxEnabled = post.data.lightbox?.gallery !== false;
 
 const backgroundColor = post.data.backgroundColor || "#FAF9F6";
 
-console.log('=== BACKGROUND COLOR DEBUG ===');
-console.log('backgroundColor from frontmatter:', post.data.backgroundColor);
-console.log('final backgroundColor:', backgroundColor);
-
 // Format date if available
 const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -129,42 +125,17 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
       }
     }
 
-    // Debug: Check if lightbox is working
-    console.log('=== PHOTOGALLERY DEBUG ===');
-    console.log('Photogallery loaded');
-    
     const images = document.querySelectorAll('.photogallery-layout img');
-    console.log('Found images:', images.length);
     
     // Check if lightbox element exists
     const lightbox = document.getElementById('lightbox');
-    console.log('Lightbox element exists:', !!lightbox);
     
     if (lightbox) {
-      console.log('Lightbox selector:', lightbox.dataset.selector);
-      console.log('Lightbox gallery:', lightbox.dataset.gallery);
-      console.log('Lightbox aria-hidden:', lightbox.getAttribute('aria-hidden'));
-    }
-    
-    // Check if lightbox script elements exist
-    const scripts = document.querySelectorAll('script');
-    console.log('Total scripts on page:', scripts.length);
-    
-    // Try to manually trigger the lightbox attachListeners if it exists
-    setTimeout(() => {
-      console.log('Checking for lightbox functions...');
-      // The lightbox script should have attached listeners by now
-      if (lightbox) {
-        const container = document.querySelector('.photogallery-layout');
-        if (container) {
-          const imgs = container.querySelectorAll('img');
-          console.log('Images in container:', imgs.length);
-          imgs.forEach((img, i) => {
-            console.log(`Image ${i} cursor:`, getComputedStyle(img).cursor);
-          });
-        }
+      const container = document.querySelector('.photogallery-layout');
+      if (container) {
+        const imgs = container.querySelectorAll('img');
       }
-    }, 1000);
+    }
   }
 
   refinePhotogalleryContent();

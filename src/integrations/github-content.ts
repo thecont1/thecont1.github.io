@@ -28,7 +28,6 @@ export async function generateCodeContent(
     const { owner, repo } = parseRepoIdentifier(repoIdentifier);
     
     // Fetch repository data
-    console.log(`Fetching data for ${owner}/${repo}...`);
     const repoData = await fetchRepoData(repoIdentifier, githubToken);
     
     // Generate slug
@@ -62,7 +61,6 @@ export async function generateCodeContent(
     
     await writeFile(filepath, content, 'utf-8');
     
-    console.log(`Generated content for ${owner}/${repo} at ${filename}`);
     return filename;
     
   } catch (error) {
@@ -234,7 +232,6 @@ export async function generateFromCLI(repoIdentifier: string, token?: string): P
       githubToken: token,
       overwrite: true
     });
-    console.log(`✅ Successfully generated ${filename}`);
   } catch (error) {
     console.error('❌ Generation failed:', error);
     process.exit(1);
@@ -255,11 +252,8 @@ export function githubContent(options: GitHubContentOptions = {}): AstroIntegrat
     hooks: {
       'astro:build:start': async () => {
         if (repositories.length === 0) {
-          console.log('🔧 GitHub Content: No repositories configured');
           return;
         }
-
-        console.log(`🚀 GitHub Content: Generating content for ${repositories.length} repositories...`);
 
         for (const repo of repositories) {
           try {
@@ -272,8 +266,6 @@ export function githubContent(options: GitHubContentOptions = {}): AstroIntegrat
             console.error(`❌ Failed to generate content for ${repo}:`, error);
           }
         }
-
-        console.log('✅ GitHub Content: Generation complete');
       }
     }
   };
@@ -293,7 +285,6 @@ export async function addRepository(repoIdentifier: string, options: Omit<GitHub
       overwrite: true
     });
     
-    console.log(`✅ Added repository content: ${filename}`);
     return filename;
   } catch (error) {
     console.error(`❌ Failed to add repository ${repoIdentifier}:`, error);

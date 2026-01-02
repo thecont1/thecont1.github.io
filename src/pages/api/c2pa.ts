@@ -34,9 +34,6 @@ async function handleRequest(request: Request, url: URL) {
   }
 
   // LOGGING: Comprehensive debug info
-  console.log(`--- C2PA API [${request.method}] ---`);
-  console.log('URL:', request.url);
-  
   const headerObj: Record<string, string> = {};
   request.headers.forEach((value, key) => {
     headerObj[key] = value;
@@ -71,7 +68,6 @@ async function handleRequest(request: Request, url: URL) {
   if (!imgSrcParam && (request.method === 'POST' || request.method === 'PUT')) {
     try {
       rawBodyText = await request.text();
-      console.log('Raw POST body text:', rawBodyText);
       
       if (rawBodyText) {
         try {
@@ -85,7 +81,6 @@ async function handleRequest(request: Request, url: URL) {
         }
       }
     } catch (e: any) {
-      console.log('Failed to read POST body:', e.message);
     }
   }
 

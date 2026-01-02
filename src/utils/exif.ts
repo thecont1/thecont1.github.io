@@ -41,7 +41,6 @@ export async function getImageMetadata(imagePath: string): Promise<ExifMetadata 
     // Find the directory (should be the part after 'originals')
     const originalsIndex = pathParts.indexOf('originals');
     if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) {
-      console.warn('Could not determine directory from path:', imagePath);
       return null;
     }
     
@@ -52,14 +51,12 @@ export async function getImageMetadata(imagePath: string): Promise<ExifMetadata 
     const response = await fetch(metadataUrl);
     
     if (!response.ok) {
-      console.warn(`Failed to load metadata from ${metadataUrl}: ${response.status}`);
       return null;
     }
     
     const directoryMetadata = await response.json();
     return directoryMetadata[filename] || null;
   } catch (error) {
-    console.warn('Failed to load metadata for:', imagePath, error);
     return null;
   }
 }
@@ -70,7 +67,6 @@ export async function getImageMetadata(imagePath: string): Promise<ExifMetadata 
  * Use the async version instead
  */
 export function getImageMetadataSync(directory: string, filename: string): ExifMetadata | null {
-  console.warn('getImageMetadataSync is not supported with co-located metadata. Use getImageMetadata instead.');
   return null;
 }
 
@@ -133,10 +129,8 @@ export async function getAvailableDirectories(): Promise<string[]> {
   try {
     // This would require a server-side API to list directories
     // For now, return empty array - directories are discovered dynamically when needed
-    console.warn('getAvailableDirectories: Directory discovery not implemented for co-located metadata');
     return [];
   } catch (error) {
-    console.warn('Failed to get available directories:', error);
     return [];
   }
 }

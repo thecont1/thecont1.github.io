@@ -61,8 +61,6 @@ const { selector = "main", gallery = true } = Astro.props;
 </div>
 
 <script>
-  console.log('=== LIGHTBOX SCRIPT STARTING ===');
-
   const lightbox = document.getElementById("lightbox");
   const gallery = lightbox?.dataset.gallery === "true";
   const selector = lightbox?.dataset.selector || "main";
@@ -83,14 +81,10 @@ const { selector = "main", gallery = true } = Astro.props;
   let isTransitioning = false;
 
   const getMetadata = async (imgUrl) => {
-    console.log('Getting comprehensive metadata for:', imgUrl);
-    
     try {
       // Extract the path from the URL (remove domain/port)
       const url = new URL(imgUrl);
       const imagePath = url.pathname;
-      
-      console.log('Looking up pre-extracted EXIF data for path:', imagePath);
       
       // Parse the directory structure from the path
       // e.g., /library/originals/TheAfricanPortraits/image.jpg -> TheAfricanPortraits
@@ -100,16 +94,13 @@ const { selector = "main", gallery = true } = Astro.props;
       // Find the directory (should be the part after 'originals')
       const originalsIndex = pathParts.indexOf('originals');
       if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) {
-        console.log('Could not determine directory from path:', imagePath);
         return {};
       }
       
       const directory = pathParts[originalsIndex + 1];
-      console.log('Determined directory:', directory, 'filename:', filename);
       
       // Fetch the co-located metadata JSON from the same directory as the images
       const metadataUrl = `/library/originals/${directory}/metadata.json`;
-      console.log('Fetching metadata from:', metadataUrl);
       
       const response = await fetch(metadataUrl);
       if (!response.ok) {
@@ -120,16 +111,12 @@ const { selector = "main", gallery = true } = Astro.props;
       const metadata = directoryMetadata[filename];
       
       if (metadata) {
-        console.log('Found pre-extracted metadata:', Object.keys(metadata));
         return metadata;
       } else {
-        console.log('No pre-extracted metadata found for:', filename);
-        console.log('Available files in directory (first 5):', Object.keys(directoryMetadata).slice(0, 5));
         return {};
       }
       
     } catch (e) {
-      console.warn('Metadata lookup error:', e);
       return {};
     }
   };
@@ -146,11 +133,6 @@ const { selector = "main", gallery = true } = Astro.props;
   };
 
   if (lightbox && lightboxImages.length === 2 && caption && closeBtn && overlay) {
-    console.log('=== LIGHTBOX SCRIPT LOADED ===');
-    console.log('Lightbox script initialized successfully');
-    console.log('Gallery mode:', gallery);
-    console.log('Selector:', selector);
-
     const updateCaptionAndMeta = async (targetImgEl) => {
       // 1. Basic Title/Caption from figure or alt
       let capText = "";
@@ -244,7 +226,6 @@ const { selector = "main", gallery = true } = Astro.props;
             `;
           }
         } catch (err) {
-          console.error('Metadata update error:', err);
           exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
         }
       }
@@ -298,7 +279,6 @@ const { selector = "main", gallery = true } = Astro.props;
             } else {
                 currentImgEl.onload = completeTransition;
                 currentImgEl.onerror = () => {
-                    console.error('Failed to load image');
                     isTransitioning = false;
                 };
             }
@@ -365,24 +345,19 @@ const { selector = "main", gallery = true } = Astro.props;
     }
 
     const openLightbox = (imageElement) => {
-      console.log('openLightbox called', { gallery });
       // If gallery is false, do nothing (should be handled by attachListeners not adding events, but safety check)
       if (!gallery) return;
 
       const container = document.querySelector(selector);
       if (!container) {
-          console.error('Lightbox container not found:', selector);
           return;
       }
       currentImages = Array.from(container.querySelectorAll("img")).filter(i => {
         return !i.closest("a") && !i.classList.contains("no-lightbox");
       });
-      console.log('Found images:', currentImages.length);
       currentIndex = currentImages.indexOf(imageElement);
-      console.log('Current index:', currentIndex);
 
       if (currentIndex === -1) {
-          console.error('Clicked image not found in currentImages list');
           return;
       }
 
@@ -451,34 +426,23 @@ const { selector = "main", gallery = true } = Astro.props;
     };
 
     const attachListeners = () => {
-      console.log('=== LIGHTBOX ATTACH LISTENERS ===');
-      console.log('Gallery enabled:', gallery);
-      console.log('Selector:', selector);
-      
       if (!gallery) return; // Disable lightbox if gallery is false
 
       const container = document.querySelector(selector);
-      console.log('Container found:', !!container);
       if (!container) return;
 
       const images = container.querySelectorAll("img");
-      console.log('Images to attach listeners to:', images.length);
       
       images.forEach((image, index) => {
         if (image.closest("a")) return;
         if (image.classList.contains("no-lightbox")) return;
 
-        console.log(`Attaching click listener to image ${index}`);
         image.style.cursor = "zoom-in";
         image.addEventListener("click", (e) => {
-          console.log('=== LIGHTBOX CLICK DETECTED ===');
-          console.log('Clicked image:', image.src);
           e.stopPropagation();
           openLightbox(image);
         });
       });
-      
-      console.log('=== LIGHTBOX LISTENERS ATTACHED ===');
     };
 
     attachListeners();
@@ -501,19 +465,12 @@ const { selector = "main", gallery = true } = Astro.props;
     if (c2paBtn) {
       c2paBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        console.log('=== C2PA BUTTON CLICKED ===');
         const currentImgEl = lightboxImages[activeImgIndex];
         const imgSrc = currentImgEl?.src;
-        console.log('Current image src:', imgSrc);
         if (imgSrc) {
-          console.log('Dispatching open-c2pa event');
           window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc } }));
-        } else {
-          console.log('No image src found');
         }
       });
-    } else {
-      console.log('C2PA button not found');
     }
 
     document.addEventListener("keydown", (e) => {

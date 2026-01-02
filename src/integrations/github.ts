@@ -68,7 +68,6 @@ export class GitHubAPI {
         return atob(content.content.replace(/\n/g, ''));
       }
     } catch (error) {
-      console.warn(`No README found for ${owner}/${repo}`);
     }
     return null;
   }
@@ -77,7 +76,6 @@ export class GitHubAPI {
     try {
       return await this.fetch(`/repos/${owner}/${repo}/languages`);
     } catch (error) {
-      console.warn(`Could not fetch languages for ${owner}/${repo}`);
       return {};
     }
   }
@@ -87,7 +85,6 @@ export class GitHubAPI {
       const contents = await this.fetch(`/repos/${owner}/${repo}/contents/${path}`);
       return Array.isArray(contents) ? contents : [contents];
     } catch (error) {
-      console.warn(`Could not fetch contents for ${owner}/${repo}/${path}`);
       return [];
     }
   }
@@ -100,7 +97,6 @@ export class GitHubAPI {
         return packageJson;
       }
     } catch (error) {
-      console.warn(`No package.json found for ${owner}/${repo}`);
     }
     return null;
   }
