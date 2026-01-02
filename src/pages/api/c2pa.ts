@@ -154,7 +154,7 @@ async function handleRequest(request: Request, url: URL) {
       });
     }
 
-    const pythonPath = '/Users/home/DEV/websites/c2patool/.venv/bin/python3';
+    const pythonPath = path.join(rootDir, '.venv', 'bin', 'python3');
     const scriptPath = path.join(rootDir, 'scripts', 'c2pa_xtract.py');
 
     const command = `"${pythonPath}" "${scriptPath}" "${absoluteImagePath}" --json`;
