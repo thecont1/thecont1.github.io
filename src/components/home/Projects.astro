@@ -53,7 +53,6 @@ async function getFeaturedContent(item: FeaturedItem) {
       url: getContentUrl(item.type, item.slug),
     };
   } catch (e) {
-    console.warn(`Featured item not found: ${item.type}/${item.slug}`);
     return null;
   }
 }

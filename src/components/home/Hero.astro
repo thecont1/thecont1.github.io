@@ -54,7 +54,6 @@ async function getSmartCaption(imgSrc: string) {
       placeStr = [city, state, country].filter(Boolean).join(", ");
     }
   } catch (e) {
-    console.error(`Error reading metadata for ${imgSrc}:`, e);
   }
 
   // If we found a full caption in IPTC, use it

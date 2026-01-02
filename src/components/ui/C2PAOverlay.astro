@@ -54,8 +54,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       
       // Listen for custom event to open
       window.addEventListener('open-c2pa', (e: any) => {
-        console.log('=== C2PA EVENT RECEIVED ===');
-        console.log('Event detail:', e.detail);
         this.open(e.detail.imgSrc);
       });
 
@@ -236,7 +234,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         
         this.render(data, cleanSrc);
       } catch (err: any) {
-        console.error('C2PA Fetch Error:', err);
         if (this.content) {
           this.content.innerHTML = `
             <div class="c2pa-error">
