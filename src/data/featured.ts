@@ -1,0 +1,72 @@
+/**
+ * FEATURED CONTENT - Manual control for homepage "The Projects" section
+ */
+
+export type FeaturedItemType = "post" | "essay" | "longform" | "photogallery" | "code" | "datastory" | "project";
+
+export interface FeaturedItem {
+  /** The content collection type */
+  type: FeaturedItemType;
+
+  /** The slug (filename without extension) of the content */
+  slug: string;
+
+  /** Optional: Override the display title */
+  displayTitle?: string;
+
+  /** Optional: Override the excerpt/description */
+  displayExcerpt?: string;
+
+  /** Optional: Override the hero image */
+  displayImage?: string;
+
+  /** Optional: Custom label (e.g., "Featured", "New", "Updated") */
+  label?: string;
+}
+
+/**
+ * Section groupings for the homepage (optional)
+ * Use this if you want to group featured items by category
+ */
+export interface FeaturedSection {
+  title: string;
+  items: FeaturedItem[];
+}
+
+/**
+ * Featured items for "The Projects" section on the homepage.
+ * Order matters - items appear in the order listed here.
+ */
+export const FEATURED_ITEMS: FeaturedItem[] = [
+  { type: "essay", slug: "fictional"},
+  { type: "datastory", slug: "nammametro", displayTitle: "The NammaMetro Ridership Inspector"},
+];
+
+export const FEATURED_SECTIONS: FeaturedSection[] = [
+  {
+    title: "Photography",
+    items: [
+      { type: "photogallery", slug: "matrimania", label: "Series" },
+      { type: "photogallery", slug: "matrimania-the-book", label: "Book" },
+      { type: "photogallery", slug: "the-african-portraits", label: "Series" },
+    ]
+  },
+
+  {
+    title: "MATRIMANIA",
+    items: [
+      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage", label: "Essay"},
+      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Who's Paying for All This Anyway?", label: "Interview"},
+      { type: "longform", slug: "matrimania-bond-and-bondage", displayTitle: "One Hundered Years of Solitude", label: "Solidad"},
+    ]
+  },
+
+  {
+    title: "Code",
+    items: [
+      { type: "code", slug: "ngl-storyteller"},
+      { type: "code", slug: "vscode"},
+    ]
+  },
+
+];

@@ -7,7 +7,7 @@ import node from '@astrojs/node';
 export default defineConfig({
   site: 'https://thecont1.github.io',
   integrations: [react()],
-  output: 'static',
+  output: 'server', // Changed to 'server' to support API endpoints
   adapter: node({
     mode: 'standalone'
   })

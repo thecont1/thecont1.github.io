@@ -1,0 +1,172 @@
+---
+import type { CollectionEntry } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Lightbox from "../ui/Lightbox.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
+import "../../styles/photogallery.css";
+
+interface Props {
+  post: CollectionEntry<"photogallery">;
+}
+
+const { post } = Astro.props;
+
+// Get collection name dynamically
+const collectionName = "Photogallery"; // Hardcode for now since post.collection is undefined in server mode
+
+// Use images from frontmatter
+const images = post.data.images || [];
+
+// Layout type - default to "tile" if not specified
+// Since we removed the layout field from frontmatter due to Astro 5 compatibility,
+// we'll use a custom field or detect from folder name
+const layoutType = post.data.layoutType || "tile";
+
+// Lightbox enabled by default, can be disabled via frontmatter
+const lightboxEnabled = post.data.lightbox?.gallery !== false;
+
+const backgroundColor = post.data.backgroundColor || "#FAF9F6";
+
+console.log('=== BACKGROUND COLOR DEBUG ===');
+console.log('backgroundColor from frontmatter:', post.data.backgroundColor);
+console.log('final backgroundColor:', backgroundColor);
+
+// Format date if available
+const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+}).format(post.data.date) : null;
+---
+
+<Layout title={post.data.title}>
+  <div class="photogallery-layout" style={`--page-bg: ${backgroundColor};`}>
+    
+    <!-- Header Section -->
+    <header class="photogallery-header">
+      <div class="photogallery-meta-top">
+        <span class="category">{collectionName}</span>
+<!--
+        {formattedDate && <span class="date">{formattedDate}</span>}
+        {post.data.geography && post.data.geography.length > 0 && (
+          <span class="geography">{post.data.geography.join(', ')}</span>
+        )}
+-->
+      </div>
+      
+      <h1 class="photogallery-title">{post.data.title}</h1>
+      
+      {post.data.excerpt && (
+        <p class="photogallery-excerpt">{post.data.excerpt}</p>
+      )}
+      
+      <div class="photogallery-author-line">
+        <span class="by">by</span>
+        <span class="author">Mahesh Shantaram</span>
+      </div>
+    </header>
+
+    <!-- Gallery Content -->
+    {layoutType === "one-up" ? (
+      <!-- ONE-UP LAYOUT -->
+      <div class="photogallery-oneup">
+        {images.map((img) => (
+          <figure class="gallery-item">
+            <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
+            {img.caption && <figcaption>{img.caption}</figcaption>}
+          </figure>
+        ))}
+        {images.length === 0 && (
+          <div class="no-images">
+            <p>No images specified in frontmatter</p>
+          </div>
+        )}
+      </div>
+    ) : (
+      <!-- GRID LAYOUT (tile) - Default -->
+      <div class="photogallery-grid">
+        {images.map((img) => (
+          <figure class="gallery-item">
+            <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
+            {img.caption && <figcaption>{img.caption}</figcaption>}
+          </figure>
+        ))}
+        {images.length === 0 && (
+          <div class="no-images">
+            <p>No images specified in frontmatter</p>
+          </div>
+        )}
+      </div>
+    )}
+
+    <!-- Lightbox (enabled by default) -->
+    {lightboxEnabled && (
+      <Lightbox 
+        selector=".photogallery-layout" 
+        gallery={true} 
+      />
+    )}
+
+    <!-- C2PA Overlay (always include, but only show indicators for one-up layout) -->
+    <C2PAOverlay />
+    
+    <!-- Note: ScreenToggle component disabled as requested -->
+  </div>
+</Layout>
+
+<script>
+  // Update site header background to match page
+  function refinePhotogalleryContent() {
+    const layout = document.querySelector('.photogallery-layout') as HTMLElement;
+    if (layout) {
+      const bgColor = getComputedStyle(layout).getPropertyValue('--page-bg');
+      const header = document.querySelector('.site-header') as HTMLElement;
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      }
+    }
+
+    // Debug: Check if lightbox is working
+    console.log('=== PHOTOGALLERY DEBUG ===');
+    console.log('Photogallery loaded');
+    
+    const images = document.querySelectorAll('.photogallery-layout img');
+    console.log('Found images:', images.length);
+    
+    // Check if lightbox element exists
+    const lightbox = document.getElementById('lightbox');
+    console.log('Lightbox element exists:', !!lightbox);
+    
+    if (lightbox) {
+      console.log('Lightbox selector:', lightbox.dataset.selector);
+      console.log('Lightbox gallery:', lightbox.dataset.gallery);
+      console.log('Lightbox aria-hidden:', lightbox.getAttribute('aria-hidden'));
+    }
+    
+    // Check if lightbox script elements exist
+    const scripts = document.querySelectorAll('script');
+    console.log('Total scripts on page:', scripts.length);
+    
+    // Try to manually trigger the lightbox attachListeners if it exists
+    setTimeout(() => {
+      console.log('Checking for lightbox functions...');
+      // The lightbox script should have attached listeners by now
+      if (lightbox) {
+        const container = document.querySelector('.photogallery-layout');
+        if (container) {
+          const imgs = container.querySelectorAll('img');
+          console.log('Images in container:', imgs.length);
+          imgs.forEach((img, i) => {
+            console.log(`Image ${i} cursor:`, getComputedStyle(img).cursor);
+          });
+        }
+      }
+    }, 1000);
+  }
+
+  refinePhotogalleryContent();
+  document.addEventListener('astro:page-load', refinePhotogalleryContent);
+</script>

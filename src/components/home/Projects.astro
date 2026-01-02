@@ -1,27 +1,94 @@
 ---
-import { getCollection } from "astro:content";
+/**
+ * Projects Section - Homepage
+ * 
+ * Displays manually curated featured content from src/data/featured.ts
+ * No auto-fetching - complete manual control over what appears here.
+ */
+import { getEntry } from "astro:content";
+import { FEATURED_ITEMS, FEATURED_SECTIONS, type FeaturedItem } from "../../data/featured";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const photography = await getCollection("photography", ({ data }) => data.status === "published");
-const writing = await getCollection("writing", ({ data }) => data.status === "published");
-const datascience = await getCollection("datascience", ({ data }) => data.status === "published");
-const code = await getCollection("code", ({ data }) => data.status === "published");
-
+// Helper to normalize public paths
 const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") : p);
 
 const publicDir = fileURLToPath(new URL("../../../public/", import.meta.url));
 const hasPublicFile = (p?: string) => {
   if (!p) return false;
   let rel = p.replace(/^\/+/, "");
-  // If the path starts with 'public/', remove it because publicDir already includes it
   if (rel.startsWith("public/")) {
     rel = rel.replace(/^public\//, "");
   }
   return existsSync(path.join(publicDir, rel));
 };
 
+// URL mapping for each collection type
+const getContentUrl = (type: string, slug: string): string => {
+  const urlMap: Record<string, string> = {
+    photogallery: `/photogallery/${slug}`,
+    essay: `/essay/${slug}`,
+    longform: `/longform/${slug}`,
+    post: `/post/${slug}`,
+    datastory: `/datastory/${slug}`,
+    code: `/code/${slug}`,
+    project: `/project/${slug}`,
+  };
+  return urlMap[type] || `/${type}/${slug}`;
+};
+
+// Fetch content for a featured item
+async function getFeaturedContent(item: FeaturedItem) {
+  try {
+    const entry = await getEntry(item.type, item.slug);
+    if (!entry) return null;
+    
+    return {
+      ...item,
+      entry,
+      title: item.displayTitle || entry.data.title,
+      excerpt: item.displayExcerpt || entry.data.excerpt || entry.data.description || "",
+      heroImage: item.displayImage || entry.data.heroImage,
+      url: getContentUrl(item.type, item.slug),
+    };
+  } catch (e) {
+    console.warn(`Featured item not found: ${item.type}/${item.slug}`);
+    return null;
+  }
+}
+
+// Determine which mode to use: flat list or sections
+const useSections = FEATURED_SECTIONS.length > 0;
+
+// Fetch all featured content
+let flatItems: Awaited<ReturnType<typeof getFeaturedContent>>[] = [];
+let sectionedItems: { title: string; items: Awaited<ReturnType<typeof getFeaturedContent>>[] }[] = [];
+
+if (useSections) {
+  // Grouped by sections
+  for (const section of FEATURED_SECTIONS) {
+    const items = await Promise.all(section.items.map(getFeaturedContent));
+    sectionedItems.push({
+      title: section.title,
+      items: items.filter(Boolean),
+    });
+  }
+} else {
+  // Flat list
+  flatItems = (await Promise.all(FEATURED_ITEMS.map(getFeaturedContent))).filter(Boolean);
+}
+
+// Type icons for each content type
+const typeIcons: Record<string, string> = {
+  post: "✏️",
+  essay: "📝",
+  longform: "📖",
+  photogallery: "📷",
+  code: "💻",
+  datastory: "📊",
+  project: "🎯",
+};
 ---
 
 <section id="projects" class="projects">
@@ -29,119 +96,78 @@ const hasPublicFile = (p?: string) => {
     <h1 class="projects-title">The Projects</h1>
   </header>
 
-  <!-- PHOTOGRAPHY -->
-  <div class="projects-section">
-    <div class="projects-label">Photography</div>
-    <div class="projects-row">
-      {photography.map((post) => (
-
-        <article class="project-card image-card">
-          <a href={`/photography/${post.slug}`}>
-            <div class="card-media">
-              {(() => {
-                const heroSrc = normalizePublicPath(post.data.heroImage);
-                return heroSrc && hasPublicFile(heroSrc) ? (
-                  <img src={heroSrc} alt={post.data.title} />
-                ) : (
-                  <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
-                    <rect x="0" y="0" width="4" height="3" />
-                  </svg>
-                );
-              })()}
-            </div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.excerpt}</p>
-            <span class="read-more">Read More →</span>
-          </a>
-        </article>
-
-      ))}
-    </div>
-  </div>
-
-  <!-- WRITING -->
-  <div class="projects-section">
-    <div class="projects-label">Writing</div>
-    <div class="projects-row">
-      {writing.map((post) => (
-        <article class="project-card image-card">
-          <a href={`/writing/${post.slug}`}>
-            <div class="card-media">
-              {(() => {
-                const heroSrc = normalizePublicPath(post.data.heroImage);
-                return heroSrc && hasPublicFile(heroSrc) ? (
-                  <img src={heroSrc} alt={post.data.title} />
-                ) : (
-                  <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
-                    <rect x="0" y="0" width="4" height="3" />
-                  </svg>
-                );
-              })()}
-            </div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.excerpt}</p>
-            <span class="read-more">Read More →</span>
-          </a>
-        </article>
-      ))}
-    </div>
-  </div>
-
-
-  <!-- DATA STORIES -->
-  <div class="projects-section">
-    <div class="projects-label">Data Stories</div>
-    <div class="projects-row">
-      {datascience.map((post) => (
-        <article class="project-card image-card">
-          <a href={`/datascience/${post.slug}`}>
-            <div class="card-media">
-              {(() => {
-                const heroSrc = normalizePublicPath(post.data.heroImage);
-                return heroSrc && hasPublicFile(heroSrc) ? (
-                  <img src={heroSrc} alt={post.data.title} />
-                ) : (
-                  <svg viewBox="0 0 4 3" class="card-placeholder" aria-hidden="true">
-                    <rect x="0" y="0" width="4" height="3" />
-                  </svg>
-                );
-              })()}
-            </div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.excerpt}</p>
-            <span class="read-more">Read More →</span>
-          </a>
-        </article>
-      ))}
-    </div>
-  </div>
-
-  <!-- CODE PROJECTS -->
-  <div class="projects-section">
-    <div class="projects-label">Code</div>
-    <div class="projects-row">
-      {code.map((post) => (
-        <article class="project-card code-card">
-          <a href={`/code/${post.slug}`}>
-            <div class="card-media code-media">
-              <div class="repo-header">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="github-icon">
-                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-                </svg>
-                <span class="repo-name">{post.data.repoOwner}/{post.data.repoName}</span>
-              </div>
-              <div class="repo-stats">
-                {post.data.language && <span class="language">{post.data.language}</span>}
-                {post.data.stars !== undefined && post.data.stars > 0 && <span class="stars">⭐ {post.data.stars}</span>}
-              </div>
-            </div>
-            <h3>{post.data.title}</h3>
-            <p>{post.data.description}</p>
-            <span class="read-more">View Project →</span>
-          </a>
-        </article>
-      ))}
-    </div>
-  </div>
-
+  {useSections ? (
+    <!-- SECTIONED LAYOUT -->
+    <>
+    {sectionedItems.map((section) => section.items.length > 0 && (
+      <div class="projects-section">
+        <div class="projects-label">{section.title}</div>
+        <div class="projects-row">
+          {section.items.map((item) => item && (
+            <article class={`project-card ${item.type}-card`}>
+              <a href={item.url}>
+                <div class="card-media">
+                  {(() => {
+                    const heroSrc = normalizePublicPath(item.heroImage);
+                    return heroSrc && hasPublicFile(heroSrc) ? (
+                      <img src={heroSrc} alt={item.title} />
+                    ) : (
+                      <div class="card-placeholder-icon">
+                        <span>{typeIcons[item.type] || "📄"}</span>
+                      </div>
+                    );
+                  })()}
+                  {item.label && <span class="card-label">{item.label}</span>}
+                </div>
+                <div class="card-content">
+                  <h3>{item.title}</h3>
+                  <p>{item.excerpt}</p>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    ))}
+    </>
+  ) : (
+    <!-- FLAT LAYOUT -->
+    <>
+    {flatItems.length > 0 ? (
+      <div class="projects-section">
+        <div class="projects-row projects-row--flat">
+          {flatItems.map((item) => item && (
+            <article class={`project-card ${item.type}-card`}>
+              <a href={item.url}>
+                <div class="card-media">
+                  {(() => {
+                    const heroSrc = normalizePublicPath(item.heroImage);
+                    return heroSrc && hasPublicFile(heroSrc) ? (
+                      <img src={heroSrc} alt={item.title} />
+                    ) : (
+                      <div class="card-placeholder-icon">
+                        <span>{typeIcons[item.type] || "📄"}</span>
+                      </div>
+                    );
+                  })()}
+                  {item.label && <span class="card-label">{item.label}</span>}
+                </div>
+                <div class="card-content">
+                  <span class="card-type">{item.type}</span>
+                  <h3>{item.title}</h3>
+                  <p>{item.excerpt}</p>
+                  <span class="read-more">View →</span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <div class="projects-empty">
+        <p>No featured content yet. Add items to <code>src/data/featured.ts</code></p>
+      </div>
+    )}
+    </>
+  )}
 </section>

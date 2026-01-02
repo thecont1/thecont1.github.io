@@ -26,13 +26,22 @@ npm run astro            # Access Astro CLI directly
 
 ### Content System
 - **Content Collections**: Defined in `src/content/config.ts` with strict typing via Zod schemas
-- **Collections**: `photography`, `writing`, `datastories`, `lab0`, `code`
+- **Collections**: 
+  - `post` - Simple text page (blog post)
+  - `essay` - Complex content designed for reading (The New Yorker style)
+  - `longform` - Multi-page essay with parts
+  - `code` - GitHub repository presentation
+  - `datastory` - Jupyter/Marimo notebook presentation
+  - `photogallery` - Photo/video collection with explicit image lists and layout options (tile/one-up)
+  - `project` - Collection of related content using Collection References
 - **Content Location**: Markdown files in `src/content/{collection-name}/`
 - **Schema Structure**:
   - Required: `title`, `excerpt`, `status` (private/draft/published)
-  - Taxonomy: `category`, `layout`, `geography[]`, `theme[]`, `container`
-  - Layouts: post, essay, longform, photo-album, timeline, thread, code, datastory, project
-  - Optional: `date`, `heroImage`, `notebook` (for marimo/jupyter), `lightbox` settings, `toc` (boolean)
+  - Taxonomy: `geography[]`, `theme[]`
+  - Optional: `date`, `heroImage`, `lightbox` settings
+  - Datastory: requires `notebook` object with `engine` (marimo/jupyter) and `entry`
+  - Photogallery: `images[]` array with `src`, `caption`, `alt`; `layout` (tile/one-up)
+  - Project: Collection References to `photogalleries`, `essays`, `longforms`, `posts`, `datastories`, `code`
 
 ### GitHub Integration (Code Layout)
 - **Integration**: `src/integrations/github.ts` - GitHub API utilities for fetching repo data
@@ -48,9 +57,15 @@ npm run astro            # Access Astro CLI directly
 - **Styles**: Custom overlay and indicator styles in `src/styles/c2pa.css`.
 - **Scripts**: Core extraction logic lives in `scripts/c2pa_xtract.py`.
 
+### Homepage Featured Content
+- **Manual Control**: `src/data/featured.ts` - curated list of featured items
+- **No Auto-fetch**: Homepage "The Projects" section uses manual selection
+- **Supports**: Flat list or grouped sections layout
+- **Override Options**: Custom display title, excerpt, image, and labels per item
+
 ### Routing & Pages
 - **File-based routing**: `src/pages/` directory
-- **Main sections**: `/photography`, `/writing`, `/datascience`, `/code`
+- **Main sections**: `/photogallery`, `/essay`, `/longform`, `/post`, `/datastory`, `/code`, `/project`
 - **Dynamic routes**: Collections generate pages via `[...slug].astro` pattern
 - **Index**: Home page at `src/pages/index.astro`
 
@@ -62,7 +77,6 @@ npm run astro            # Access Astro CLI directly
 ### Assets & Media
 - **Static assets**: `public/` directory (served as-is)
 - **High-resolution media**: `public/library/` for photography and visual content
-- **Processed assets**: `src/assets/` for build-time optimization
 
 ### Styling
 - **Vanilla CSS3**: No CSS framework.

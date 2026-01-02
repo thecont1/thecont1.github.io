@@ -1,0 +1,82 @@
+---
+/**
+ * TimelineFormat - Reusable content formatting component
+ * 
+ * Displays content in a horizontal scrolling timeline format.
+ * Can be used within any layout or page.
+ * 
+ * Usage:
+ * <TimelineFormat title="My Timeline">
+ *   <div class="timeline-card intro-card">
+ *     <p class="lead">Introduction text</p>
+ *   </div>
+ *   <figure class="timeline-card image-card">
+ *     <img src="/image.jpg" alt="..." />
+ *     <figcaption>Caption</figcaption>
+ *   </figure>
+ * </TimelineFormat>
+ * 
+ * Or with images prop for automatic rendering:
+ * <TimelineFormat 
+ *   title="My Timeline" 
+ *   intro="Introduction text"
+ *   images={[{src: "/img.jpg", caption: "Caption"}]} 
+ * />
+ */
+import "../../styles/timeline.css";
+
+interface TimelineImage {
+  src: string;
+  caption?: string;
+  alt?: string;
+}
+
+interface Props {
+  title?: string;
+  intro?: string;
+  images?: TimelineImage[];
+  showHeader?: boolean;
+  class?: string;
+}
+
+const {
+  title,
+  intro,
+  images = [],
+  showHeader = true,
+  class: className = "",
+} = Astro.props;
+
+const hasSlotContent = Astro.slots.has("default");
+---
+
+<div class={`timeline-format ${className}`}>
+  {showHeader && title && (
+    <header class="timeline-format-header">
+      <h2>{title}</h2>
+      <span class="instruction">Scroll →</span>
+    </header>
+  )}
+
+  <div class="timeline-scroll-container">
+    <div class="timeline-track">
+      {hasSlotContent ? (
+        <slot />
+      ) : (
+        <>
+          {intro && (
+            <article class="timeline-card intro-card">
+              <p class="lead">{intro}</p>
+            </article>
+          )}
+          {images.map((img) => (
+            <figure class="timeline-card image-card">
+              <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
+              {img.caption && <figcaption>{img.caption}</figcaption>}
+            </figure>
+          ))}
+        </>
+      )}
+    </div>
+  </div>
+</div>

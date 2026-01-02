@@ -1,0 +1,63 @@
+---
+/**
+ * ThreadFormat - Reusable content formatting component
+ * 
+ * Displays content in a Twitter/X thread-like format with connected posts.
+ * Can be used within any layout or page.
+ * 
+ * Usage:
+ * <ThreadFormat title="My Thread" excerpt="Opening statement">
+ *   <p>First tweet content...</p>
+ *   <p>Second tweet content...</p>
+ *   <img src="/image.jpg" alt="..." />
+ * </ThreadFormat>
+ */
+import "../../styles/thread.css";
+
+interface Props {
+  title?: string;
+  excerpt?: string;
+  authorName?: string;
+  authorHandle?: string;
+  avatarUrl?: string;
+  showHeader?: boolean;
+  class?: string;
+}
+
+const {
+  title,
+  excerpt,
+  authorName = "Mahesh Shantaram",
+  authorHandle = "@thecontrarian",
+  avatarUrl,
+  showHeader = true,
+  class: className = "",
+} = Astro.props;
+---
+
+<div class={`thread-format ${className}`}>
+  {showHeader && (title || excerpt) && (
+    <header class="thread-op">
+      <div class="avatar-column">
+        {avatarUrl ? (
+          <img src={avatarUrl} alt={authorName} class="avatar" />
+        ) : (
+          <div class="avatar"></div>
+        )}
+        <div class="spine"></div>
+      </div>
+      <div class="tweet-content">
+        <div class="meta">
+          <span class="name">{authorName}</span>
+          <span class="handle">{authorHandle}</span>
+        </div>
+        {title && <h2 class="thread-title">{title}</h2>}
+        {excerpt && <p class="thread-excerpt">{excerpt}</p>}
+      </div>
+    </header>
+  )}
+
+  <div class="thread-stream">
+    <slot />
+  </div>
+</div>

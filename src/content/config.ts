@@ -1,12 +1,24 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection, reference, z } from "astro:content";
 
-// Reusable schemas
-const categoryEnum = z.enum(["photography", "writing", "datastories", "lab0"]);
-const layoutEnum = z.enum(["post", "essay", "longform", "photo-album", "timeline", "thread", "code", "datastory", "project"]);
-const geographyEnum = z.enum(["bangalore", "india", "africa", "europe", "usa", "asia", "middle-east", "airtime"]);
-const themeEnum = z.enum(["weddings", "travel", "society", "justice", "technology", "motorcycling", "humour", "interview", "lore", "night"]);
-const containerEnum = z.enum(["matrimania", "the-african-portraits", "last-days-of-manmohan", "magazine-work", "indiacomestogether", "caerdydd-diary", "bruxelles-diary", "conakry-diary"]);
+// ============================================================================
+// TAXONOMY ENUMS
+// ============================================================================
+const geographyEnum = z.enum([
+  "bangalore", "india", "africa", "europe", "usa", "asia", "middle-east", "airtime"
+]);
+const themeEnum = z.enum([
+  "weddings", "travel", "society", "justice", "technology", "motorcycling", 
+  "humour", "interview", "lore", "night", "racism", "india", "portraits"
+]);
+const containerEnum = z.enum([
+  "matrimania", "the-african-portraits", "last-days-of-manmohan", 
+  "magazine-work", "indiacomestogether", "caerdydd-diary", 
+  "bruxelles-diary", "conakry-diary"
+]);
 
+// ============================================================================
+// SHARED BASE SCHEMA (for text-based content)
+// ============================================================================
 const baseSchema = z.object({
   title: z.string(),
   excerpt: z.string(),
@@ -14,22 +26,13 @@ const baseSchema = z.object({
   heroImage: z.string().optional(),
   
   // Taxonomy
-  category: categoryEnum.optional(), // Optional for now to avoid breaking existing content immediately, will strict later if needed
-  layout: layoutEnum.optional(),
   geography: z.array(geographyEnum).max(2).optional().default([]),
   theme: z.array(themeEnum).max(5).optional().default([]),
   container: containerEnum.optional(),
 
-  // Optional dates
+  // Dates
   date: z.date().optional(),
   
-  // For notebook layouts
-  notebook: z.object({
-    engine: z.enum(["marimo", "jupyter"]).optional(),
-    entry: z.string().optional(),
-    env: z.string().optional(),
-  }).optional(),
-
   // Lightbox settings
   lightbox: z.object({
     gallery: z.boolean().optional().default(true),
@@ -40,13 +43,42 @@ const baseSchema = z.object({
 
   // Appearance
   backgroundColor: z.string().optional(),
-  "background-color": z.string().optional(),
 
   // Hero Image visibility control
   showhero: z.boolean().optional().default(true)
 });
 
-// Code collection schema for GitHub repositories
+// ============================================================================
+// 1. POST - Simple text page (blog post)
+// ============================================================================
+const postSchema = baseSchema;
+
+// ============================================================================
+// 2. ESSAY - More complex, designed for reading (The New Yorker style)
+// ============================================================================
+const essaySchema = baseSchema.extend({
+  // Essays typically have more metadata
+  author: z.string().optional(),
+  readingTime: z.number().optional(), // minutes
+  series: z.string().optional(),
+});
+
+// ============================================================================
+// 3. LONGFORM - Multi-page essay
+// ============================================================================
+const longformSchema = baseSchema.extend({
+  // Multi-page structure
+  parts: z.array(z.object({
+    title: z.string(),
+    slug: z.string(),
+  })).optional(),
+  currentPart: z.number().optional(),
+  totalParts: z.number().optional(),
+});
+
+// ============================================================================
+// 4. CODE - GitHub repository presentation
+// ============================================================================
 const codeSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
@@ -87,10 +119,114 @@ const codeSchema = z.object({
   }).optional(),
 });
 
+// ============================================================================
+// 5. DATASTORY - Jupyter/Marimo notebook presentation
+// ============================================================================
+const datastorySchema = z.object({
+  title: z.string(),
+  excerpt: z.string(),
+  status: z.enum(["private", "draft", "published"]),
+  heroImage: z.string().optional(),
+  
+  // Notebook configuration (required for datastories)
+  notebook: z.object({
+    engine: z.enum(["marimo", "jupyter"]),
+    entry: z.string(), // path to notebook file
+    env: z.string().optional(), // environment/venv path
+  }),
+  
+  // Taxonomy
+  geography: z.array(geographyEnum).max(2).optional().default([]),
+  theme: z.array(themeEnum).max(5).optional().default([]),
+  
+  // Dates
+  date: z.date().optional(),
+  
+  // Appearance
+  backgroundColor: z.string().optional(),
+  showhero: z.boolean().optional().default(true),
+});
+
+// ============================================================================
+// 6. PHOTOGALLERY - Photo/video collection (replaces photography)
+// ============================================================================
+const photogallerySchema = z.object({
+  // Status first
+  status: z.enum(["private", "draft", "published"]),
+  
+  // Project reference(s) - which Project(s) this gallery belongs to
+  project: z.union([z.string(), z.array(z.string())]).optional(),
+  
+  // Core content
+  title: z.string(),
+  excerpt: z.string(),
+  heroImage: z.string().optional(),
+  date: z.date().optional(),
+  
+  // Layout style
+  layoutType: z.enum(["tile", "one-up"]).default("tile"),
+  
+  // Taxonomy
+  geography: z.array(geographyEnum).max(2).optional().default([]),
+  theme: z.array(themeEnum).max(5).optional().default([]),
+  
+  // Images array - explicit list of images to display
+  images: z.array(z.object({
+    src: z.string(),
+    caption: z.string().optional(),
+    alt: z.string().optional(),
+  })).default([]),
+  
+  // Lightbox settings
+  lightbox: z.object({
+    gallery: z.boolean().optional().default(true),
+  }).optional().default({ gallery: true }),
+  
+  // Appearance
+  backgroundColor: z.string().optional().nullable(),
+  showhero: z.boolean().optional().default(true),
+});
+
+// ============================================================================
+// 7. PROJECT - Collection of related content using Collection References
+// ============================================================================
+const projectSchema = z.object({
+  title: z.string(),
+  excerpt: z.string(),
+  status: z.enum(["private", "draft", "published"]),
+  heroImage: z.string().optional(),
+  
+  // Project description (markdown body)
+  
+  // Collection References - link to other content
+  photogalleries: z.array(reference("photogallery")).optional().default([]),
+  essays: z.array(reference("essay")).optional().default([]),
+  longforms: z.array(reference("longform")).optional().default([]),
+  posts: z.array(reference("post")).optional().default([]),
+  datastories: z.array(reference("datastory")).optional().default([]),
+  code: z.array(reference("code")).optional().default([]),
+  
+  // Taxonomy
+  geography: z.array(geographyEnum).max(2).optional().default([]),
+  theme: z.array(themeEnum).max(5).optional().default([]),
+  
+  // Dates
+  date: z.date().optional(),
+  
+  // Appearance
+  backgroundColor: z.string().optional(),
+  showhero: z.boolean().optional().default(true),
+});
+
+// ============================================================================
+// EXPORT COLLECTIONS
+// ============================================================================
 export const collections = {
-  photography: defineCollection({ schema: baseSchema }),
-  writing: defineCollection({ schema: baseSchema }),
-  datastories: defineCollection({ schema: baseSchema }),
-  lab0: defineCollection({ schema: baseSchema }),
-  code: defineCollection({ schema: codeSchema })
+  post: defineCollection({ schema: postSchema }),
+  essay: defineCollection({ schema: essaySchema }),
+  longform: defineCollection({ schema: longformSchema }),
+  code: defineCollection({ schema: codeSchema }),
+  datastory: defineCollection({ schema: datastorySchema }),
+  photogallery: defineCollection({ schema: photogallerySchema }),
+  project: defineCollection({ schema: projectSchema }),
 };

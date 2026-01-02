@@ -1,14 +1,18 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
+import ScreenToggle from "../ui/ScreenToggle.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
+import ContentsToggle from "../ui/ContentsToggle.astro";
 
 interface Props {
   post: CollectionEntry<"datastories">;
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content, headings } = await post.render();
 
+const toc = headings.filter((h) => h.depth === 2);
 const backgroundColor = post.data.backgroundColor || "var(--surface)";
 ---
 
@@ -17,15 +21,31 @@ const backgroundColor = post.data.backgroundColor || "var(--surface)";
     <div class="meta-top">Data Story</div>
     <h1>{post.data.title}</h1>
     {post.data.excerpt && <p class="lead">{post.data.excerpt}</p>}
+    {post.data.showhero !== false && post.data.heroImage && (
+      <figure class="post-hero">
+        <img src={post.data.heroImage} alt={post.data.title} />
+      </figure>
+    )}
   </header>
 
   <div class="datastory-container">
+    {post.data.toc && toc.length > 0 && (
+      <ContentsToggle title={post.data.title}>
+        <ul>
+          {toc.map((h) => (
+            <li><a href={`#${h.slug}`}>{h.text}</a></li>
+          ))}
+        </ul>
+      </ContentsToggle>
+    )}
     <div class="notebook-wrapper">
       <Content />
     </div>
   </div>
 
   <Lightbox selector=".notebook-wrapper" gallery={post.data.lightbox?.gallery} />
+  <ScreenToggle />
+  <C2PAOverlay />
 </article>
 
 <script>
@@ -79,6 +99,19 @@ const backgroundColor = post.data.backgroundColor || "var(--surface)";
     max-width: 900px;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .post-hero {
+    margin: 4rem auto 0;
+    max-width: 1000px;
+  }
+
+  .post-hero img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 4px;
+    box-shadow: var(--shadow-elev-1);
   }
 
   .lead {

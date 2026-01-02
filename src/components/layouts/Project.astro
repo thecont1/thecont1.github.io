@@ -3,6 +3,8 @@ import type { CollectionEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import ContentDispatcher from "./ContentDispatcher.astro";
 import Carousel from "../carousel/Carousel.tsx";
+import ScreenToggle from "../ui/ScreenToggle.astro";
+import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/home.css";
 
 interface Props {
@@ -90,6 +92,9 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
        }}
     </div>
   </section>
+
+  <ScreenToggle />
+  <C2PAOverlay />
 </div>
 
 <script>
