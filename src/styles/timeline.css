@@ -1,0 +1,173 @@
+/* Timeline Content Formatting Styles */
+
+.timeline-format {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.timeline-format-header {
+  padding: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--hairline, #e0e0e0);
+  margin-bottom: 1rem;
+}
+
+.timeline-format-header h2 {
+  font-family: "Fraunces", serif;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.timeline-format-header .instruction {
+  font-family: "DM Sans", sans-serif;
+  color: var(--muted, #666);
+  font-size: 0.9rem;
+}
+
+.timeline-scroll-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  display: flex;
+  align-items: center;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 1rem 0;
+}
+
+.timeline-scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.timeline-track {
+  display: flex;
+  gap: 2rem;
+  min-height: 400px;
+  align-items: center;
+  padding-right: 2rem;
+}
+
+.timeline-card {
+  flex: 0 0 auto;
+  width: min(85vw, 400px);
+  max-height: 100%;
+  background: var(--paper, #fff);
+  border: 1px solid var(--hairline-2, #e0e0e0);
+  box-shadow: var(--shadow-elev-1, 0 2px 8px rgba(0,0,0,0.1));
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.timeline-card.intro-card {
+  padding: 2rem;
+  overflow-y: auto;
+  justify-content: center;
+}
+
+.timeline-card .lead {
+  font-family: "Fraunces", serif;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: var(--ink, #333);
+}
+
+.timeline-card .timeline-text {
+  font-family: "Inter", sans-serif;
+  line-height: 1.6;
+  color: var(--muted, #666);
+}
+
+.timeline-card .timeline-text p {
+  margin-bottom: 1rem;
+}
+
+.timeline-card.image-card {
+  padding: 0.5rem;
+  width: auto;
+  max-width: 85vw;
+}
+
+.timeline-card.image-card img {
+  height: 350px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.timeline-card.image-card figcaption {
+  margin-top: 0.5rem;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+  text-align: center;
+}
+
+/* Full-page timeline layout variant */
+.timeline-layout {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--page-bg, var(--surface, #f5f5f5));
+}
+
+.timeline-layout .timeline-header {
+  padding: 1rem 2rem;
+  background: var(--paper, #fff);
+  border-bottom: 1px solid var(--hairline, #e0e0e0);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.timeline-layout .timeline-header h1 {
+  font-family: "Fraunces", serif;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.timeline-layout .timeline-scroll-container {
+  flex: 1;
+  padding: 0 2rem;
+}
+
+.timeline-layout .timeline-track {
+  height: 70vh;
+  gap: 4rem;
+  padding-right: 4rem;
+}
+
+.timeline-layout .timeline-card {
+  width: min(85vw, 500px);
+}
+
+.timeline-layout .timeline-card.intro-card {
+  padding: 2.5rem;
+}
+
+.timeline-layout .timeline-card .lead {
+  font-size: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-layout .timeline-card.image-card {
+  padding: 0.75rem;
+}
+
+.timeline-layout .timeline-card.image-card img {
+  height: 60vh;
+}
+
+.timeline-layout .timeline-card.image-card figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
