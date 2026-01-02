@@ -3,7 +3,9 @@ import type { CollectionEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Lightbox from "../ui/Lightbox.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
+import Carousel from "../carousel/Carousel.tsx";
 import "../../styles/photogallery.css";
+import "../../styles/carousel.css";
 
 interface Props {
   post: CollectionEntry<"photogallery">;
@@ -12,14 +14,12 @@ interface Props {
 const { post } = Astro.props;
 
 // Get collection name dynamically
-const collectionName = "Photogallery"; // Hardcode for now since post.collection is undefined in server mode
+const collectionName = "Photogallery";
 
 // Use images from frontmatter
 const images = post.data.images || [];
 
 // Layout type - default to "tile" if not specified
-// Since we removed the layout field from frontmatter due to Astro 5 compatibility,
-// we'll use a custom field or detect from folder name
 const layoutType = post.data.layoutType || "tile";
 
 // Lightbox enabled by default, can be disabled via frontmatter
@@ -35,105 +35,202 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
 }).format(post.data.date) : null;
 ---
 
-<Layout title={post.data.title}>
-  <div class="photogallery-layout" style={`--page-bg: ${backgroundColor};`}>
-    
-    <!-- Header Section -->
-    <header class="photogallery-header">
-      <div class="photogallery-meta-top">
-        <span class="category">{collectionName}</span>
-<!--
-        {formattedDate && <span class="date">{formattedDate}</span>}
-        {post.data.geography && post.data.geography.length > 0 && (
-          <span class="geography">{post.data.geography.join(', ')}</span>
-        )}
--->
+{layoutType === "carousel" ? (
+  <!-- CAROUSEL LAYOUT - Full page with curtain, then footer -->
+  <Layout title={post.data.title}>
+    <section class="photogallery-carousel-hero">
+      <!-- Fixed carousel layer -->
+      <div class="carousel-hero-fixed">
+        <Carousel 
+          images={images.map(img => ({
+            src: img.src,
+            caption: img.caption
+          }))}
+          client:load
+        />
       </div>
-      
-      <h1 class="photogallery-title">{post.data.title}</h1>
-      
-      {post.data.excerpt && (
-        <p class="photogallery-excerpt">{post.data.excerpt}</p>
-      )}
-      
-      <div class="photogallery-author-line">
-        <span class="by">by</span>
-        <span class="author">Mahesh Shantaram</span>
-      </div>
-    </header>
 
-    <!-- Gallery Content -->
-    {layoutType === "one-up" ? (
-      <!-- ONE-UP LAYOUT -->
-      <div class="photogallery-oneup">
-        {images.map((img) => (
-          <figure class="gallery-item">
-            <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
-            {img.caption && <figcaption>{img.caption}</figcaption>}
-          </figure>
-        ))}
-        {images.length === 0 && (
-          <div class="no-images">
-            <p>No images specified in frontmatter</p>
-          </div>
-        )}
+      <!-- Curtain with title/subtitle/category - uses backgroundColor with transparency -->
+      <div class="carousel-curtain" style={`--curtain-bg: ${backgroundColor};`}>
+        <div class="carousel-curtain-content">
+          <span class="carousel-curtain-category">{collectionName}</span>
+          <h1 class="carousel-curtain-title">{post.data.title}</h1>
+          {post.data.excerpt && (
+            <p class="carousel-curtain-subtitle">{post.data.excerpt}</p>
+          )}
+        </div>
       </div>
-    ) : (
-      <!-- GRID LAYOUT (tile) - Default -->
-      <div class="photogallery-grid">
-        {images.map((img) => (
-          <figure class="gallery-item">
-            <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
-            {img.caption && <figcaption>{img.caption}</figcaption>}
-          </figure>
-        ))}
-        {images.length === 0 && (
-          <div class="no-images">
-            <p>No images specified in frontmatter</p>
-          </div>
-        )}
-      </div>
-    )}
+    </section>
 
-    <!-- Lightbox (enabled by default) -->
-    {lightboxEnabled && (
-      <Lightbox 
-        selector=".photogallery-layout" 
-        gallery={true} 
-      />
-    )}
+    <!-- Creates space for curtain lift -->
+    <div class="carousel-scroll-runway"></div>
 
-    <!-- C2PA Overlay (always include, but only show indicators for one-up layout) -->
+    <!-- Small buffer to push carousel up for footer -->
+    <div class="carousel-scroll-buffer"></div>
+
+    <!-- C2PA Overlay -->
     <C2PAOverlay />
-    
-    <!-- Note: ScreenToggle component disabled as requested -->
-  </div>
-</Layout>
+  </Layout>
+) : (
+  <!-- REGULAR PHOTOGALLERY LAYOUTS (tile/one-up) -->
+  <Layout title={post.data.title}>
+    <div class="photogallery-layout" style={`--page-bg: ${backgroundColor};`}>
+      
+      <!-- Header Section -->
+      <header class="photogallery-header">
+        <div class="photogallery-meta-top">
+          <span class="category">{collectionName}</span>
+        </div>
+        
+        <h1 class="photogallery-title">{post.data.title}</h1>
+        
+        {post.data.excerpt && (
+          <p class="photogallery-excerpt">{post.data.excerpt}</p>
+        )}
+        
+        <div class="photogallery-author-line">
+          <span class="by">by</span>
+          <span class="author">Mahesh Shantaram</span>
+        </div>
+      </header>
+
+      <!-- Gallery Content -->
+      {layoutType === "one-up" ? (
+        <!-- ONE-UP LAYOUT -->
+        <div class="photogallery-oneup">
+          {images.map((img) => (
+            <figure class="gallery-item">
+              <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
+              {img.caption && <figcaption>{img.caption}</figcaption>}
+            </figure>
+          ))}
+          {images.length === 0 && (
+            <div class="no-images">
+              <p>No images specified in frontmatter</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <!-- GRID LAYOUT (tile) - Default -->
+        <div class="photogallery-grid">
+          {images.map((img) => (
+            <figure class="gallery-item">
+              <img src={img.src} alt={img.alt || img.caption || ""} loading="lazy" />
+              {img.caption && <figcaption>{img.caption}</figcaption>}
+            </figure>
+          ))}
+          {images.length === 0 && (
+            <div class="no-images">
+              <p>No images specified in frontmatter</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <!-- Content below gallery -->
+      <div class="photogallery-content">
+        <slot />
+      </div>
+
+      <!-- Lightbox (enabled by default) -->
+      {lightboxEnabled && (
+        <Lightbox 
+          selector=".photogallery-layout" 
+          gallery={true} 
+        />
+      )}
+
+      <!-- C2PA Overlay -->
+      <C2PAOverlay />
+    </div>
+  </Layout>
+)}
 
 <script>
-  // Update site header background to match page
   function refinePhotogalleryContent() {
     const layout = document.querySelector('.photogallery-layout') as HTMLElement;
-    if (layout) {
-      const bgColor = getComputedStyle(layout).getPropertyValue('--page-bg');
-      const header = document.querySelector('.site-header') as HTMLElement;
+    const isCarousel = document.querySelector('.photogallery-carousel-hero');
+    const header = document.querySelector('.site-header') as HTMLElement;
+    
+    if (isCarousel) {
+      // Add class to body for carousel styles
+      document.body.classList.add('photogallery-carousel');
+      
+      // Keep header transparent for carousel
       if (header) {
-        header.style.backgroundColor = bgColor;
+        header.style.backgroundColor = 'transparent';
         header.style.transition = 'background-color 0.3s ease';
+        
         const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
         if (headerInner) headerInner.style.backgroundColor = 'transparent';
       }
-    }
-
-    const images = document.querySelectorAll('.photogallery-layout img');
-    
-    // Check if lightbox element exists
-    const lightbox = document.getElementById('lightbox');
-    
-    if (lightbox) {
-      const container = document.querySelector('.photogallery-layout');
-      if (container) {
-        const imgs = container.querySelectorAll('img');
+      
+      // Scroll handler for curtain, controls, and carousel lift
+      const carouselFixed = document.querySelector('.carousel-hero-fixed') as HTMLElement;
+      const curtain = document.querySelector('.carousel-curtain') as HTMLElement;
+      
+      // Check if browser supports scroll-driven animations
+      const supportsScrollTimeline = CSS.supports('animation-timeline: scroll()');
+      
+      let ticking = false;
+      
+      const onScroll = () => {
+        if (ticking) return;
+        ticking = true;
+        
+        window.requestAnimationFrame(() => {
+          const scrollY = window.scrollY;
+          const vh = window.innerHeight;
+          
+          // Controls appear at 100vh (after curtain lifts)
+          // Controls disappear at 80vh (giving delay before curtain returns)
+          if (scrollY >= vh) {
+            document.body.classList.add('controls-visible');
+          } else if (scrollY < vh * 0.8) {
+            document.body.classList.remove('controls-visible');
+          }
+          
+          // Only do manual transforms if browser doesn't support scroll-driven animations
+          if (!supportsScrollTimeline) {
+            // Curtain lifts faster (0 to 100vh instead of 120vh)
+            if (curtain) {
+              const curtainProgress = Math.min(1, scrollY / vh);
+              curtain.style.transform = `translateY(${-curtainProgress * 120}vh)`;
+            }
+            
+            // Carousel shifts up to make room for footer (220vh to 250vh)
+            if (carouselFixed) {
+              const startShift = vh * 2.2;
+              const endShift = vh * 2.5;
+              
+              if (scrollY < startShift) {
+                carouselFixed.style.transform = 'translateY(0)';
+              } else if (scrollY >= endShift) {
+                carouselFixed.style.transform = 'translateY(-15vh)';
+              } else {
+                const progress = (scrollY - startShift) / (endShift - startShift);
+                carouselFixed.style.transform = `translateY(${-progress * 15}vh)`;
+              }
+            }
+          }
+          
+          ticking = false;
+        });
+      };
+      
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll(); // Run once on load
+      
+    } else if (layout) {
+      // Regular photogallery layout
+      const bgColor = getComputedStyle(layout).getPropertyValue('--page-bg');
+      
+      if (header) {
+        header.style.backgroundColor = bgColor;
+        header.style.transition = 'background-color 0.3s ease';
+        
+        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+        if (headerInner) headerInner.style.backgroundColor = 'transparent';
       }
     }
   }

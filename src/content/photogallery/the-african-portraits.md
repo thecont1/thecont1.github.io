@@ -5,7 +5,7 @@ title: "The African Portraits"
 excerpt: "Anywhere in the world, it takes a black person to tell us what racism really feels like."
 heroImage: "/library/originals/TheAfricanPortraits/MS201609-KhojResidency0058.jpg"
 date: 2017-06-01
-layoutType: tile
+layoutType: carousel
 backgroundColor: "#000000cc"
 geography: [india, africa]
 theme: [racism, india, society, night]
@@ -59,3 +59,19 @@ images:
     - src: /library/originals/TheAfricanPortraits/MS201602-Soladevanahalli0075.jpg
     - src: /library/originals/TheAfricanPortraits/MS201705-AfricanPortraits0011.jpg
 ---
+
+This photographic series documents the experiences of African students and immigrants living in India, capturing their stories of resilience, identity, and belonging in a complex social landscape.
+
+## The Project
+
+Between 2016 and 2017, I spent time with members of the African community across various Indian cities - from Bangalore to Delhi, from university campuses to shared accommodations. Each portrait tells a story of someone navigating life far from home, dealing with both the opportunities and challenges that come with being visibly different in Indian society.
+
+## Context
+
+The African student community in India has grown significantly over the past decade, with thousands pursuing education in Indian universities. However, their experiences are often marked by incidents of discrimination and cultural misunderstanding. This series aims to humanize these experiences and give voice to individuals whose stories are rarely heard in mainstream discourse.
+
+## Approach
+
+Each photograph was taken with consent and often followed by conversations about the subject's experiences, dreams, and challenges. The portraits are intimate yet respectful, aiming to capture both vulnerability and strength. The accompanying captions include direct quotes and observations from these interactions.
+
+*This work was supported by the Khoj International Artists' Association residency program in New Delhi.*

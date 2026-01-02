@@ -9,7 +9,8 @@ type Image = {
 export default function Carousel({ images }: { images: Image[] }) {
   const [index, setIndex] = useState(0);
   const [showCaption, setShowCaption] = useState(false);
-  const [autoPlay, setAutoPlay] = useState(true);
+  const [userTookControl, setUserTookControl] = useState(false);
+  const [curtainVisible, setCurtainVisible] = useState(true);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -21,15 +22,49 @@ export default function Carousel({ images }: { images: Image[] }) {
     slideRefs.current = slideRefs.current.slice(0, images.length);
   }, [images.length]);
 
+  // Watch for controls-visible class to detect when curtain is pulled/lifted
   useEffect(() => {
-    if (!autoPlay || images.length < 2) return;
+    const checkCurtainState = () => {
+      const controlsVisible = document.body.classList.contains('controls-visible');
+      const wasCurtainVisible = curtainVisible;
+      const isCurtainVisible = !controlsVisible;
+      
+      setCurtainVisible(isCurtainVisible);
+      
+      // If curtain just became visible (user scrolled back up), reset user control
+      if (!wasCurtainVisible && isCurtainVisible) {
+        setUserTookControl(false); // Reset - autoplay resumes
+      }
+    };
+
+    // Check initially
+    checkCurtainState();
+
+    // Use MutationObserver to watch for class changes on body
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          checkCurtainState();
+        }
+      });
+    });
+
+    observer.observe(document.body, { attributes: true });
+
+    return () => observer.disconnect();
+  }, [curtainVisible]);
+
+  // Autoplay effect - only stops if user manually clicked prev/next
+  useEffect(() => {
+    // Don't autoplay if user took control or if there are less than 2 images
+    if (userTookControl || images.length < 2) return;
 
     const timer = window.setInterval(() => {
       setIndex((i) => (i + 1) % images.length);
     }, 5000);
 
     return () => window.clearInterval(timer);
-  }, [autoPlay, images.length]);
+  }, [userTookControl, images.length]);
 
   useEffect(() => {
     const el = slideRefs.current[index];
@@ -42,12 +77,12 @@ export default function Carousel({ images }: { images: Image[] }) {
   const captionText = caption ? caption : "No caption available.";
 
   const onPrev = () => {
-    setAutoPlay(false);
+    setUserTookControl(true); // User clicked - stop autoplay
     setIndex((i) => (i - 1 + images.length) % images.length);
   };
 
   const onNext = () => {
-    setAutoPlay(false);
+    setUserTookControl(true); // User clicked - stop autoplay
     setIndex((i) => (i + 1) % images.length);
   };
 
