@@ -2,6 +2,11 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden; /* Prevent horizontal scroll globally */
+}
+
+body {
+  overflow-x: hidden; /* Ensure no horizontal scroll on body */
 }
 
 .photogallery-layout {
@@ -12,6 +17,7 @@ html {
   min-height: 100vh;
   position: relative;
   display: block;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Header Design - Borrowed from essay.css */
@@ -72,22 +78,24 @@ html {
   margin-right: 0.4rem;
 }
 
-/* GRID LAYOUT (tile) - Default masonry grid */
+/* GRID LAYOUT (tile) - Row-wise grid respecting frontmatter order */
 .photogallery-grid {
-  column-count: 5;
-  column-gap: 0px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2px;
   max-width: 80%;
   margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .photogallery-grid .gallery-item {
-  break-inside: avoid;
-  margin: 2px;
-  padding: 0px;
-  background: none;
-  line-height: 0;
   display: block;
   position: relative;
+  margin: 0;
+  padding: 0;
+  background: none;
+  line-height: 0;
 }
 
 .photogallery-grid .gallery-item img {
@@ -128,11 +136,7 @@ html {
   border: 10px solid white;
   box-shadow: 0 20px 60px rgba(0,0,0,0.1);
   cursor: zoom-in;
-  transition: transform 0.2s ease;
-}
-
-.photogallery-oneup .gallery-item img:hover {
-  transform: scale(1.02);
+  /* Removed hover scale transform */
 }
 
 .photogallery-oneup .gallery-item figcaption {
@@ -154,6 +158,43 @@ html {
   display: block;
 }
 
+/* Enable C2PA hover indicator for one-up layout */
+.photogallery-oneup .gallery-item {
+  position: relative;
+}
+
+.photogallery-oneup .gallery-item:hover .c2pa-indicator.c2pa-injected {
+  opacity: 1 !important;
+  visibility: visible !important;
+  right: -10px !important;
+  top: 10px !important;
+  color: #d04b36 !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Force positioning with higher specificity */
+.photogallery-layout .photogallery-oneup .gallery-item:hover .c2pa-indicator.c2pa-injected {
+  right: -8px !important;
+  top: 12px !important;
+}
+
+/* Center the CR logo within the circle - borrowed from essay.css */
+.photogallery-oneup .gallery-item .c2pa-indicator svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin: 0;
+  display: block;
+  position: relative;
+  left: 4px; /* Fine-tune horizontal centering */
+  top: 0px; /* Fine-tune vertical centering */
+}
+
+.photogallery-layout .photogallery-oneup .gallery-item:hover .c2pa-indicator:hover svg {
+  left: 0px !important;
+  top: 0px !important;
+}
+
 /* Empty state */
 .no-images {
   text-align: center;
@@ -165,13 +206,13 @@ html {
 /* Responsive adjustments for grid */
 @media (max-width: 1200px) {
   .photogallery-grid {
-    column-count: 4;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 
 @media (max-width: 900px) {
   .photogallery-grid {
-    column-count: 3;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     max-width: 90%;
   }
   
@@ -182,7 +223,7 @@ html {
 
 @media (max-width: 600px) {
   .photogallery-grid {
-    column-count: 2;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     max-width: 95%;
   }
   

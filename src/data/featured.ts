@@ -46,8 +46,8 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
   {
     title: "Photography",
     items: [
-      { type: "photogallery", slug: "matrimania", label: "Series" },
-      { type: "photogallery", slug: "matrimania-the-book", label: "Book" },
+      { type: "photogallery", slug: "matrimania-series", label: "Series" },
+      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
       { type: "photogallery", slug: "the-african-portraits", label: "Series" },
     ]
   },

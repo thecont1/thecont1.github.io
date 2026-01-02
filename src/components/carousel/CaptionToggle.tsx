@@ -9,7 +9,7 @@ export default function CaptionToggle({ enabled, onToggle }: Props) {
       className="caption-toggle"
       aria-pressed={enabled}
       onClick={onToggle}
-      title="Toggle captions"
+      title="Toggle image info"
     >
       ⓘ
     </button>
