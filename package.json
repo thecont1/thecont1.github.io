@@ -8,6 +8,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "generate:repo": "node scripts/generate-repo-content.js",
+    "scaffold": "node scripts/scaffold.js",
     "extract:exif": "uv run python scripts/build_exif.py"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "exifreader": "^4.33.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod-to-json-schema": "^3.25.1"
   }
 }

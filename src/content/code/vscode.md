@@ -40,6 +40,7 @@ apiData:
     TypeScript: 15234567
     JavaScript: 2345678
     CSS: 567890
+author: "Siddharth Kaneria"
 ---
 
 ## Repository Overview

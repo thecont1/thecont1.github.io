@@ -42,7 +42,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
     <div class="post-author-line">
       <span class="by">by</span>
-      <span class="author-name">Mahesh Shantaram</span>
+      <span class="author-name">{post.data.author}</span>
     </div>
 
     {post.data.showhero !== false && post.data.heroImage && (

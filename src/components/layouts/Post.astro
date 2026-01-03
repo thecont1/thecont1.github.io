@@ -88,7 +88,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
         <div class="post-meta-details">
           {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
           <span class="dot">·</span>
-          <span class="author-name">Mahesh Shantaram</span>
+          <span class="author-name">{post.data.author}</span>
         </div>
     </div>
   </header>

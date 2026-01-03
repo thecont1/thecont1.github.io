@@ -3,6 +3,7 @@ status: published
 project: the-african-portraits
 title: "The African Portraits"
 excerpt: "Anywhere in the world, it takes a black person to tell us what racism really feels like."
+author: "Mahesh Shantaram"
 heroImage: "/library/originals/TheAfricanPortraits/MS201609-KhojResidency0058.jpg"
 date: 2017-06-01
 layoutType: carousel

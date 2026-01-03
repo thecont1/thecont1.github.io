@@ -105,19 +105,18 @@ if (layoutType === "carousel" && images.length > 0) {
       <!-- Header Section -->
       <header class="photogallery-header">
         <div class="photogallery-meta-top">
-          <span class="category">{collectionName}</span>
+          {post.data.category && <span class="category">{post.data.category}</span>}
+          {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
         </div>
         
         <h1 class="photogallery-title">{post.data.title}</h1>
         
-        {post.data.excerpt && (
-          <p class="photogallery-excerpt">{post.data.excerpt}</p>
-        )}
-        
         <div class="photogallery-author-line">
           <span class="by">by</span>
-          <span class="author">Mahesh Shantaram</span>
+          <span class="author-name">{post.data.author}</span>
         </div>
+
+        {post.data.excerpt && <p class="photogallery-lead">{post.data.excerpt}</p>}
       </header>
 
       <!-- Gallery Content -->
