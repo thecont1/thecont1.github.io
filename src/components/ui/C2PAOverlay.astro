@@ -69,6 +69,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       // "Major photographs" and other relevant images
       const selectors = [
         '.post-body img',
+        '.post-body figure img',
         '.post-hero img',
         '.album-item img',
         '.lightbox-figure img',
@@ -91,13 +92,29 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           const src = imgEl.getAttribute('src');
           if (!src || !src.includes('/library/originals/')) return;
 
-          const container = imgEl.closest('figure') || imgEl.closest('.album-item') || imgEl.closest('.lightbox-figure') || imgEl.closest('.gallery-item');
+          // Post pages: avoid redundant in-image indicators.
+          // Content Credentials can be opened from the hover InfoPanel and from the Lightbox.
+          const inPost = !!imgEl.closest('.simple-post');
+          const inLightbox = !!(imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure'));
+          if (inPost && !inLightbox) return;
+
+          // Find a suitable container for the indicator
+          let container = imgEl.closest('figure') || 
+                            imgEl.closest('.album-item') || 
+                            imgEl.closest('.lightbox-figure') || 
+                            imgEl.closest('.gallery-item');
+          
+          // If no standard container, and image is in .post-body, use parent
+          if (!container && imgEl.closest('.post-body')) {
+            container = imgEl.parentElement;
+          }
+
           if (container && !container.querySelector('.c2pa-indicator')) {
             const containerEl = container as HTMLElement;
+            
+            // Critical for indicator positioning
+            containerEl.style.position = 'relative';
             containerEl.setAttribute('data-c2pa-container', 'true');
-            if (getComputedStyle(containerEl).position === 'static') {
-              containerEl.style.position = 'relative';
-            }
             
             const btn = document.createElement('button');
             btn.className = 'c2pa-indicator c2pa-injected';

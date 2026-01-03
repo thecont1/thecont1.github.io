@@ -240,7 +240,7 @@
 
 .lightbox.lights-off .sidebar-footer {
   background: transparent;
-  pointer-events: none; /* Container ignores clicks */
+  pointer-events: auto; /* Allow bulb to be clickable */
 }
 
 .lightbox.lights-off .control-group {

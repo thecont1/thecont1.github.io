@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const longforms = await getCollection("longform", ({ data }) => {
+  return data.status === "published";
+});
+
+// Sort by date, newest first
+const sortedLongforms = longforms.sort((a, b) => {
+  const dateA = a.data.date || new Date(0);
+  const dateB = b.data.date || new Date(0);
+  return dateB.getTime() - dateA.getTime();
+});
+---
+
+<Layout title="Longform">
+  <main>
+    <h1>Longform</h1>
+    <div class="longform-list">
+      {sortedLongforms.map((longform) => (
+        <article class="longform-preview">
+          <h2><a href={`/longform/${longform.slug}`}>{longform.data.title}</a></h2>
+          <p>{longform.data.excerpt}</p>
+          {longform.data.date && (
+            <time datetime={longform.data.date.toISOString()}>
+              {longform.data.date.toLocaleDateString()}
+            </time>
+          )}
+        </article>
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .longform-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .longform-preview h2 a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .longform-preview h2 a:hover {
+    text-decoration: underline;
+  }
+  
+  .longform-preview time {
+    color: #666;
+    font-size: 0.9em;
+  }
+</style>
