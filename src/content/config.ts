@@ -22,6 +22,7 @@ const containerEnum = z.enum([
 const baseSchema = z.object({
   title: z.string(),
   excerpt: z.string(),
+  author: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   
@@ -58,7 +59,6 @@ const postSchema = baseSchema;
 // ============================================================================
 const essaySchema = baseSchema.extend({
   // Essays typically have more metadata
-  author: z.string().optional(),
   readingTime: z.number().optional(), // minutes
   series: z.string().optional(),
 });
@@ -81,6 +81,7 @@ const longformSchema = baseSchema.extend({
 // ============================================================================
 const codeSchema = z.object({
   title: z.string(),
+  author: z.string(),
   description: z.string().optional(),
   excerpt: z.string().optional(),
   status: z.enum(["private", "draft", "published"]).default("published"),

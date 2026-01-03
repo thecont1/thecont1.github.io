@@ -3,6 +3,7 @@ status: published
 project: matrimania
 title: "MATRIMANIA"
 excerpt: "A fictional narrative through one dreary wedding night in an India tearing at its seams."
+author: "Mahesh Shantaram"
 heroImage: "/library/originals/MATRIMANIA/MS201502-NehaVikul0590.jpg"
 date: 2015-06-01
 layoutType: carousel

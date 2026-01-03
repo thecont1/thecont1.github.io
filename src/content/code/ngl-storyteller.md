@@ -33,6 +33,7 @@ apiData:
     JavaScript: 85
     HTML: 10
     CSS: 5
+author: "Siddharth Kaneria"
 ---
 
 ## Repository Overview
