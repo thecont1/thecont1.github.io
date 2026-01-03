@@ -44,20 +44,19 @@ export const FEATURED_ITEMS: FeaturedItem[] = [
 
 export const FEATURED_SECTIONS: FeaturedSection[] = [
   {
+    title: "MATRIMANIA",
+    items: [
+      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage", label: "Essay"},
+      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Name's Bond: A Surmise", label: "Post"},
+    ]
+  },
+
+  {
     title: "Photography",
     items: [
       { type: "photogallery", slug: "matrimania-series", label: "Series" },
       { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
       { type: "photogallery", slug: "the-african-portraits", label: "Series" },
-    ]
-  },
-
-  {
-    title: "MATRIMANIA",
-    items: [
-      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage", label: "Essay"},
-      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Who's Paying for All This Anyway?", label: "Interview"},
-      { type: "longform", slug: "matrimania-bond-and-bondage", displayTitle: "One Hundered Years of Solitude", label: "Solidad"},
     ]
   },
 

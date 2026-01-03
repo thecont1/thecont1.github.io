@@ -6,9 +6,10 @@ import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
 import "../../styles/post.css";
+import "../../styles/info-panel.css";
 
 interface Props {
-  post: CollectionEntry<"photography" | "writing" | "datastories">;
+  post: CollectionEntry<"post" | "photography" | "writing" | "datastories">;
 }
 
 const { post } = Astro.props;
@@ -27,47 +28,74 @@ const formattedDate = post.data.date?.toLocaleDateString("en-GB", {
 const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 ---
 
-<style is:global define:vars={{ backgroundColor }}>
-  /* Very aggressive override */
-  :root {
-    --page-bg: var(--backgroundColor);
-  }
+<style is:global>
+  {`
+    /* Immediate application to avoid flash of default background */
+    html, body {
+      background-color: ${backgroundColor} !important;
+    }
 
-  html, 
-  body, 
-  main,
-  #app, 
-  #root, 
-  .post-layout-container, 
-  .simple-post {
-    background: var(--backgroundColor) !important;
-    background-color: var(--backgroundColor) !important;
-  }
-  
-  /* Ensure header also gets the background color */
-  .site-header {
-    background-color: var(--backgroundColor) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
-  }
-  
-  .site-header-inner {
-    background-color: transparent !important;
-  }
+    :root {
+      --page-bg: ${backgroundColor};
+    }
+
+    /* Ensure transparency in layout parents */
+    main,
+    #snow-canvas {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+
+    .site-header {
+      background-color: ${backgroundColor} !important;
+      backdrop-filter: blur(8px) !important;
+      -webkit-backdrop-filter: blur(8px) !important;
+    }
+
+    .site-header-inner {
+      background-color: transparent !important;
+    }
+
+    /* Improved contrast detection using data-bg attribute on html or body */
+    html[data-bg^="#0"],
+    html[data-bg^="#1"],
+    html[data-bg^="#2"],
+    html[data-bg="black"] {
+      --ink: #eee;
+      --muted: #aaa;
+      --hairline: #333;
+    }
+  `}
 </style>
 
-<article class="simple-post" data-bg={backgroundColor} style={`--page-bg: ${backgroundColor};`}>
+<script is:inline define:vars={{ backgroundColor }}>
+  (function() {
+    const bg = backgroundColor || '#ffffff';
+    // Set data-bg on html for CSS targeting
+    document.documentElement.setAttribute('data-bg', bg);
+    document.documentElement.style.setProperty('background-color', bg, 'important');
+    // Also set on body to be safe
+    document.body.setAttribute('data-bg', bg);
+    document.body.style.setProperty('background-color', bg, 'important');
+  })();
+</script>
+
+<article class="simple-post" data-bg={backgroundColor}>
   <header class="post-header">
     <h1 class="post-title">{post.data.title}</h1>
     
-    {post.data.excerpt && <p class="post-lead">{post.data.excerpt}</p>}
-
-    <div class="post-byline">
-      {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
-      <span class="separator">|</span>
-      <span class="location">MAHESH SHANTARAM</span>
+    <div class="post-author-row">
+        <div class="post-meta-details">
+          {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
+          <span class="dot">·</span>
+          <span class="author-name">Mahesh Shantaram</span>
+        </div>
     </div>
   </header>
+
+  <div class="post-interactions-bar">
+    {post.data.excerpt && <p class="post-subtitle">{post.data.excerpt}</p>}
+  </div>
 
   <div class="post-layout-container">
     <div class="post-body">
@@ -83,52 +111,240 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     </div>
   </div>
 
-  {post.data.lightbox?.gallery && (
-    <Lightbox selector=".post-body" gallery={true} />
-  )}
+  <Lightbox 
+    selector=".post-body" 
+    gallery={post.data.lightbox?.gallery ?? false} 
+  />
   <C2PAOverlay />
 </article>
 
 <script>
-  // Sync header background with page background
-  function refinePostContent() {
-    const article = document.querySelector('.simple-post') as HTMLElement;
-    if (article) {
-      const bgColor = article.style.getPropertyValue('--page-bg').trim() || 
-                      getComputedStyle(article).getPropertyValue('--page-bg').trim();
-      
-      if (bgColor) {
-        // Direct injection to HTML and Body
-        document.documentElement.style.backgroundColor = bgColor;
-        document.body.style.backgroundColor = bgColor;
+  function setupPostLayout() {
+    const postBody = document.querySelector('.post-body');
+    if (!postBody) return;
+
+    // Handle image orientation and aspect ratio for C2PA positioning
+    const images = postBody.querySelectorAll('img');
+    images.forEach(img => {
+      const handleImg = (el) => {
+        const ratio = el.naturalWidth / el.naturalHeight;
+        el.style.setProperty('--aspect-ratio', ratio.toString());
         
-        // Force important on all potential containers
-        const styleId = 'dynamic-post-bg';
-        let style = document.getElementById(styleId);
-        if (!style) {
-          style = document.createElement('style');
-          style.id = styleId;
-          document.head.appendChild(style);
+        if (el.naturalHeight > el.naturalWidth) {
+          el.classList.add('is-vertical');
+          el.closest('figure')?.classList.add('is-vertical');
+        } else {
+          el.classList.add('is-horizontal');
+          el.closest('figure')?.classList.add('is-horizontal');
         }
-        style.textContent = `
-          html, body, main, #app, #root, .post-layout-container, .simple-post { 
-            background-color: ${bgColor} !important; 
-          }
-        `;
-        
-        document.body.classList.add('simple-post-active');
+      };
+
+      if (img.complete) handleImg(img);
+      else img.addEventListener('load', () => handleImg(img));
+    });
+
+    // Render caption below each image (caption comes from markdown alt text)
+    images.forEach((img) => {
+      if (img.dataset.hasInlineCaption === 'true') return;
+      const captionText = (img.getAttribute('alt') || '').trim();
+      if (!captionText) {
+        img.dataset.hasInlineCaption = 'true';
+        return;
       }
 
-      const header = document.querySelector('.site-header') as HTMLElement;
-      if (header) {
-        header.style.backgroundColor = bgColor;
-        header.style.transition = 'background-color 0.3s ease';
-        const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
-        if (headerInner) headerInner.style.backgroundColor = 'transparent';
+      const existingFigure = img.closest('figure');
+      if (existingFigure) {
+        if (!existingFigure.querySelector('figcaption')) {
+          const figcaption = document.createElement('figcaption');
+          figcaption.textContent = captionText;
+          existingFigure.appendChild(figcaption);
+        }
+        img.dataset.hasInlineCaption = 'true';
+        return;
       }
+
+      const figure = document.createElement('figure');
+      const figcaption = document.createElement('figcaption');
+      figcaption.textContent = captionText;
+
+      const parent = img.parentNode;
+      if (!parent) return;
+      parent.insertBefore(figure, img);
+      figure.appendChild(img);
+      figure.appendChild(figcaption);
+
+      img.dataset.hasInlineCaption = 'true';
+    });
+
+    // Hover metadata panel (Post pages)
+    const metadataCache = (window.__postMetadataCache ||= new Map());
+    const getMetadataForImage = async (imgUrl) => {
+      try {
+        const url = new URL(imgUrl, window.location.origin);
+        const imagePath = url.pathname;
+        const pathParts = imagePath.split('/');
+        const filename = pathParts[pathParts.length - 1];
+        const originalsIndex = pathParts.indexOf('originals');
+        if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) return null;
+
+        const directory = pathParts[originalsIndex + 1];
+        const cacheKey = `originals:${directory}`;
+        if (!metadataCache.has(cacheKey)) {
+          const metadataUrl = `/library/originals/${directory}/metadata.json`;
+          const resp = await fetch(metadataUrl);
+          metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
+        }
+        const dirMeta = metadataCache.get(cacheKey);
+        return dirMeta && dirMeta[filename] ? dirMeta[filename] : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      try {
+        const [datePart] = dateStr.split(' ');
+        const [year, month, day] = datePart.split(':');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    const formatCamera = (make, model) => {
+      if (!model) return '';
+      const cleanModel = make && model.includes(make) ? model.replace(make, '').trim() : model;
+      return cleanModel;
+    };
+
+    let hoverPanel = document.getElementById('post-hover-info-panel');
+    if (!hoverPanel) {
+      hoverPanel = document.createElement('div');
+      hoverPanel.id = 'post-hover-info-panel';
+      hoverPanel.className = 'carousel-info-panel post-hover-info-panel';
+      hoverPanel.style.display = 'none';
+      document.body.appendChild(hoverPanel);
     }
+
+    let hideTimer = null;
+    const hidePanel = () => {
+      hoverPanel.style.display = 'none';
+      hoverPanel.innerHTML = '';
+    };
+
+    const scheduleHide = () => {
+      if (hideTimer) clearTimeout(hideTimer);
+      hideTimer = setTimeout(hidePanel, 120);
+    };
+
+    const showPanelForImage = async (img) => {
+      if (hideTimer) clearTimeout(hideTimer);
+      const meta = await getMetadataForImage(img.currentSrc || img.src);
+      if (!meta) {
+        hidePanel();
+        return;
+      }
+      const photo = meta?.photography || {};
+
+      // InfoPanel data comes strictly from metadata.json
+      const description = meta?.exif?.ImageDescription || meta?.description || '';
+
+      const camera = formatCamera(photo.camera_make, photo.camera_model);
+      const date = formatDate(photo.date_original);
+      const specs = [photo.focal_length, photo.aperture, photo.shutter_speed, photo.iso ? `ISO ${photo.iso}` : null]
+        .filter(Boolean)
+        .join(' · ');
+
+      const crLogo = `\
+        <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">\
+          <path d="M195.796,356.024c-50.865,0-82.616-39.85-82.616-87.151s31.75-87.151,82.616-87.151c41.145,0,69.008,26.891,76.459,61.88h-41.469c-5.508-15.551-18.467-24.946-34.99-24.946c-25.594,0-42.443,20.086-42.443,50.217c0,30.13,16.848,50.217,42.443,50.217c17.17,0,30.454-10.043,35.637-26.566h41.146C265.775,328.486,237.588,356.024,195.796,356.024z" fill="currentColor"/>\
+          <path d="M288.962,351.488V186.258h38.878v17.819c9.071-11.987,23.327-19.763,44.71-19.763h10.043v38.229h-10.366c-14.58,0-23.651,3.24-30.455,9.395c-7.775,6.48-12.311,17.172-12.311,33.371v86.179H288.962z" fill="currentColor"/>\
+          <path d="M475,474.974H249.974C125.923,474.974,25,374.048,25,250C25,125.949,125.93,25.026,249.987,25.026C374.061,25.026,475,125.961,475,250.027V474.974z M249.987,64.024c-102.556,0-185.99,83.43-185.99,185.977c0,102.544,83.43,185.972,185.977,185.972h186.029V250.027C436.003,147.465,352.557,64.024,249.987,64.024z" fill="currentColor"/>\
+        </svg>`;
+
+      const rows = [];
+      if (camera) rows.push({ label: 'Camera', value: camera });
+      if (photo.lens_model) rows.push({ label: 'Lens', value: photo.lens_model });
+      if (specs) rows.push({ label: 'Settings', value: specs });
+      if (date) rows.push({ label: 'Date', value: date });
+
+      hoverPanel.innerHTML = `
+        <div class="info-panel-header">
+          <span class="info-panel-title">Metadata</span>
+        </div>
+        ${description ? `<p class="info-panel-description"></p>` : ''}
+        <div class="info-panel-details">
+          ${rows
+            .map(
+              (r) => `
+                <div class="info-panel-row">
+                  <span class="info-panel-label">${r.label}</span>
+                  <span class="info-panel-value">${r.value}</span>
+                </div>`
+            )
+            .join('')}
+        </div>
+        ${photo.copyright ? `<div class="info-panel-copyright">${photo.copyright}</div>` : ''}
+        <button class="c2pa-indicator info-panel-cr-button" aria-label="View Content Credentials">
+          ${crLogo}<span class="c2pa-indicator-label">content credentials</span>
+        </button>
+      `;
+
+      if (description) {
+        const descEl = hoverPanel.querySelector('.info-panel-description');
+        if (descEl) descEl.textContent = description;
+      }
+
+      const crBtn = hoverPanel.querySelector('.info-panel-cr-button');
+      if (crBtn) {
+        crBtn.addEventListener(
+          'click',
+          (e) => {
+            e.stopPropagation();
+            const src = img.currentSrc || img.src;
+            if (src) window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc: src } }));
+          },
+          { once: true }
+        );
+      }
+
+      const rect = img.getBoundingClientRect();
+      const panelWidth = 320;
+      const gap = 16;
+      const centerY = rect.top + rect.height / 2;
+      let left = rect.right + gap;
+
+      if (left + panelWidth > window.innerWidth - gap) {
+        left = rect.left - panelWidth - gap;
+      }
+      if (left < gap) left = gap;
+
+      hoverPanel.style.top = `${Math.max(gap, Math.min(window.innerHeight - gap, centerY))}px`;
+      hoverPanel.style.left = `${left}px`;
+      hoverPanel.style.right = 'auto';
+      hoverPanel.style.transform = 'translateY(-50%)';
+      hoverPanel.style.display = 'block';
+    };
+
+    if (!hoverPanel.dataset.hasHoverListeners) {
+      hoverPanel.addEventListener('mouseenter', () => {
+        if (hideTimer) clearTimeout(hideTimer);
+      });
+      hoverPanel.addEventListener('mouseleave', scheduleHide);
+      hoverPanel.dataset.hasHoverListeners = 'true';
+    }
+
+    images.forEach((img) => {
+      if (img.dataset.hasHoverInfo === 'true') return;
+      img.dataset.hasHoverInfo = 'true';
+      img.addEventListener('mouseenter', () => showPanelForImage(img));
+      img.addEventListener('mouseleave', scheduleHide);
+    });
   }
 
-  refinePostContent();
-  document.addEventListener('astro:page-load', refinePostContent);
+  // Initial load and Astro page transitions
+  setupPostLayout();
+  document.addEventListener('astro:page-load', setupPostLayout);
 </script>

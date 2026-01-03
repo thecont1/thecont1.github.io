@@ -1,0 +1,23 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Longform from "../../components/layouts/Longform.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const longforms = await getCollection("longform", ({ data }) => {
+    return data.status === "published";
+  });
+  return longforms.map((longform) => ({
+    params: { slug: longform.slug },
+    props: { longform },
+  }));
+}
+
+const { longform } = Astro.props;
+---
+
+<Layout title={longform.data.title}>
+  <Longform post={longform} />
+</Layout>

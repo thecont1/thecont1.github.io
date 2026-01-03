@@ -61,80 +61,61 @@ const { selector = "main", gallery = true } = Astro.props;
 </div>
 
 <script>
-  const lightbox = document.getElementById("lightbox");
-  const gallery = lightbox?.dataset.gallery === "true";
-  const selector = lightbox?.dataset.selector || "main";
-  const lightboxImages = document.querySelectorAll(".lightbox-img");
-  const caption = document.getElementById("lightbox-caption");
-  const closeBtn = document.getElementById("lightbox-close");
-  const prevBtn = document.getElementById("lightbox-prev");
-  const nextBtn = document.getElementById("lightbox-next");
-  const overlay = document.querySelector(".lightbox-overlay");
-  const toggleLightsBtn = document.getElementById("toggle-lights");
-  const metaContainer = document.getElementById("lightbox-meta");
-  const exifContainer = document.getElementById("lightbox-exif");
-  const c2paBtn = document.getElementById("lightbox-c2pa");
+  function initLightbox() {
+    const lightbox = document.getElementById("lightbox");
+    if (!lightbox) return;
 
-  let currentImages = [];
-  let currentIndex = -1;
-  let activeImgIndex = 0;
-  let isTransitioning = false;
+    // If already initialized, only re-attach listeners to in-page images.
+    if (lightbox.dataset.initialized === 'true') {
+      if (typeof window.__attachLightboxListeners === 'function') {
+        window.__attachLightboxListeners();
+      }
+      return;
+    }
 
-  const getMetadata = async (imgUrl) => {
-    try {
-      // Extract the path from the URL (remove domain/port)
-      const url = new URL(imgUrl);
-      const imagePath = url.pathname;
-      
-      // Parse the directory structure from the path
-      // e.g., /library/originals/TheAfricanPortraits/image.jpg -> TheAfricanPortraits
-      const pathParts = imagePath.split('/');
-      const filename = pathParts[pathParts.length - 1];
-      
-      // Find the directory (should be the part after 'originals')
-      const originalsIndex = pathParts.indexOf('originals');
-      if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) {
+    const gallery = lightbox.dataset.gallery === "true";
+    const selector = lightbox.dataset.selector || "main";
+    const lightboxImages = document.querySelectorAll(".lightbox-img");
+    const caption = document.getElementById("lightbox-caption");
+    const closeBtn = document.getElementById("lightbox-close");
+    const prevBtn = document.getElementById("lightbox-prev");
+    const nextBtn = document.getElementById("lightbox-next");
+    const overlay = document.querySelector(".lightbox-overlay");
+    const toggleLightsBtn = document.getElementById("toggle-lights");
+    const metaContainer = document.getElementById("lightbox-meta");
+    const exifContainer = document.getElementById("lightbox-exif");
+    const c2paBtn = document.getElementById("lightbox-c2pa");
+
+    if (!lightbox || !caption || !closeBtn || !overlay) return;
+
+    let currentImages = [];
+    let currentIndex = -1;
+    let activeImgIndex = 0;
+    let isTransitioning = false;
+
+    const getMetadata = async (imgUrl) => {
+      try {
+        const url = new URL(imgUrl, window.location.origin);
+        const imagePath = url.pathname;
+        const pathParts = imagePath.split('/');
+        const filename = pathParts[pathParts.length - 1];
+        const originalsIndex = pathParts.indexOf('originals');
+        if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) return {};
+        
+        const directory = pathParts[originalsIndex + 1];
+        const metadataUrl = `/library/originals/${directory}/metadata.json`;
+        
+        const response = await fetch(metadataUrl);
+        if (!response.ok) return {};
+        
+        const directoryMetadata = await response.json();
+        return directoryMetadata[filename] || {};
+      } catch (e) {
         return {};
       }
-      
-      const directory = pathParts[originalsIndex + 1];
-      
-      // Fetch the co-located metadata JSON from the same directory as the images
-      const metadataUrl = `/library/originals/${directory}/metadata.json`;
-      
-      const response = await fetch(metadataUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to load metadata from ${metadataUrl}: ${response.status}`);
-      }
-      
-      const directoryMetadata = await response.json();
-      const metadata = directoryMetadata[filename];
-      
-      if (metadata) {
-        return metadata;
-      } else {
-        return {};
-      }
-      
-    } catch (e) {
-      return {};
-    }
-  };
+    };
 
-  const formatShutterSpeed = (exposureTime) => {
-    if (!exposureTime) return '';
-    const val = exposureTime.value || exposureTime;
-    if (typeof val === 'number') {
-      if (val >= 1) return val.toFixed(1) + 's';
-      const denominator = Math.round(1 / val);
-      return denominator > 0 ? `1/${denominator}s` : `${val}s`;
-    }
-    return exposureTime.description || String(val);
-  };
-
-  if (lightbox && lightboxImages.length === 2 && caption && closeBtn && overlay) {
     const updateCaptionAndMeta = async (targetImgEl) => {
-      // 1. Basic Title/Caption from figure or alt
       let capText = "";
       const fig = targetImgEl.closest("figure");
       if (fig) {
@@ -142,88 +123,38 @@ const { selector = "main", gallery = true } = Astro.props;
         if (cap) capText = cap.textContent;
       }
       
-      // If no figcaption, we'll try to get it from EXIF ImageDescription later
       let initialCaption = capText || targetImgEl.alt || "Untitled";
       caption.textContent = initialCaption;
 
-      // 2. EXIF/IPTC Metadata
       if (exifContainer) {
         exifContainer.innerHTML = '<p class="loading-meta">Fetching metadata...</p>';
-        
         try {
           const data = await getMetadata(targetImgEl.src);
-          
-          // Update caption with EXIF ImageDescription if no figcaption was found
-          if (!capText && data && data.exif && data.exif.ImageDescription) {
+          if (!capText && data?.exif?.ImageDescription) {
             const imageDesc = data.exif.ImageDescription;
-            if (imageDesc && imageDesc.length > 10) { // Only use if it's substantial
-              caption.textContent = imageDesc;
-            }
+            if (imageDesc && imageDesc.length > 10) caption.textContent = imageDesc;
           }
           
           if (data && !data.error && (data.exif || data.photography)) {
             let exifHtml = '';
-            
-            // Display photography data (processed/formatted)
             if (data.photography) {
               const photo = data.photography;
-              
               if (photo.camera_make || photo.camera_model) {
-                let cameraInfo = '';
-                if (photo.camera_make && photo.camera_model) {
-                  cameraInfo = `${photo.camera_make} ${photo.camera_model}`;
-                } else {
-                  cameraInfo = photo.camera_make || photo.camera_model;
-                }
-                exifHtml += `<p class="exif-row"><strong>Camera:</strong> ${cameraInfo}</p>`;
+                exifHtml += `<p class="exif-row"><strong>Camera:</strong> ${[photo.camera_make, photo.camera_model].filter(Boolean).join(' ')}</p>`;
               }
-              
-              if (photo.lens_model) {
-                exifHtml += `<p class="exif-row"><strong>Lens:</strong> ${photo.lens_model}</p>`;
-              }
-              
-              // Camera settings
-              const settings = [
-                photo.shutter_speed,
-                photo.aperture,
-                photo.iso ? `ISO ${photo.iso}` : '',
-                photo.focal_length
-              ].filter(Boolean).join('  •  ');
-              
-              if (settings) {
-                exifHtml += `<p class="exif-row"><strong>Settings:</strong> ${settings}</p>`;
-              }
-              
-              if (photo.date_taken || photo.date_original) {
-                const date = photo.date_original || photo.date_taken;
-                exifHtml += `<p class="exif-row"><strong>Date Taken:</strong> ${date}</p>`;
-              }
-              
-              if (photo.artist) {
-                exifHtml += `<p class="exif-row"><strong>Artist:</strong> ${photo.artist}</p>`;
-              }
-              
-              if (photo.copyright) {
-                exifHtml += `<p class="exif-row"><strong>Copyright:</strong> ${photo.copyright}</p>`;
-              }
+              if (photo.lens_model) exifHtml += `<p class="exif-row"><strong>Lens:</strong> ${photo.lens_model}</p>`;
+              const settings = [photo.shutter_speed, photo.aperture, photo.iso ? `ISO ${photo.iso}` : '', photo.focal_length].filter(Boolean).join('  •  ');
+              if (settings) exifHtml += `<p class="exif-row"><strong>Settings:</strong> ${settings}</p>`;
+              const date = photo.date_original || photo.date_taken;
+              if (date) exifHtml += `<p class="exif-row"><strong>Date Taken:</strong> ${date}</p>`;
+              if (photo.artist) exifHtml += `<p class="exif-row"><strong>Artist:</strong> ${photo.artist}</p>`;
+              if (photo.copyright) exifHtml += `<p class="exif-row"><strong>Copyright:</strong> ${photo.copyright}</p>`;
             }
-            
-            // Add basic image info
-            if (data.width && data.height) {
-              exifHtml += `<p class="exif-row"><strong>Dimensions:</strong> ${data.width} × ${data.height}</p>`;
-            }
-            
-            if (data.format) {
-              exifHtml += `<p class="exif-row"><strong>Format:</strong> ${data.format}</p>`;
-            }
-            
+            if (data.width && data.height) exifHtml += `<p class="exif-row"><strong>Dimensions:</strong> ${data.width} × ${data.height}</p>`;
+            if (data.format) exifHtml += `<p class="exif-row"><strong>Format:</strong> ${data.format}</p>`;
             exifContainer.innerHTML = exifHtml || `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} × ${targetImgEl.naturalHeight}</p>`;
           } else {
-            // Fallback to basic info
-            exifContainer.innerHTML = `
-              <p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} x ${targetImgEl.naturalHeight}</p>
-              <p class="exif-row"><strong>Format:</strong> ${targetImgEl.src.split('.').pop().toUpperCase()}</p>
-            `;
+            exifContainer.innerHTML = `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} x ${targetImgEl.naturalHeight}</p><p class="exif-row"><strong>Format:</strong> ${targetImgEl.src.split('.').pop().toUpperCase()}</p>`;
           }
         } catch (err) {
           exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
@@ -233,148 +164,68 @@ const { selector = "main", gallery = true } = Astro.props;
 
     const updateLightbox = (index, withTransition = false) => {
       if (index < 0 || index >= currentImages.length) return;
-      
       const target = currentImages[index];
-      
-      // Determine orientation for sizing
       const isVertical = target.naturalHeight > target.naturalWidth;
       lightbox.setAttribute("data-orientation", isVertical ? "vertical" : "horizontal");
-
-      const currentImgEl = lightboxImages[activeImgIndex];
+      const currentImgEl = lightboxImages[activeImgIndex] as HTMLImageElement;
 
       if (withTransition && !isTransitioning) {
         isTransitioning = true;
-        
-        // Phase 1: Fade Out
         currentImgEl.style.opacity = '0';
-        
         setTimeout(() => {
-            // Phase 2: Swap Source (while invisible)
-            currentImgEl.src = target.src;
-            currentImgEl.alt = target.alt || "";
-            
-            // Preload next image while we wait
-            const lookaheadIndex = (index + 1) % currentImages.length;
-            if (lookaheadIndex !== index) {
-                const preloadImg = new Image();
-                preloadImg.src = currentImages[lookaheadIndex].src;
-            }
-
-            // Ensure image is loaded before fading in and updating meta
-            const completeTransition = () => {
-                // Important: Metadata must be extracted from the element that has the source
-                updateCaptionAndMeta(currentImgEl);
-                
-                // Phase 3: Fade In
-                requestAnimationFrame(() => {
-                    currentImgEl.style.opacity = '1';
-                    setTimeout(() => {
-                        isTransitioning = false;
-                    }, 300); // Match CSS transition
-                });
-            };
-
-            if (currentImgEl.complete) {
-                completeTransition();
-            } else {
-                currentImgEl.onload = completeTransition;
-                currentImgEl.onerror = () => {
-                    isTransitioning = false;
-                };
-            }
-        }, 300); // Wait for fade out to finish
-
+          currentImgEl.src = target.src;
+          currentImgEl.alt = target.alt || "";
+          const completeTransition = () => {
+            updateCaptionAndMeta(currentImgEl);
+            requestAnimationFrame(() => {
+              currentImgEl.style.opacity = '1';
+              setTimeout(() => { isTransitioning = false; }, 300);
+            });
+          };
+          if (currentImgEl.complete) completeTransition();
+          else {
+            currentImgEl.onload = completeTransition;
+            currentImgEl.onerror = () => { isTransitioning = false; };
+          }
+        }, 300);
       } else {
-        // Instant update (first load)
-        currentImgEl.style.opacity = '0'; // Start hidden to prevent flash
+        currentImgEl.style.opacity = '0';
         currentImgEl.src = target.src;
         currentImgEl.alt = target.alt || "";
-        
         const showImage = () => {
-            updateCaptionAndMeta(currentImgEl);
-            currentImgEl.style.opacity = '1';
-            
-            // Preload next
-            const lookaheadIndex = (index + 1) % currentImages.length;
-            if (lookaheadIndex !== index && currentImages.length > 0) {
-                 const preloadImg = new Image();
-                 preloadImg.src = currentImages[lookaheadIndex].src;
-            }
+          updateCaptionAndMeta(currentImgEl);
+          currentImgEl.style.opacity = '1';
         };
-
-        if (currentImgEl.complete) {
-            requestAnimationFrame(showImage);
-        } else {
-            currentImgEl.onload = showImage;
-        }
+        if (currentImgEl.complete) requestAnimationFrame(showImage);
+        else currentImgEl.onload = showImage;
       }
-
       currentIndex = index;
     };
 
-    // Add click-to-next on the images themselves
-    lightboxImages.forEach(imgEl => {
-        imgEl.addEventListener('click', (e) => {
-            e.stopPropagation();
-            // Only advance if gallery mode is active (single images shouldn't cycle endlessly unless desired)
-            if (gallery && currentImages.length > 1) {
-                nextImage();
-            }
-        });
-        // Add pointer cursor to indicate clickability
-        imgEl.style.cursor = gallery ? "pointer" : "default";
-    });
-
-    if (toggleLightsBtn && metaContainer) {
-      toggleLightsBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const isLightsOn = lightbox.classList.toggle("lights-on");
-        const isLightsOff = !isLightsOn;
-        
-        if (isLightsOff) {
-          lightbox.classList.add("lights-off");
-          // Keep meta active in both modes, CSS handles styling
-          metaContainer.classList.add("is-active"); 
-          toggleLightsBtn.classList.remove("active");
-        } else {
-          lightbox.classList.remove("lights-off");
-          metaContainer.classList.add("is-active");
-          toggleLightsBtn.classList.add("active");
-        }
-      });
-    }
-
     const openLightbox = (imageElement) => {
-      // If gallery is false, do nothing (should be handled by attachListeners not adding events, but safety check)
-      if (!gallery) return;
-
       const container = document.querySelector(selector);
-      if (!container) {
-          return;
-      }
-      currentImages = Array.from(container.querySelectorAll("img")).filter(i => {
-        return !i.closest("a") && !i.classList.contains("no-lightbox");
-      });
-      currentIndex = currentImages.indexOf(imageElement);
+      if (!container) return;
 
-      if (currentIndex === -1) {
-          return;
+      if (gallery) {
+        currentImages = Array.from(container.querySelectorAll("img")).filter(i => !i.closest("a") && !i.classList.contains("no-lightbox"));
+        currentIndex = currentImages.indexOf(imageElement);
+      } else {
+        currentImages = [imageElement];
+        currentIndex = 0;
       }
 
-      // Reset state for clean open
+      if (currentIndex === -1) return;
+
       lightboxImages.forEach(img => {
         img.classList.remove('active', 'next');
-        img.removeAttribute('src'); // Use removeAttribute instead of src="" to avoid self-fetch
+        img.removeAttribute('src');
       });
-      activeImgIndex = 0; // Reset to first slot
+      activeImgIndex = 0;
 
-      updateLightbox(currentIndex, false); 
+      updateLightbox(currentIndex, false);
       lightbox.setAttribute("aria-hidden", "false");
       document.body.style.overflow = "hidden";
-      document.body.classList.add("lightbox-open");
-      document.body.classList.add("toc-hidden");
-      
-      // Default state: Lights On
+      document.body.classList.add("lightbox-open", "toc-hidden");
       lightbox.classList.add("lights-on");
       lightbox.classList.remove("lights-off");
       if (metaContainer) metaContainer.classList.add("is-active");
@@ -384,103 +235,113 @@ const { selector = "main", gallery = true } = Astro.props;
     const closeLightbox = () => {
       lightbox.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
-      document.body.classList.remove("lightbox-open");
-      document.body.classList.remove("toc-hidden");
-      
-      // Reset image state after close animation
+      document.body.classList.remove("lightbox-open", "toc-hidden");
       setTimeout(() => {
-          lightboxImages.forEach(img => {
-            img.removeAttribute('src');
-            img.classList.remove('active', 'next');
-          });
-          isTransitioning = false;
+        lightboxImages.forEach(img => {
+          img.removeAttribute('src');
+          img.classList.remove('active', 'next');
+        });
+        isTransitioning = false;
       }, 300);
     };
 
-    // Close when clicking main area or overlay
-    const mainArea = document.querySelector(".lightbox-main");
-    if (mainArea) {
-      mainArea.addEventListener("click", (e) => {
-        if (e.target === mainArea || e.target === document.querySelector(".lightbox-figure")) {
-          closeLightbox();
-        }
-      });
-    }
-
     const nextImage = () => {
       if (isTransitioning) return;
-      if (currentIndex < currentImages.length - 1) {
-        updateLightbox(currentIndex + 1, true);
-      } else if (currentImages.length > 1) {
-        updateLightbox(0, true); // Loop to start
-      }
+      if (currentIndex < currentImages.length - 1) updateLightbox(currentIndex + 1, true);
+      else if (currentImages.length > 1) updateLightbox(0, true);
     };
 
     const prevImage = () => {
       if (isTransitioning) return;
-      if (currentIndex > 0) {
-        updateLightbox(currentIndex - 1, true);
-      } else if (currentImages.length > 1) {
-        updateLightbox(currentImages.length - 1, true); // Loop to end
-      }
+      if (currentIndex > 0) updateLightbox(currentIndex - 1, true);
+      else if (currentImages.length > 1) updateLightbox(currentImages.length - 1, true);
     };
 
     const attachListeners = () => {
-      if (!gallery) return; // Disable lightbox if gallery is false
-
       const container = document.querySelector(selector);
       if (!container) return;
-
+      
       const images = container.querySelectorAll("img");
       
-      images.forEach((image, index) => {
-        if (image.closest("a")) return;
-        if (image.classList.contains("no-lightbox")) return;
-
+      images.forEach((image) => {
+        if (image.closest("a") || image.classList.contains("no-lightbox")) return;
         image.style.cursor = "zoom-in";
-        image.addEventListener("click", (e) => {
+        
+        image.onclick = (e) => {
+          e.preventDefault();
           e.stopPropagation();
           openLightbox(image);
-        });
+        };
       });
     };
 
-    attachListeners();
-    document.addEventListener("astro:page-load", attachListeners);
+    // Expose for subsequent Astro page transitions without re-initializing controls.
+    window.__attachLightboxListeners = attachListeners;
 
+    // Initialize
+    attachListeners();
+    
+    // Support Astro ViewTransitions
+    document.addEventListener("astro:page-load", attachListeners);
+    document.addEventListener("astro:after-swap", attachListeners);
+    
+    // Fallback for dynamically added content
+    const observer = new MutationObserver(attachListeners);
+    observer.observe(document.body, { childList: true, subtree: true });
     closeBtn.addEventListener("click", closeLightbox);
     overlay.addEventListener("click", closeLightbox);
     
     if (gallery && prevBtn && nextBtn) {
-      prevBtn.addEventListener("click", (e) => {
+      prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevImage(); });
+      nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextImage(); });
+    }
+
+    if (toggleLightsBtn) {
+      toggleLightsBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        prevImage();
-      });
-      nextBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        nextImage();
+        const isCurrentlyOff = lightbox.classList.contains("lights-off");
+        
+        if (isCurrentlyOff) {
+          // Turn lights ON
+          lightbox.classList.remove("lights-off");
+          lightbox.classList.add("lights-on");
+          toggleLightsBtn.classList.add("active");
+        } else {
+          // Turn lights OFF
+          lightbox.classList.add("lights-off");
+          lightbox.classList.remove("lights-on");
+          toggleLightsBtn.classList.remove("active");
+        }
       });
     }
 
     if (c2paBtn) {
       c2paBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const currentImgEl = lightboxImages[activeImgIndex];
-        const imgSrc = currentImgEl?.src;
-        if (imgSrc) {
-          window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc } }));
-        }
+        const currentImgEl = lightboxImages[activeImgIndex] as HTMLImageElement;
+        if (currentImgEl?.src) window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc: currentImgEl.src } }));
+      });
+    }
+
+    const mainArea = document.querySelector(".lightbox-main");
+    if (mainArea) {
+      mainArea.addEventListener("click", (e) => {
+        if (e.target === mainArea || e.target === document.querySelector(".lightbox-figure")) closeLightbox();
       });
     }
 
     document.addEventListener("keydown", (e) => {
       if (lightbox.getAttribute("aria-hidden") === "true") return;
-
       if (e.key === "Escape") closeLightbox();
       if (gallery) {
         if (e.key === "ArrowRight") nextImage();
         if (e.key === "ArrowLeft") prevImage();
       }
     });
+
+    lightbox.dataset.initialized = 'true';
   }
+
+  initLightbox();
+  document.addEventListener("astro:page-load", initLightbox);
 </script>

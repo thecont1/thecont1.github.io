@@ -443,9 +443,9 @@
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-  padding: 0; /* Ensure no padding interferes with centering */
+  padding: 0;
   box-sizing: border-box;
-  line-height: 1; /* Remove line-height that might affect centering */
+  line-height: 1;
 }
 
 .c2pa-indicator.c2pa-injected {
@@ -456,7 +456,8 @@
 /* Show indicator in ochre when hovering the image container (exclude lightbox) */
 [data-c2pa-container]:hover .c2pa-indicator.c2pa-injected,
 .album-item:hover .c2pa-indicator.c2pa-injected,
-body.screen-mode .c2pa-indicator.c2pa-injected {
+body.screen-mode .c2pa-indicator.c2pa-injected,
+.post-body p:hover .c2pa-indicator.c2pa-injected {
   opacity: 1 !important;
   visibility: visible !important;
   right: 5px; /* Keep consistent positioning on hover */

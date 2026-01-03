@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const essays = await getCollection("essay", ({ data }) => {
+  return data.status === "published";
+});
+
+// Sort by date, newest first
+const sortedEssays = essays.sort((a, b) => {
+  const dateA = a.data.date || new Date(0);
+  const dateB = b.data.date || new Date(0);
+  return dateB.getTime() - dateA.getTime();
+});
+---
+
+<Layout title="Essays">
+  <main>
+    <h1>Essays</h1>
+    <div class="essay-list">
+      {sortedEssays.map((essay) => (
+        <article class="essay-preview">
+          <h2><a href={`/essay/${essay.slug}`}>{essay.data.title}</a></h2>
+          <p>{essay.data.excerpt}</p>
+          {essay.data.date && (
+            <time datetime={essay.data.date.toISOString()}>
+              {essay.data.date.toLocaleDateString()}
+            </time>
+          )}
+        </article>
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .essay-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  .essay-preview h2 a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .essay-preview h2 a:hover {
+    text-decoration: underline;
+  }
+  
+  .essay-preview time {
+    color: #666;
+    font-size: 0.9em;
+  }
+</style>

@@ -99,9 +99,9 @@ html {
 .post-body {
   font-family: "Fraunces", serif;
   font-size: 1.4rem;
-  line-height: 1.8;
+  line-height: 1.7;
   color: var(--ink);
-  max-width: 720px;
+  max-width: 840px;
   width: calc(100% - 4rem);
   margin: 0 auto;
   padding: 0;
@@ -121,7 +121,7 @@ html {
   font-family: "Fraunces", serif;
   font-size: 2.2rem;
   font-weight: 400;
-  margin: 3rem 0 1.5rem -2rem;
+  margin: 5rem 0 1.5rem -2rem;
   line-height: 1.2;
   scroll-margin-top: 6rem;
   position: relative;
@@ -257,7 +257,7 @@ html {
 
 /* Pull Quotes (Markdown blockquote with .pull-quote class) */
 .post-body blockquote.pull-quote {
-  margin: 4rem -4rem;
+  margin: 2rem -4rem;
   padding: 3rem 0;
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
