@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
+import Note from "../ui/Note.astro";
 import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
@@ -99,7 +100,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
   <div class="post-layout-container">
     <div class="post-body">
-      <Content />
+      <Content components={{ Note, note: Note }} />
       
       <footer class="post-footer">
         {tags.length > 0 && (

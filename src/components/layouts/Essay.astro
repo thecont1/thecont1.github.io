@@ -4,6 +4,7 @@ import Lightbox from "../ui/Lightbox.astro";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import ContentsToggle from "../ui/ContentsToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
+import Note from "../ui/Note.astro";
 import "../../styles/essay.css";
 
 interface Props {
@@ -64,7 +65,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     )}
 
     <div class="post-body">
-      <Content />
+      <Content components={{ Note, note: Note }} />
       
       <footer class="post-footer">
         {tags.length > 0 && (
