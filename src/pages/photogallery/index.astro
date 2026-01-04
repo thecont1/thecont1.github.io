@@ -13,7 +13,7 @@ const photogalleries = await getCollection("photogallery", ({ data }) => data.st
         <article class="collection-item">
           <a href={`/photogallery/${gallery.slug}`}>
             <h2>{gallery.data.title}</h2>
-            <p>{gallery.data.excerpt}</p>
+            <p>{gallery.data.subtitle}</p>
           </a>
         </article>
       ))}

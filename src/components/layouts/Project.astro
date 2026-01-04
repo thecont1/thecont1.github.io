@@ -79,7 +79,7 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
   <header class="project-header">
     <h1>{post.data.title}</h1>
     <p class="project-author">by {post.data.author}</p>
-    <p class="lead">{post.data.excerpt}</p>
+    <p class="lead">{post.data.subtitle}</p>
   </header>
 
   <!-- CAROUSEL SECTION (The "wholesome way to view the series") -->
@@ -96,7 +96,7 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
         <a href={`/${module.collection}/${module.slug}`} class="module-card">
           <span class="module-type">{module.data.layout || module.collection}</span>
           <h2 class="module-title">{module.data.title}</h2>
-          <p class="module-excerpt">{module.data.excerpt}</p>
+          <p class="module-subtitle">{module.data.subtitle}</p>
           <span class="read-more">Explore &rarr;</span>
         </a>
       ))}
@@ -223,7 +223,7 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
     line-height: 1.2;
   }
 
-  .module-excerpt {
+  .module-subtitle {
     font-family: "DM Sans", sans-serif;
     font-size: 0.95rem;
     color: var(--muted);

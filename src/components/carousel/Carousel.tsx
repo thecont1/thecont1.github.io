@@ -31,6 +31,9 @@ export default function Carousel({ images }: { images: Image[] }) {
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
   const isAutoScrollingRef = useRef(false);
   const skipNextScrollRef = useRef(false);
+  const programmaticNavUntilRef = useRef(0);
+  const ioRef = useRef<IntersectionObserver | null>(null);
+  const ioTickRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (index >= images.length) setIndex(0);
@@ -39,6 +42,70 @@ export default function Carousel({ images }: { images: Image[] }) {
   useEffect(() => {
     slideRefs.current = slideRefs.current.slice(0, images.length);
   }, [images.length]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    ioRef.current?.disconnect();
+
+    const updateIndexFromVisibility = () => {
+      if (Date.now() < programmaticNavUntilRef.current) return;
+      if (ioTickRef.current != null) return;
+      ioTickRef.current = window.requestAnimationFrame(() => {
+        ioTickRef.current = null;
+
+        const trackRect = track.getBoundingClientRect();
+        const rootLeft = trackRect.left;
+        const rootRight = trackRect.right;
+        let bestIdx = 0;
+        let bestDist = Number.POSITIVE_INFINITY;
+
+        slideRefs.current.forEach((el, i) => {
+          if (!el) return;
+          const r = el.getBoundingClientRect();
+          if (r.right <= rootLeft || r.left >= rootRight) return;
+          const dist = Math.abs(r.left - rootLeft);
+          if (dist < bestDist) {
+            bestDist = dist;
+            bestIdx = i;
+          }
+        });
+
+        if (bestIdx !== index) {
+          skipNextScrollRef.current = true;
+          setIndex(bestIdx);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      () => updateIndexFromVisibility(),
+      {
+        root: track,
+        threshold: [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1],
+      }
+    );
+    ioRef.current = observer;
+
+    slideRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    updateIndexFromVisibility();
+
+    const onResize = () => updateIndexFromVisibility();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      if (ioTickRef.current != null) {
+        window.cancelAnimationFrame(ioTickRef.current);
+        ioTickRef.current = null;
+      }
+      observer.disconnect();
+    };
+  }, [images.length, index]);
 
   // Resume autoplay when user scrolls back to curtain (scroll position near top)
   useEffect(() => {
@@ -110,14 +177,6 @@ export default function Carousel({ images }: { images: Image[] }) {
       // If scroll changed and we're not auto-scrolling, user did it
       if (scrollDelta > 5 && !isAutoScrollingRef.current) {
         setUserTookControl(true);
-        
-        // Sync index to the currently visible slide (skip the scroll effect)
-        const slideWidth = track.scrollWidth / images.length;
-        const newIndex = Math.round(currentScrollLeft / slideWidth);
-        if (newIndex >= 0 && newIndex < images.length && newIndex !== index) {
-          skipNextScrollRef.current = true;
-          setIndex(newIndex);
-        }
       }
       
       lastScrollLeft = currentScrollLeft;
@@ -148,11 +207,13 @@ export default function Carousel({ images }: { images: Image[] }) {
 
   const onPrev = () => {
     setUserTookControl(true);
+    programmaticNavUntilRef.current = Date.now() + 900;
     setIndex((i) => (i - 1 + images.length) % images.length);
   };
 
   const onNext = () => {
     setUserTookControl(true);
+    programmaticNavUntilRef.current = Date.now() + 900;
     setIndex((i) => (i + 1) % images.length);
   };
 

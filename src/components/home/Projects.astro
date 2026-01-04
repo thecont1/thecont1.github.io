@@ -48,7 +48,7 @@ async function getFeaturedContent(item: FeaturedItem) {
       ...item,
       entry,
       title: item.displayTitle || entry.data.title,
-      excerpt: item.displayExcerpt || entry.data.excerpt || entry.data.description || "",
+      subtitle: item.displaySubtitle || entry.data.subtitle || entry.data.description || "",
       heroImage: item.displayImage || entry.data.heroImage,
       url: getContentUrl(item.type, item.slug),
     };
@@ -120,7 +120,7 @@ const typeIcons: Record<string, string> = {
                 </div>
                 <div class="card-content">
                   <h3>{item.title}</h3>
-                  <p>{item.excerpt}</p>
+                  <p>{item.subtitle}</p>
                 </div>
               </a>
             </article>
@@ -154,7 +154,7 @@ const typeIcons: Record<string, string> = {
                 <div class="card-content">
                   <span class="card-type">{item.type}</span>
                   <h3>{item.title}</h3>
-                  <p>{item.excerpt}</p>
+                  <p>{item.subtitle}</p>
                   <span class="read-more">View →</span>
                 </div>
               </a>

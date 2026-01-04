@@ -385,10 +385,94 @@
 }
 
 /* Default blockquote still supported */
-.post-body blockquote:not(.pull-quote) {
+.post-body blockquote:not(.pull-quote):not(.note-aside) {
   border-left: 2px solid var(--accent);
   padding-left: 1.5rem;
   margin: 2rem 0;
   font-style: italic;
   color: var(--muted);
+}
+
+/* Note callout styling */
+.post-body blockquote.note-aside {
+  --note-gutter: 360px;
+  float: right;
+  clear: right;
+  width: 280px;
+  margin: 0.5rem 0 1.5rem 2rem;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--hairline);
+  border-left: 3px solid var(--accent, #d04b36);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--ink);
+  font-family: "Inter", sans-serif;
+  border-radius: 4px;
+  position: relative;
+  z-index: 2;
+  font-style: normal;
+}
+
+.post-body blockquote.note-aside p {
+  margin: 0;
+}
+
+.post-body blockquote.note-aside p + p {
+  margin-top: 0.75rem;
+}
+
+/* Fallback for literal <note> tag */
+.post-body note {
+  display: block;
+  --note-gutter: 360px;
+  float: right;
+  clear: right;
+  width: 280px;
+  margin: 0.5rem 0 1.5rem 2rem;
+  padding: 1.25rem;
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid #e5e5e5;
+  border-left: 3px solid #d04b36;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #292929;
+  font-family: "Inter", sans-serif;
+  border-radius: 4px;
+  position: relative;
+  z-index: 10;
+}
+
+.post-body note p {
+  margin: 0;
+}
+
+.post-body note p + p {
+  margin-top: 0.75rem;
+}
+
+/* Wide screen: pull notes outside the container */
+@media (min-width: 1200px) {
+  .post-body blockquote.note-aside {
+    margin-right: calc(-1 * var(--note-gutter));
+  }
+  
+  .post-body note {
+    margin-right: calc(-1 * var(--note-gutter));
+  }
+}
+
+/* Mobile: revert to inline */
+@media (max-width: 1024px) {
+  .post-body blockquote.note-aside {
+    float: none;
+    width: auto;
+    margin: 2rem 0;
+  }
+  
+  .post-body note {
+    float: none;
+    width: auto;
+    margin: 2rem 0;
+  }
 }

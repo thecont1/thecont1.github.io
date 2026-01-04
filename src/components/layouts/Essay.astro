@@ -32,19 +32,26 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
 <article class="editorial-post" id="top" style={`--page-bg: ${backgroundColor};`}>
   <header class="post-header">
-    <div class="post-meta-top">
-      {post.data.category && <span class="category">{post.data.category}</span>}
-      {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
-    </div>
-    
+    {post.data.category && (
+      <div class="post-kicker">
+        <span class="category">{post.data.category}</span>
+      </div>
+    )}
+
     <h1 class="post-title">{post.data.title}</h1>
-    
-    {post.data.excerpt && <p class="post-lead">{post.data.excerpt}</p>}
+
+    {post.data.subtitle && <p class="post-subtitle">{post.data.subtitle}</p>}
 
     <div class="post-author-line">
-      <span class="by">by</span>
+      <span class="by">By</span>
       <span class="author-name">{post.data.author}</span>
     </div>
+
+    {formattedDate && (
+      <div class="post-date-line">
+        <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>
+      </div>
+    )}
 
     {post.data.showhero !== false && post.data.heroImage && (
       <figure class="post-hero">

@@ -4,12 +4,12 @@
 
 .carousel-info-panel {
   position: fixed;
-  top: 50%;
+  top: calc(var(--site-header-height) + 12px);
   right: 2rem;
-  transform: translateY(-50%);
+  transform: none;
   width: 320px;
   max-width: calc(100vw - 4rem);
-  max-height: 70vh;
+  max-height: calc(100vh - var(--site-header-height) - 24px);
   overflow-y: auto;
 
   background: rgba(0, 0, 0, 0.75);
@@ -25,14 +25,23 @@
   animation: info-panel-slide-in 0.3s ease-out;
 }
 
+/* Post hover panel is positioned dynamically via JS; avoid initial fixed top/right + slide-in */
+.post-hover-info-panel {
+  top: 0;
+  right: auto;
+  left: 0;
+  transform: translateY(-50%);
+  animation: none;
+}
+
 @keyframes info-panel-slide-in {
   from {
     opacity: 0;
-    transform: translateY(-50%) translateX(20px);
+    transform: translateX(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(-50%) translateX(0);
+    transform: translateX(0);
   }
 }
 
@@ -93,23 +102,41 @@
 }
 
 .info-panel-cr-button {
-  position: relative !important;
+  position: relative;
   margin-top: 1.5rem;
-  opacity: 1 !important;
-  visibility: visible !important;
-  color: #d04b36 !important;
-  background: rgba(255, 255, 255, 0.8) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  padding: 0.5rem 0.9rem !important;
-  border-radius: 999px !important;
-  font-size: 0.85rem !important;
-  font-weight: 600 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 0.55rem !important;
-  cursor: pointer !important;
-  width: auto !important;
-  height: auto !important;
+  opacity: 1;
+  visibility: visible;
+  color: #d04b36;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  width: auto;
+  height: auto;
+  transform: none;
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(208, 75, 54, 0),
+    0 0 18px rgba(208, 75, 54, 0),
+    0 0 48px rgba(208, 75, 54, 0),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.info-panel-cr-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(208, 75, 54, 0.4);
+  box-shadow:
+    0 0 0 3px rgba(208, 75, 54, 0.14),
+    0 0 18px rgba(208, 75, 54, 0.45),
+    0 0 48px rgba(208, 75, 54, 0.25),
+    0 4px 12px rgba(208, 75, 54, 0.2);
 }
 
 .info-panel-cr-button svg {
@@ -119,10 +146,15 @@
 }
 
 .info-panel-cr-button .c2pa-indicator-label {
-  display: inline-block !important;
+  display: inline-block;
   max-width: 220px;
-  opacity: 1 !important;
+  opacity: 1;
   overflow: visible;
+  color: #000;
+  font-family: "Inter", sans-serif;
+  font-size: inherit;
+  font-weight: inherit;
+  text-transform: lowercase;
 }
 
 /* Responsive */

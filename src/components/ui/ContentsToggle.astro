@@ -243,10 +243,13 @@ const { title, label = "Contents" } = Astro.props;
     const toggle = document.getElementById('toc-toggle');
     const tocTitleLink = document.querySelector('.toc-title-link') as HTMLElement;
 
+    document.body.classList.remove('toc-open');
+
     if (sidebar && toggle && !toggle.dataset.hasTocListener) {
       toggle.addEventListener('click', () => {
         const isOpen = sidebar.classList.toggle('is-open');
         toggle.classList.toggle('active', isOpen);
+        document.body.classList.toggle('toc-open', isOpen);
       });
       toggle.dataset.hasTocListener = 'true';
     }

@@ -62,7 +62,7 @@
   font-weight: 700;
 }
 
-.thread-op .thread-excerpt {
+.thread-op .thread-subtitle {
   font-size: 1.2rem;
   color: var(--ink, #333);
   margin: 0;

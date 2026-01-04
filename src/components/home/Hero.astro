@@ -9,23 +9,28 @@ import ExifReader from "exifreader";
 import fs from "node:fs";
 import path from "node:path";
 
-// Load metadata for carousel images
-let imageMetadata: Record<string, any> = {};
-if (CAROUSEL_IMAGES.length > 0) {
-  // Extract folder path from first image
-  const firstImagePath = CAROUSEL_IMAGES[0].src;
-  const folderPath = firstImagePath.substring(0, firstImagePath.lastIndexOf('/'));
-  const metadataPath = path.join(process.cwd(), 'public', folderPath, 'metadata.json');
-  
+function getOriginalsDirFromSrc(imgSrc: string): string | null {
+  const parts = imgSrc.split('/').filter(Boolean);
+  const originalsIndex = parts.indexOf('originals');
+  if (originalsIndex === -1) return null;
+  if (originalsIndex >= parts.length - 2) return null;
+  return parts.slice(0, parts.length - 1).join('/');
+}
+
+function loadMetadataForDir(dirPathFromWebRoot: string): Record<string, any> {
+  const metadataPath = path.join(process.cwd(), 'public', dirPathFromWebRoot, 'metadata.json');
   try {
     if (fs.existsSync(metadataPath)) {
       const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
-      imageMetadata = JSON.parse(metadataContent);
+      return JSON.parse(metadataContent);
     }
   } catch (e) {
-    console.warn('Could not load metadata.json for homepage carousel:', e);
+    console.warn('Could not load metadata.json:', metadataPath, e);
   }
+  return {};
 }
+
+const dirMetadataCache = new Map<string, Record<string, any>>();
 
 async function getSmartCaption(imgSrc: string) {
   // Only process local images in public folder
@@ -118,7 +123,15 @@ async function getSmartCaption(imgSrc: string) {
 const images = await Promise.all(
   CAROUSEL_IMAGES.map(async (img) => {
     const filename = img.src.split('/').pop() || '';
-    const meta = imageMetadata[filename]?.photography || {};
+    const dir = getOriginalsDirFromSrc(img.src);
+    let meta: any = {};
+    if (dir) {
+      if (!dirMetadataCache.has(dir)) {
+        dirMetadataCache.set(dir, loadMetadataForDir(dir));
+      }
+      const dirMeta = dirMetadataCache.get(dir) || {};
+      meta = dirMeta[filename]?.photography || {};
+    }
     return {
       src: img.src,
       caption: img.caption || (await getSmartCaption(img.src)),

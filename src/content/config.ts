@@ -21,7 +21,7 @@ const containerEnum = z.enum([
 // ============================================================================
 const baseSchema = z.object({
   title: z.string(),
-  excerpt: z.string(),
+  subtitle: z.string(),
   author: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
@@ -83,7 +83,7 @@ const codeSchema = z.object({
   title: z.string(),
   author: z.string(),
   description: z.string().optional(),
-  excerpt: z.string().optional(),
+  subtitle: z.string().optional(),
   status: z.enum(["private", "draft", "published"]).default("published"),
   
   // Repository metadata
@@ -125,7 +125,7 @@ const codeSchema = z.object({
 // ============================================================================
 const datastorySchema = z.object({
   title: z.string(),
-  excerpt: z.string(),
+  subtitle: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   
@@ -160,7 +160,7 @@ const photogallerySchema = z.object({
   
   // Core content
   title: z.string(),
-  excerpt: z.string(),
+  subtitle: z.string(),
   heroImage: z.string().optional(),
   date: z.date().optional(),
   
@@ -193,7 +193,7 @@ const photogallerySchema = z.object({
 // ============================================================================
 const projectSchema = z.object({
   title: z.string(),
-  excerpt: z.string(),
+  subtitle: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   

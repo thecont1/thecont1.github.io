@@ -57,6 +57,14 @@ npm run astro            # Access Astro CLI directly
 - **Styles**: Custom overlay and indicator styles in `src/styles/c2pa.css`.
 - **Scripts**: Core extraction logic lives in `scripts/c2pa_xtract.py`.
 
+### Image Metadata (EXIF) + `metadata.json`
+- **Build-time extraction**: `scripts/build_exif.py` scans `public/library/originals/` and writes co-located `metadata.json` files per directory.
+- **Scoped extraction**: `scripts/build_exif.py --dir <TOP_FOLDER>` regenerates metadata only for that subtree under `public/library/originals/`.
+- **Dev-time watcher**: `scripts/scaffold-integration.ts` (Astro integration) watches:
+  - `src/content/**` to auto-scaffold new empty `.md/.mdx`
+  - `public/library/originals/**/*.{jpg,jpeg}` to keep `metadata.json` up-to-date by running the scoped Python extractor
+- **Startup sync in dev**: on `npm run dev`, the integration scans `public/library/originals/` and regenerates metadata for any folder whose newest JPG/JPEG is newer than `metadata.json`.
+
 ### Homepage Featured Content
 - **Manual Control**: `src/data/featured.ts` - curated list of featured items
 - **No Auto-fetch**: Homepage "The Projects" section uses manual selection
@@ -83,6 +91,7 @@ npm run astro            # Access Astro CLI directly
   - **Metadata Integration**: Loads `metadata.json` from image folders, displays camera settings, descriptions, copyright
   - **C2PA Integration**: Content Credentials verification via existing C2PA overlay system
   - **Responsive Design**: Adapts info panel position for mobile devices
+- **Homepage/Photogallery carousel metadata**: `src/components/home/Hero.astro` and `src/components/layouts/Photogallery.astro` load `metadata.json` per image directory (not just the first image’s folder).
 - **Usage**: Homepage hero, photogallery carousel layout, project carousels
 - **Styling**: `src/styles/carousel.css` - All carousel-related styles including info panel
 
@@ -93,6 +102,7 @@ npm run astro            # Access Astro CLI directly
 - **Index**: Home page at `src/pages/index.astro`
 - **Static assets**: `public/` directory (served as-is)
 - **High-resolution media**: `public/library/` for photography and visual content
+- **About images**: `public/library/about/` (used by `src/components/home/About.astro`)
 - **Metadata**: `metadata.json` files in image folders contain EXIF data, descriptions, and technical details
 
 ### Styling

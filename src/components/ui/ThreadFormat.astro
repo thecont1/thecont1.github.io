@@ -6,7 +6,7 @@
  * Can be used within any layout or page.
  * 
  * Usage:
- * <ThreadFormat title="My Thread" excerpt="Opening statement">
+ * <ThreadFormat title="My Thread" subtitle="Opening statement">
  *   <p>First tweet content...</p>
  *   <p>Second tweet content...</p>
  *   <img src="/image.jpg" alt="..." />
@@ -16,7 +16,7 @@ import "../../styles/thread.css";
 
 interface Props {
   title?: string;
-  excerpt?: string;
+  subtitle?: string;
   authorName?: string;
   authorHandle?: string;
   avatarUrl?: string;
@@ -26,7 +26,7 @@ interface Props {
 
 const {
   title,
-  excerpt,
+  subtitle,
   authorName = "Mahesh Shantaram",
   authorHandle = "@thecontrarian",
   avatarUrl,
@@ -36,7 +36,7 @@ const {
 ---
 
 <div class={`thread-format ${className}`}>
-  {showHeader && (title || excerpt) && (
+  {showHeader && (title || subtitle) && (
     <header class="thread-op">
       <div class="avatar-column">
         {avatarUrl ? (
@@ -52,7 +52,7 @@ const {
           <span class="handle">{authorHandle}</span>
         </div>
         {title && <h2 class="thread-title">{title}</h2>}
-        {excerpt && <p class="thread-excerpt">{excerpt}</p>}
+        {subtitle && <p class="thread-subtitle">{subtitle}</p>}
       </div>
     </header>
   )}

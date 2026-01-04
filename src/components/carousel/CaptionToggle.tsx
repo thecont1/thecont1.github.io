@@ -11,7 +11,7 @@ export default function CaptionToggle({ enabled, onToggle }: Props) {
       onClick={onToggle}
       title="Toggle image info"
     >
-      ⓘ
+      <span className="carousel-glyph" aria-hidden="true">i</span>
     </button>
   );
 }

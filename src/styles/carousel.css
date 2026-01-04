@@ -110,6 +110,19 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   animation: carousel-bob 2.6s ease-in-out infinite;
+  color: var(--controls-glyph);
+  outline: none;
+  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.carousel-controls button:hover,
+.carousel-controls button:focus-visible {
+  border-color: rgba(208, 75, 54, 0.45);
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(208, 75, 54, 0.14),
+    0 0 18px rgba(208, 75, 54, 0.45),
+    0 0 48px rgba(208, 75, 54, 0.25);
 }
 
 .carousel-controls button:nth-child(2) {

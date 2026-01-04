@@ -14,8 +14,8 @@ export interface FeaturedItem {
   /** Optional: Override the display title */
   displayTitle?: string;
 
-  /** Optional: Override the excerpt/description */
-  displayExcerpt?: string;
+  /** Optional: Override the subtitle/description */
+  displaySubtitle?: string;
 
   /** Optional: Override the hero image */
   displayImage?: string;
@@ -44,19 +44,27 @@ export const FEATURED_ITEMS: FeaturedItem[] = [
 
 export const FEATURED_SECTIONS: FeaturedSection[] = [
   {
-    title: "MATRIMANIA",
+    title: "Photography",
     items: [
-      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage", label: "Essay"},
-      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Name's Bond: A Surmise", label: "Post"},
+      { type: "photogallery", slug: "kashmir", label: "Album" },
+      { type: "photogallery", slug: "matrimania-series", label: "Series" },
+      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
+      { type: "photogallery", slug: "the-african-portraits", label: "Series" },
     ]
   },
 
   {
-    title: "Photography",
+    title: "Travels",
     items: [
-      { type: "photogallery", slug: "matrimania-series", label: "Series" },
-      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
-      { type: "photogallery", slug: "the-african-portraits", label: "Series" },
+      { type: "post", slug: "bundelkhand", label: "Itinerary" },
+    ]
+  },
+
+  {
+    title: "MATRIMANIA",
+    items: [
+      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage", label: "Essay"},
+      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Name's Bond: A Surmise", label: "Post"},
     ]
   },
 

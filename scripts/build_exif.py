@@ -7,6 +7,7 @@ Creates organized metadata files that mirror the directory structure
 import os
 import json
 import sys
+import argparse
 from pathlib import Path
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
@@ -217,19 +218,48 @@ def extract_image_metadata(image_path):
 
 def main():
     """Extract EXIF data and co-locate with images in their directories."""
-    
+
+    parser = argparse.ArgumentParser(
+        description="Extract EXIF data and write co-located metadata.json files"
+    )
+    parser.add_argument(
+        "--dir",
+        dest="dir",
+        default="",
+        help="Limit processing to a subdirectory under public/library/originals (e.g. 'AFRICA' or 'WEDDINGS').",
+    )
+    parser.add_argument(
+        "--file",
+        dest="file",
+        default="",
+        help="Limit processing to a single image file path under public/library/originals.",
+    )
+    args = parser.parse_args()
+
     # Paths
     project_root = Path(__file__).parent.parent
     originals_dir = project_root / "public" / "library" / "originals"
-    
+
+    # Determine scan root
+    scan_root = originals_dir
+    if args.dir:
+        scan_root = originals_dir / args.dir
+    if args.file:
+        scan_root = (originals_dir / args.file).parent
+
+    if not scan_root.exists():
+        print(f"❌ Scan path not found: {scan_root}")
+        sys.exit(1)
+
     # Clean existing metadata files
-    for root, dirs, files in os.walk(originals_dir):
+    clean_root = originals_dir if (not args.dir and not args.file) else scan_root
+    for root, dirs, files in os.walk(clean_root):
         metadata_file = Path(root) / "metadata.json"
         if metadata_file.exists():
             metadata_file.unlink()
             print(f"🗑️  Removed old metadata: {metadata_file.relative_to(project_root)}")
-    
-    print(f"🔍 Scanning for images in: {originals_dir}")
+
+    print(f"🔍 Scanning for images in: {scan_root}")
     
     # Find all image files organized by directory
     image_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif'}
@@ -237,7 +267,7 @@ def main():
     total_processed = 0
     
     # Walk through all subdirectories
-    for root, dirs, files in os.walk(originals_dir):
+    for root, dirs, files in os.walk(scan_root):
         root_path = Path(root)
         
         # Skip if no image files in this directory
@@ -288,20 +318,21 @@ def main():
     print(f"💾 Created {len(directories_processed)} metadata files (co-located with images)")
     print(f"📁 Metadata files are co-located in public/library/originals/")
     
-    # Test specific image mentioned by user
-    test_dir = originals_dir / "TheAfricanPortraits"
-    test_file = test_dir / "metadata.json"
-    if test_file.exists():
-        with open(test_file, 'r', encoding='utf-8') as f:
-            test_data = json.load(f)
-        
-        test_image = "MS201705-AfricanPortraits0060.jpg"
-        if test_image in test_data:
-            print(f"\n🎯 Test image metadata:")
-            photo = test_data[test_image].get("photography", {})
-            print(f"  Title: {photo.get('title', 'N/A')}")
-            print(f"  Camera: {photo.get('camera_make', '')} {photo.get('camera_model', '')}")
-            print(f"  Description: {photo.get('description', 'N/A')[:100]}...")
+    # Test specific image mentioned by user (only in full scan)
+    if not args.dir and not args.file:
+        test_dir = originals_dir / "TheAfricanPortraits"
+        test_file = test_dir / "metadata.json"
+        if test_file.exists():
+            with open(test_file, 'r', encoding='utf-8') as f:
+                test_data = json.load(f)
+            
+            test_image = "MS201705-AfricanPortraits0060.jpg"
+            if test_image in test_data:
+                print(f"\n🎯 Test image metadata:")
+                photo = test_data[test_image].get("photography", {})
+                print(f"  Title: {photo.get('title', 'N/A')}")
+                print(f"  Camera: {photo.get('camera_make', '')} {photo.get('camera_model', '')}")
+                print(f"  Description: {photo.get('description', 'N/A')[:100]}...")
 
 if __name__ == "__main__":
     main()

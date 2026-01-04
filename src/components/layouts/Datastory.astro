@@ -20,7 +20,7 @@ const backgroundColor = post.data.backgroundColor || "var(--surface)";
   <header class="datastory-header">
     <div class="meta-top">Data Story</div>
     <h1>{post.data.title}</h1>
-    {post.data.excerpt && <p class="lead">{post.data.excerpt}</p>}
+    {post.data.subtitle && <p class="lead">{post.data.subtitle}</p>}
     <div class="story-author-line">
       <span class="by">by</span>
       <span class="author-name">{post.data.author}</span>

@@ -95,7 +95,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   </header>
 
   <div class="post-interactions-bar">
-    {post.data.excerpt && <p class="post-subtitle">{post.data.excerpt}</p>}
+    {post.data.subtitle && <p class="post-subtitle">{post.data.subtitle}</p>}
   </div>
 
   <div class="post-layout-container">
@@ -112,10 +112,12 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     </div>
   </div>
 
-  <Lightbox 
-    selector=".post-body" 
-    gallery={post.data.lightbox?.gallery ?? false} 
-  />
+  {(post.data.lightbox?.gallery ?? false) && (
+    <Lightbox 
+      selector=".post-body" 
+      gallery={true} 
+    />
+  )}
   <C2PAOverlay />
 </article>
 
@@ -242,6 +244,26 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
     const showPanelForImage = async (img) => {
       if (hideTimer) clearTimeout(hideTimer);
+
+      // Position first (hidden) so the panel doesn't appear in a default position and then jump.
+      const rect = img.getBoundingClientRect();
+      const panelWidth = 320;
+      const gap = 16;
+      const centerY = rect.top + rect.height / 2;
+      let left = rect.right + gap;
+
+      if (left + panelWidth > window.innerWidth - gap) {
+        left = rect.left - panelWidth - gap;
+      }
+      if (left < gap) left = gap;
+
+      hoverPanel.style.display = 'block';
+      hoverPanel.style.visibility = 'hidden';
+      hoverPanel.style.top = `${Math.max(gap, Math.min(window.innerHeight - gap, centerY))}px`;
+      hoverPanel.style.left = `${left}px`;
+      hoverPanel.style.right = 'auto';
+      hoverPanel.style.transform = 'translateY(-50%)';
+
       const meta = await getMetadataForImage(img.currentSrc || img.src);
       if (!meta) {
         hidePanel();
@@ -311,22 +333,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
         );
       }
 
-      const rect = img.getBoundingClientRect();
-      const panelWidth = 320;
-      const gap = 16;
-      const centerY = rect.top + rect.height / 2;
-      let left = rect.right + gap;
-
-      if (left + panelWidth > window.innerWidth - gap) {
-        left = rect.left - panelWidth - gap;
-      }
-      if (left < gap) left = gap;
-
-      hoverPanel.style.top = `${Math.max(gap, Math.min(window.innerHeight - gap, centerY))}px`;
-      hoverPanel.style.left = `${left}px`;
-      hoverPanel.style.right = 'auto';
-      hoverPanel.style.transform = 'translateY(-50%)';
-      hoverPanel.style.display = 'block';
+      hoverPanel.style.visibility = 'visible';
     };
 
     if (!hoverPanel.dataset.hasHoverListeners) {

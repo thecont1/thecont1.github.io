@@ -4,6 +4,7 @@ import Lightbox from "../ui/Lightbox.astro";
 import ContentsToggle from "../ui/ContentsToggle.astro";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
+import Note from "../ui/Note.astro";
 import "../../styles/longform.css";
 
 interface Props {
@@ -59,7 +60,7 @@ const totalChapters = chapters.length;
     
     <h1 class="post-title">{post.data.title}</h1>
     
-    {post.data.excerpt && <p class="post-lead">{post.data.excerpt}</p>}
+    {post.data.subtitle && <p class="post-lead">{post.data.subtitle}</p>}
 
     <div class="post-author-line">
       <span class="by">by</span>
@@ -87,7 +88,7 @@ const totalChapters = chapters.length;
     )}
 
     <div class="post-body" id="longform-content">
-      <Content />
+      <Content components={{ Note, note: Note }} />
     </div>
 
     <!-- Chapter Navigation -->

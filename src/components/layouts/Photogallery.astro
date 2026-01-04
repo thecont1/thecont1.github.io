@@ -37,23 +37,28 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
   day: 'numeric'
 }).format(post.data.date) : null;
 
-// Load metadata for carousel images
-let imageMetadata: Record<string, any> = {};
-if (layoutType === "carousel" && images.length > 0) {
-  // Extract folder path from first image
-  const firstImagePath = images[0].src;
-  const folderPath = firstImagePath.substring(0, firstImagePath.lastIndexOf('/'));
-  const metadataPath = path.join(process.cwd(), 'public', folderPath, 'metadata.json');
-  
+function getOriginalsDirFromSrc(imgSrc: string): string | null {
+  const parts = imgSrc.split('/').filter(Boolean);
+  const originalsIndex = parts.indexOf('originals');
+  if (originalsIndex === -1) return null;
+  if (originalsIndex >= parts.length - 2) return null;
+  return parts.slice(0, parts.length - 1).join('/');
+}
+
+function loadMetadataForDir(dirPathFromWebRoot: string): Record<string, any> {
+  const metadataPath = path.join(process.cwd(), 'public', dirPathFromWebRoot, 'metadata.json');
   try {
     if (fs.existsSync(metadataPath)) {
       const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
-      imageMetadata = JSON.parse(metadataContent);
+      return JSON.parse(metadataContent);
     }
   } catch (e) {
-    console.warn('Could not load metadata.json:', e);
+    console.warn('Could not load metadata.json:', metadataPath, e);
   }
+  return {};
 }
+
+const dirMetadataCache = new Map<string, Record<string, any>>();
 ---
 
 {layoutType === "carousel" ? (
@@ -65,7 +70,15 @@ if (layoutType === "carousel" && images.length > 0) {
         <Carousel 
           images={images.map(img => {
             const filename = img.src.split('/').pop() || '';
-            const meta = imageMetadata[filename]?.photography || {};
+            const dir = getOriginalsDirFromSrc(img.src);
+            let meta: any = {};
+            if (dir) {
+              if (!dirMetadataCache.has(dir)) {
+                dirMetadataCache.set(dir, loadMetadataForDir(dir));
+              }
+              const dirMeta = dirMetadataCache.get(dir) || {};
+              meta = dirMeta[filename]?.photography || {};
+            }
             return {
               src: img.src,
               caption: img.caption,
@@ -81,8 +94,8 @@ if (layoutType === "carousel" && images.length > 0) {
         <div class="carousel-curtain-content">
           <span class="carousel-curtain-category">{collectionName}</span>
           <h1 class="carousel-curtain-title">{post.data.title}</h1>
-          {post.data.excerpt && (
-            <p class="carousel-curtain-subtitle">{post.data.excerpt}</p>
+          {post.data.subtitle && (
+            <p class="carousel-curtain-subtitle">{post.data.subtitle}</p>
           )}
         </div>
       </div>
@@ -116,7 +129,7 @@ if (layoutType === "carousel" && images.length > 0) {
           <span class="author-name">{post.data.author}</span>
         </div>
 
-        {post.data.excerpt && <p class="photogallery-lead">{post.data.excerpt}</p>}
+        {post.data.subtitle && <p class="photogallery-subtitle">{post.data.subtitle}</p>}
       </header>
 
       <!-- Gallery Content -->

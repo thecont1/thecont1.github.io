@@ -6,7 +6,7 @@ html {
 .editorial-post {
   width: 100%;
   margin: 0rem;
-  padding: 10rem 5rem 8rem;
+  padding: 9rem clamp(1.25rem, 5vw, 5rem) 8rem;
   background: var(--page-bg, #f9e4e4);
   min-height: 100vh;
   position: relative;
@@ -23,52 +23,54 @@ html {
   box-sizing: border-box;
 }
 
-.post-meta-top {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
+.post-kicker {
   font-family: "Inter", sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
-  color: var(--muted);
-  margin-bottom: 2rem;
-}
-
-.post-meta-top .category {
+  letter-spacing: 0.18em;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--accent, #d04b36);
-  font-weight: 700;
+  margin: 0 auto 2.25rem;
 }
 
 .post-title {
   font-family: "Fraunces", serif;
-  font-size: clamp(3rem, 8vw, 5rem);
-  line-height: 1;
+  font-size: clamp(3.2rem, 7.5vw, 5.2rem);
+  line-height: 0.98;
   font-weight: 300;
-  margin-bottom: 2.5rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  margin: 0 auto 1.75rem;
 }
 
-.post-lead {
+.post-subtitle {
   font-family: "Fraunces", serif;
-  font-size: 1.6rem;
-  line-height: 1.4;
+  font-size: 1.55rem;
+  line-height: 1.45;
   font-style: italic;
-  color: var(--muted);
-  max-width: 780px;
-  margin: 0 auto 3rem;
+  color: rgba(0, 0, 0, 0.7);
+  max-width: 52ch;
+  margin: 0.25rem auto 2.25rem;
 }
 
 .post-author-line {
-  font-family: "DM Sans", sans-serif;
-  font-size: 1rem;
+  font-family: "Inter", sans-serif;
+  font-size: 1.05rem;
   color: var(--ink);
+  font-weight: 700;
 }
 
 .post-author-line .by {
-  font-style: italic;
-  color: var(--muted);
-  margin-right: 0.4rem;
+  font-style: normal;
+  letter-spacing: 0.02em;
+  margin-right: 0.35rem;
+}
+
+.post-date-line {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: rgba(0, 0, 0, 0.55);
+  margin-top: 0.5rem;
 }
 
 /* Hero Image styling */
@@ -98,41 +100,59 @@ html {
 
 .post-body {
   font-family: "Fraunces", serif;
-  font-size: 1.4rem;
-  line-height: 1.7;
+  font-size: 1.3rem;
+  line-height: 1.9;
+  font-weight: 300;
   color: var(--ink);
-  max-width: 840px;
-  width: calc(100% - 4rem);
+  max-width: 62ch;
+  width: 100%;
   margin: 0 auto;
-  padding: 0;
+  padding: 0 2rem;
   box-sizing: border-box;
   display: block;
   position: relative;
   z-index: 1;
 }
 
+/* Reserve a stable left gutter so opening/closing the TOC does not shift the text column */
+.editorial-post {
+  padding-left: calc(clamp(1.25rem, 5vw, 5rem) - 1.8rem);
+}
+
+@media (max-width: 768px) {
+  .editorial-post {
+    padding-left: clamp(1.25rem, 5vw, 5rem);
+  }
+}
+
 .post-body p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.6rem;
 }
 
 /* Anchor targets (H2) - Now always visible as requested */
 .post-body h2 {
   display: block !important;
   font-family: "Fraunces", serif;
-  font-size: 2.2rem;
+  font-size: 2.1rem;
   font-weight: 400;
-  margin: 5rem 0 1.5rem -2rem;
+  margin: 4.5rem 0 1.25rem -1.75rem;
   line-height: 1.2;
   scroll-margin-top: 6rem;
   position: relative;
   z-index: 1;
 }
 
+@media (max-width: 768px) {
+  .post-body h2 {
+    margin-left: 0;
+  }
+}
+
 /* Over-the-top Dropcaps - Refined for "Inside" effect */
 .editorial-post .post-body .dropcap {
   position: relative;
   z-index: 1;
-  margin-top: 3rem;
+  margin-top: 2rem;
   margin-bottom: 3rem;
   padding-left: 0 !important;
 }
@@ -140,10 +160,10 @@ html {
 .editorial-post .post-body .dropcap::before {
   content: attr(data-letter);
   position: absolute;
-  top: -8rem;
+  top: -7rem;
   left: -8rem;
   font-family: "Fraunces", serif;
-  font-size: 52rem;
+  font-size: 48rem;
   line-height: 1;
   font-weight: 100;
   color: var(--accent);
@@ -242,7 +262,8 @@ html {
   float: left;
   font-family: "Fraunces", serif;
   margin-right: -0.75rem;
-  padding-top: 0.5rem;
+  margin-left: -0.35rem;
+  padding: 0.5rem 1.0rem 0rem 0rem;
   color: var(--accent);
 }
 
@@ -257,7 +278,7 @@ html {
 
 /* Pull Quotes (Markdown blockquote with .pull-quote class) */
 .post-body blockquote.pull-quote {
-  margin: 2rem -4rem;
+  margin: 2.25rem -2.5rem;
   padding: 3rem 0;
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
@@ -271,6 +292,15 @@ html {
   position: relative;
   max-width: none;
   width: auto;
+}
+
+@media (max-width: 768px) {
+  .post-body blockquote.pull-quote {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 2.25rem 0;
+    font-size: 1.75rem;
+  }
 }
 
 .post-body blockquote.pull-quote::before {
@@ -318,7 +348,7 @@ html {
 /* Fallback for literal <note> tag */
 .post-body note {
   display: block;
-  --note-gutter: 360px;
+  --note-gutter: 330px;
   float: right;
   clear: right;
   width: 280px;
