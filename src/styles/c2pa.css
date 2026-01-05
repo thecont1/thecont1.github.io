@@ -468,6 +468,19 @@
    margin-right: auto;
  }
 
+ /* Post layout: ensure the injected wrapper does not change text flow */
+ .post-body .c2pa-media-wrap {
+   display: block;
+   width: 100%;
+ }
+
+ .post-body .c2pa-media-wrap > img,
+ .post-body .c2pa-media-wrap > picture,
+ .post-body .c2pa-media-wrap > picture > img {
+   margin-left: auto;
+   margin-right: auto;
+ }
+
 /* Exclude info panel button from base indicator positioning and visibility */
 .c2pa-indicator.info-panel-cr-button {
   position: relative !important;

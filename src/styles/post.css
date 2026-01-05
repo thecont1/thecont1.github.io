@@ -290,7 +290,7 @@
 .post-body img {
   width: 95%;
   height: auto;
-  margin: 3rem auto;
+  margin: 0.5rem auto;
   display: block;
   border-radius: 2px;
   border: 0.5px solid #777;
@@ -313,7 +313,7 @@
 }
 
 .post-body figure {
-  margin: 3.5rem auto;
+  margin: 2.5rem auto;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -327,7 +327,7 @@
   font-style: italic;
   font-size: 0.9rem;
   color: #3b3b3b;
-  margin: -1.5rem 2rem 0;
+  margin: 0.5rem 2rem 0;
   line-height: 1.3rem;
 }
 
