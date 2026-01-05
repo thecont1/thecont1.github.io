@@ -15,32 +15,55 @@ The `.gitignore` excludes image files, but `metadata.json` files are tracked in 
 
 ## Adding New Images
 
-### 1. Add images locally
-Place your images in the appropriate directory:
+### Recommended: Upload directly to R2, then generate metadata
+
+**1. Upload images directly to R2:**
 ```bash
-public/library/originals/YOUR_DIRECTORY_NAME/image1.jpg
-public/library/originals/YOUR_DIRECTORY_NAME/image2.jpg
+# Using rclone
+rclone sync ~/my_photos/ myR2:thecontrarian-library/originals/NEW_SERIES/
+
+# Or use Cloudflare R2 web dashboard
 ```
 
-### 2. Upload to R2
+**2. Generate metadata:**
 ```bash
-# Upload a specific directory
-./scripts/upload_to_r2.sh YOUR_DIRECTORY_NAME
-
-# Or upload all directories
-./scripts/upload_to_r2.sh
+./scripts/generate_r2_metadata.sh NEW_SERIES
 ```
 
 This script will:
+- Download images from R2 temporarily
 - Generate `metadata.json` with EXIF data
-- Upload images to R2
 - Upload metadata to R2
-- Keep files locally for C2PA processing
+- Keep metadata.json locally (for C2PA)
+- Clean up downloaded images
 
-### 3. Commit metadata to Git
+**3. Commit metadata to Git:**
 ```bash
-git add public/library/originals/YOUR_DIRECTORY_NAME/metadata.json
-git commit -m "Add YOUR_DIRECTORY_NAME images"
+git add public/library/originals/NEW_SERIES/metadata.json
+git commit -m "Add NEW_SERIES metadata"
+git push
+```
+
+---
+
+### Alternative: Upload from local directory
+
+If you prefer to keep images locally first:
+
+**1. Add images locally:**
+```bash
+cp ~/my_photos/*.jpg public/library/originals/NEW_SERIES/
+```
+
+**2. Upload to R2:**
+```bash
+./scripts/upload_to_r2.sh NEW_SERIES
+```
+
+**3. Commit metadata to Git:**
+```bash
+git add public/library/originals/NEW_SERIES/metadata.json
+git commit -m "Add NEW_SERIES images"
 git push
 ```
 
@@ -87,10 +110,11 @@ This will:
 
 | Task | Command |
 |------|---------|
-| Add new images | `./scripts/upload_to_r2.sh DIRECTORY` |
-| Update existing images | `./scripts/upload_to_r2.sh DIRECTORY` |
-| Upload all directories | `./scripts/upload_to_r2.sh` |
-| Sync from R2 | `./scripts/sync_r2_metadata.sh` |
+| **Generate metadata (recommended)** | `./scripts/generate_r2_metadata.sh DIRECTORY` |
+| Upload images from local | `./scripts/upload_to_r2.sh DIRECTORY` |
+| Upload all local directories | `./scripts/upload_to_r2.sh` |
+| Sync from R2 (recovery) | `./scripts/sync_r2_metadata.sh` |
+| Direct R2 upload | `rclone sync local/ myR2:thecontrarian-library/originals/DIR/` |
 | Extract metadata only | `uv run python scripts/build_exif.py --dir DIRECTORY` |
 
 ---
