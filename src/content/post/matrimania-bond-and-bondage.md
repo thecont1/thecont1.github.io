@@ -8,7 +8,7 @@ container: matrimania
 heroImage: https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA/MS201112-AartiNitin0341.jpg
 toc: false
 lightbox:
-  gallery: true
+  gallery: false
 ---
 
 Kalindi’s marriage was made in tax haven. Her big day was actually a strategic joint venture between two business magnates, the kind who, if they sneezed, could give the Sensex a slipped disc. Kalindi’s father got an early foothold into the CCTV industry. As Indians became more insecure, his business grew by leaps and bounds. She will marry into the family that owns exclusive rights to sell sugar doughnuts and deep-fried chicken to half the population. Needless to say, in the diabetes capital of the world, business is booming.

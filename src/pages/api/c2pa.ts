@@ -21,6 +21,36 @@ export const ALL: APIRoute = async ({ request, url }) => {
   return handleRequest(request, url);
 };
 
+async function resolvePythonBinary(rootDir: string): Promise<string> {
+  const envPython = process.env.PYTHON_BIN;
+  if (envPython && envPython.trim() !== '') return envPython;
+
+  const candidates = [
+    path.join(rootDir, '.venv', 'bin', 'python3'),
+    path.join(rootDir, '.venv', 'bin', 'python'),
+    'python3',
+    'python'
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      if (candidate.startsWith(rootDir)) {
+        await fs.access(candidate);
+      } else {
+        // Validate it's available in PATH
+        await execPromise(`command -v ${candidate}`);
+      }
+      return candidate;
+    } catch {
+      // try next
+    }
+  }
+
+  throw new Error(
+    'Python interpreter not found. Set PYTHON_BIN or ensure python is available (recommended: run `uv sync` during build to create .venv).'
+  );
+}
+
 async function handleRequest(request: Request, url: URL) {
   // Handle preflight OPTIONS request
   if (request.method === 'OPTIONS') {
@@ -185,7 +215,7 @@ async function handleRequest(request: Request, url: URL) {
     const tmpPath = path.join(os.tmpdir(), `c2pa-${Date.now()}-${Math.random().toString(16).slice(2)}-${baseName}`);
     await fs.writeFile(tmpPath, imgBuf);
 
-    const pythonPath = path.join(rootDir, '.venv', 'bin', 'python3');
+    const pythonPath = await resolvePythonBinary(rootDir);
     const scriptPath = path.join(rootDir, 'scripts', 'c2pa_xtract.py');
 
     const command = `"${pythonPath}" "${scriptPath}" "${tmpPath}" --json`;

@@ -109,7 +109,19 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             container = imgEl.parentElement;
           }
 
-          if (container && !container.querySelector('.c2pa-indicator')) {
+          // Only avoid duplicating indicators that were injected by this script.
+          // Other UI (e.g., info panels) may use the base .c2pa-indicator class too.
+          if (container) {
+            // If multiple injected indicators exist (e.g. after view transitions), keep only the first.
+            const injected = container.querySelectorAll('.c2pa-indicator.c2pa-injected');
+            if (injected.length > 1) {
+              injected.forEach((el, idx) => {
+                if (idx > 0) el.remove();
+              });
+            }
+          }
+
+          if (container && !container.querySelector('.c2pa-indicator.c2pa-injected')) {
             const containerEl = container as HTMLElement;
             
             // Critical for indicator positioning
@@ -392,6 +404,9 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
   // Initialize on page load
   function initC2PA() {
+    if ((window as any).__c2paManagerInitialized) return;
+    (window as any).__c2paManagerInitialized = true;
+
     const manager = new C2PAManager();
     // Run injection again on any DOM changes to catch late-loading images
     const observer = new MutationObserver(() => {

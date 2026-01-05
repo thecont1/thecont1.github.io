@@ -32,9 +32,10 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
 <article class="editorial-post" id="top" style={`--page-bg: ${backgroundColor};`}>
   <header class="post-header">
-    {post.data.category && (
+    {(post.data.category || (post.data as any).project) && (
       <div class="post-kicker">
-        <span class="category">{post.data.category}</span>
+        {post.data.category && <span class="category">{post.data.category}</span>}
+        {(post.data as any).project && <span class="category">{(post.data as any).project}</span>}
       </div>
     )}
 
