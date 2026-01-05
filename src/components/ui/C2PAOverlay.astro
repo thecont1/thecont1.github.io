@@ -92,11 +92,13 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           const src = imgEl.getAttribute('src');
           if (!src || !(src.includes('/library/originals/') || src.includes('r2.dev/originals/'))) return;
 
-          // Post pages: avoid redundant in-image indicators.
-          // Content Credentials can be opened from the hover InfoPanel and from the Lightbox.
-          const inPost = !!imgEl.closest('.simple-post');
+          // Skip injection inside the lightbox itself (it has its own CR button)
           const inLightbox = !!(imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure'));
-          if (inPost && !inLightbox) return;
+          if (inLightbox) return;
+
+          // Post pages with hover InfoPanel: skip injection (CR accessible from InfoPanel)
+          const inPost = !!imgEl.closest('.simple-post');
+          if (inPost) return;
 
           // Find a suitable container for the indicator
           let container = imgEl.closest('figure') || 
@@ -109,20 +111,53 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             container = imgEl.parentElement;
           }
 
-          // Only avoid duplicating indicators that were injected by this script.
-          // Other UI (e.g., info panels) may use the base .c2pa-indicator class too.
-          if (container) {
-            // If multiple injected indicators exist (e.g. after view transitions), keep only the first.
-            const injected = container.querySelectorAll('.c2pa-indicator.c2pa-injected');
-            if (injected.length > 1) {
-              injected.forEach((el, idx) => {
-                if (idx > 0) el.remove();
-              });
+          const pictureEl = imgEl.closest('picture');
+          const mediaNode = (pictureEl && pictureEl.contains(imgEl)) ? pictureEl : imgEl;
+          const existingWrap = (mediaNode as HTMLElement).closest('.c2pa-media-wrap');
+
+          let indicatorHost: HTMLElement | null = existingWrap as HTMLElement | null;
+          if (!indicatorHost) {
+            const parent = (mediaNode as HTMLElement).parentElement;
+            if (parent) {
+              const wrapEl = document.createElement('div');
+              wrapEl.className = 'c2pa-media-wrap';
+              parent.insertBefore(wrapEl, mediaNode as any);
+              wrapEl.appendChild(mediaNode as any);
+              indicatorHost = wrapEl;
+            } else {
+              indicatorHost = container as HTMLElement | null;
             }
           }
 
-          if (container && !container.querySelector('.c2pa-indicator.c2pa-injected')) {
-            const containerEl = container as HTMLElement;
+          if (indicatorHost && indicatorHost.dataset.c2paSized !== 'true') {
+            indicatorHost.dataset.c2paSized = 'true';
+            const applySize = () => {
+              const rect = imgEl.getBoundingClientRect();
+              if (!rect || rect.width <= 0 || rect.height <= 0) return;
+              indicatorHost!.style.width = `${Math.round(rect.width)}px`;
+              indicatorHost!.style.height = `${Math.round(rect.height)}px`;
+            };
+            if (imgEl.complete) requestAnimationFrame(applySize);
+            else imgEl.addEventListener('load', () => requestAnimationFrame(applySize), { once: true });
+            if (typeof ResizeObserver !== 'undefined') {
+              const ro = new ResizeObserver(() => applySize());
+              ro.observe(imgEl);
+            }
+          }
+
+          // Only avoid duplicating indicators that were injected by this script.
+          // Other UI (e.g., info panels) may use the base .c2pa-indicator class too.
+          if (indicatorHost) {
+            // If multiple injected indicators exist (e.g. after view transitions), keep only the first.
+            const injected = indicatorHost.querySelectorAll('.c2pa-indicator.c2pa-injected');
+            if (injected.length > 0) {
+              // Already has an indicator, don't add another
+              return;
+            }
+          }
+
+          if (indicatorHost && !indicatorHost.querySelector('.c2pa-indicator.c2pa-injected')) {
+            const containerEl = indicatorHost;
             
             // Critical for indicator positioning
             containerEl.style.position = 'relative';
@@ -144,9 +179,17 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
               if (currentSrc) this.open(currentSrc);
             });
             
-            container.appendChild(btn);
+            containerEl.appendChild(btn);
           }
         };
+
+        // If this image has been processed before, still re-check injection.
+        // Essay layout scripts may move images into figures after initial injection.
+        if (imgEl.dataset.c2paProcessed === 'true') {
+          updateIndicator();
+          return;
+        }
+        imgEl.dataset.c2paProcessed = 'true';
 
         updateIndicator();
 

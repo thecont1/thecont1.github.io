@@ -15,6 +15,34 @@
   text-align: left;
 }
 
+/* Kicker / Collection Type */
+.simple-post .post-kicker {
+  font-family: "Inter", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent, #d04b36);
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.simple-post .post-kicker .collection-type {
+  color: var(--accent, #d04b36);
+}
+
+.simple-post .post-kicker .category {
+  color: var(--muted, #6b6b6b);
+}
+
+.simple-post .post-kicker .category::before {
+  content: "·";
+  margin-right: 0.75rem;
+  color: var(--muted, #6b6b6b);
+}
+
 .simple-post .post-title {
   font-family: "Inter", system-ui, sans-serif;
   font-size: clamp(2.5rem, 5vw, 3.5rem);

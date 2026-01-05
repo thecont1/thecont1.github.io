@@ -83,6 +83,11 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
 <article class="simple-post" data-bg={backgroundColor}>
   <header class="post-header">
+    <div class="post-kicker">
+      <span class="collection-type">Post</span>
+      {post.data.category && <span class="category">{post.data.category}</span>}
+    </div>
+    
     <h1 class="post-title">{post.data.title}</h1>
     
     <div class="post-author-row">

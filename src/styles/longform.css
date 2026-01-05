@@ -30,6 +30,11 @@
   margin-bottom: 2rem;
 }
 
+.post-meta-top .collection-type {
+  color: var(--accent, #d04b36);
+  font-weight: 700;
+}
+
 .post-meta-top .category {
   color: var(--accent, #d04b36);
   font-weight: 700;

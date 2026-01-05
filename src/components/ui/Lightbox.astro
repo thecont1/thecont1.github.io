@@ -5,18 +5,20 @@
   - Handles opening, closing, and basic accessibility.
 */
 import "../../styles/lightbox.css";
+import "../../styles/info-panel.css";
 import IconBulb from "../icons/IconBulb.astro";
 import IconCR from "../icons/IconCR.astro";
 
 interface Props {
   selector?: string; // CSS selector to scope image listeners (e.g., '.post-content')
   gallery?: boolean; // Whether to allow cycling through images
+  includeHero?: boolean; // Whether to include hero image in gallery
 }
 
-const { selector = "main", gallery = true } = Astro.props;
+const { selector = "main", gallery = true, includeHero = false } = Astro.props;
 ---
 
-<div id="lightbox" class="lightbox" aria-hidden="true" data-selector={selector} data-gallery={gallery.toString()}>
+<div id="lightbox" class="lightbox" aria-hidden="true" data-selector={selector} data-gallery={gallery.toString()} data-include-hero={includeHero.toString()}>
   <div class="lightbox-overlay"></div>
   
   <div class="lightbox-main">
@@ -75,6 +77,7 @@ const { selector = "main", gallery = true } = Astro.props;
 
     const gallery = lightbox.dataset.gallery === "true";
     const selector = lightbox.dataset.selector || "main";
+    const includeHero = lightbox.dataset.includeHero === "true";
     const lightboxImages = document.querySelectorAll(".lightbox-img");
     const caption = document.getElementById("lightbox-caption");
     const closeBtn = document.getElementById("lightbox-close");
@@ -93,6 +96,44 @@ const { selector = "main", gallery = true } = Astro.props;
     let activeImgIndex = 0;
     let isTransitioning = false;
 
+    // Cache metadata by directory to avoid redundant fetches
+    const metadataCache = (window.__lightboxMetadataCache ||= new Map());
+
+    const formatDate = (dateStr) => {
+      if (!dateStr) return '';
+      try {
+        const [datePart] = dateStr.split(' ');
+        const [year, month, day] = datePart.split(':');
+        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      } catch {
+        return dateStr;
+      }
+    };
+
+    const formatCamera = (make, model) => {
+      if (!model) return '';
+      const cleanModel = make && model.includes(make) ? model.replace(make, '').trim() : model;
+      return cleanModel;
+    };
+
+    const toInfoPanelMetadata = (meta) => {
+      const photo = meta?.photography || {};
+      const description = meta?.exif?.ImageDescription || meta?.description || '';
+      return {
+        camera_make: photo.camera_make,
+        camera_model: photo.camera_model,
+        lens_model: photo.lens_model,
+        aperture: photo.aperture,
+        shutter_speed: photo.shutter_speed,
+        iso: photo.iso,
+        focal_length: photo.focal_length,
+        date_original: photo.date_original,
+        copyright: photo.copyright,
+        description,
+      };
+    };
+
     const getMetadata = async (imgUrl) => {
       try {
         const url = new URL(imgUrl, window.location.origin);
@@ -100,18 +141,19 @@ const { selector = "main", gallery = true } = Astro.props;
         const pathParts = imagePath.split('/');
         const filename = pathParts[pathParts.length - 1];
         const originalsIndex = pathParts.indexOf('originals');
-        if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) return {};
-        
+        if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) return null;
+
         const directory = pathParts[originalsIndex + 1];
-        const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
-        
-        const response = await fetch(metadataUrl);
-        if (!response.ok) return {};
-        
-        const directoryMetadata = await response.json();
-        return directoryMetadata[filename] || {};
-      } catch (e) {
-        return {};
+        const cacheKey = `originals:${directory}`;
+        if (!metadataCache.has(cacheKey)) {
+          const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
+          const resp = await fetch(metadataUrl);
+          metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
+        }
+        const dirMeta = metadataCache.get(cacheKey);
+        return dirMeta && dirMeta[filename] ? dirMeta[filename] : null;
+      } catch {
+        return null;
       }
     };
 
@@ -129,32 +171,52 @@ const { selector = "main", gallery = true } = Astro.props;
       if (exifContainer) {
         exifContainer.innerHTML = '<p class="loading-meta">Fetching metadata...</p>';
         try {
-          const data = await getMetadata(targetImgEl.src);
-          if (!capText && data?.exif?.ImageDescription) {
-            const imageDesc = data.exif.ImageDescription;
-            if (imageDesc && imageDesc.length > 10) caption.textContent = imageDesc;
+          const meta = await getMetadata(targetImgEl.currentSrc || targetImgEl.src);
+          if (!meta) {
+            exifContainer.innerHTML = `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} × ${targetImgEl.naturalHeight}</p>`;
+            return;
           }
-          
-          if (data && !data.error && (data.exif || data.photography)) {
-            let exifHtml = '';
-            if (data.photography) {
-              const photo = data.photography;
-              if (photo.camera_make || photo.camera_model) {
-                exifHtml += `<p class="exif-row"><strong>Camera:</strong> ${[photo.camera_make, photo.camera_model].filter(Boolean).join(' ')}</p>`;
-              }
-              if (photo.lens_model) exifHtml += `<p class="exif-row"><strong>Lens:</strong> ${photo.lens_model}</p>`;
-              const settings = [photo.shutter_speed, photo.aperture, photo.iso ? `ISO ${photo.iso}` : '', photo.focal_length].filter(Boolean).join('  •  ');
-              if (settings) exifHtml += `<p class="exif-row"><strong>Settings:</strong> ${settings}</p>`;
-              const date = photo.date_original || photo.date_taken;
-              if (date) exifHtml += `<p class="exif-row"><strong>Date Taken:</strong> ${date}</p>`;
-              if (photo.artist) exifHtml += `<p class="exif-row"><strong>Artist:</strong> ${photo.artist}</p>`;
-              if (photo.copyright) exifHtml += `<p class="exif-row"><strong>Copyright:</strong> ${photo.copyright}</p>`;
-            }
-            if (data.width && data.height) exifHtml += `<p class="exif-row"><strong>Dimensions:</strong> ${data.width} × ${data.height}</p>`;
-            if (data.format) exifHtml += `<p class="exif-row"><strong>Format:</strong> ${data.format}</p>`;
-            exifContainer.innerHTML = exifHtml || `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} × ${targetImgEl.naturalHeight}</p>`;
-          } else {
-            exifContainer.innerHTML = `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} x ${targetImgEl.naturalHeight}</p><p class="exif-row"><strong>Format:</strong> ${targetImgEl.src.split('.').pop().toUpperCase()}</p>`;
+
+          const m = toInfoPanelMetadata(meta);
+          const camera = formatCamera(m.camera_make, m.camera_model);
+          const date = formatDate(m.date_original);
+          const specs = [m.focal_length, m.aperture, m.shutter_speed, m.iso ? `ISO ${m.iso}` : null]
+            .filter(Boolean)
+            .join(' · ');
+
+          if (!capText && m.description && m.description.length > 10) {
+            caption.textContent = m.description;
+          }
+
+          const rows = [];
+          if (camera) rows.push({ label: 'Camera', value: camera });
+          if (m.lens_model) rows.push({ label: 'Lens', value: m.lens_model });
+          if (specs) rows.push({ label: 'Settings', value: specs });
+          if (date) rows.push({ label: 'Date', value: date });
+
+          exifContainer.innerHTML = `
+            <div class="carousel-info-panel">
+              <div class="info-panel-header">
+                <span class="info-panel-title">Metadata</span>
+              </div>
+
+              ${m.description ? `<p class="info-panel-description"></p>` : ''}
+
+              <div class="info-panel-details">
+                ${rows
+                  .map(
+                    (r) => `<div class="info-panel-row"><span class="info-panel-label">${r.label}</span><span class="info-panel-value">${r.value}</span></div>`
+                  )
+                  .join('')}
+              </div>
+
+              ${m.copyright ? `<div class="info-panel-copyright">${m.copyright}</div>` : ''}
+            </div>
+          `;
+
+          if (m.description) {
+            const descEl = exifContainer.querySelector('.info-panel-description');
+            if (descEl) descEl.textContent = m.description;
           }
         } catch (err) {
           exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
@@ -207,14 +269,23 @@ const { selector = "main", gallery = true } = Astro.props;
       if (!container) return;
 
       if (gallery) {
-        currentImages = Array.from(container.querySelectorAll("img")).filter(i => !i.closest("a") && !i.classList.contains("no-lightbox"));
+        let images = Array.from(container.querySelectorAll("img")).filter(i => !i.closest("a") && !i.classList.contains("no-lightbox"));
+        
+        if (includeHero) {
+          const heroImg = document.querySelector(".post-hero img") as HTMLImageElement;
+          if (heroImg && !images.includes(heroImg)) {
+            images = [heroImg, ...images];
+          }
+        }
+        
+        currentImages = images;
         currentIndex = currentImages.indexOf(imageElement);
       } else {
         currentImages = [imageElement];
         currentIndex = 0;
       }
 
-      if (currentIndex === -1) return;
+      if (currentIndex === -1) currentIndex = 0;
 
       lightboxImages.forEach(img => {
         img.classList.remove('active', 'next');
@@ -273,6 +344,18 @@ const { selector = "main", gallery = true } = Astro.props;
           openLightbox(image);
         };
       });
+      
+      if (includeHero) {
+        const heroImg = document.querySelector(".post-hero img") as HTMLImageElement;
+        if (heroImg && !heroImg.closest("a") && !heroImg.classList.contains("no-lightbox")) {
+          heroImg.style.cursor = "zoom-in";
+          heroImg.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openLightbox(heroImg);
+          };
+        }
+      }
     };
 
     // Expose for subsequent Astro page transitions without re-initializing controls.

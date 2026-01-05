@@ -54,6 +54,7 @@ const totalChapters = chapters.length;
 <article class="longform-post" style={`--page-bg: ${backgroundColor};`} data-total-chapters={totalChapters}>
   <header class="post-header">
     <div class="post-meta-top">
+      <span class="collection-type">Longform</span>
       {post.data.category && <span class="category">{post.data.category}</span>}
       {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
     </div>

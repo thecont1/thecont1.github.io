@@ -157,6 +157,19 @@
   gap: 0.5rem;
 }
 
+/* When using InfoPanel markup inside the Lightbox, it must not behave like a fixed floating panel */
+.lightbox .carousel-info-panel {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  transform: none;
+  width: 100%;
+  max-width: 100%;
+  max-height: none;
+  animation: none;
+}
+
 .exif-row {
   margin: 0;
 }

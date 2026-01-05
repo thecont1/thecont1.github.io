@@ -32,12 +32,11 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
 <article class="editorial-post" id="top" style={`--page-bg: ${backgroundColor};`}>
   <header class="post-header">
-    {(post.data.category || (post.data as any).project) && (
-      <div class="post-kicker">
-        {post.data.category && <span class="category">{post.data.category}</span>}
-        {(post.data as any).project && <span class="category">{(post.data as any).project}</span>}
-      </div>
-    )}
+    <div class="post-kicker">
+      <span class="collection-type">Essay</span>
+      {post.data.category && <span class="category">{post.data.category}</span>}
+      {(post.data as any).project && <span class="category">{(post.data as any).project}</span>}
+    </div>
 
     <h1 class="post-title">{post.data.title}</h1>
 
@@ -85,7 +84,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     </div>
   </div>
 
-  <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
+  <Lightbox selector=".post-body" includeHero={post.data.showhero !== false && !!post.data.heroImage} gallery={post.data.lightbox?.gallery} />
 
   <ScreenToggle />
   <C2PAOverlay />
@@ -140,10 +139,13 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       images.forEach(img => {
         const imgEl = img as HTMLImageElement;
         if (imgEl.alt && !imgEl.closest('figure')?.querySelector('figcaption')) {
-          const figure = imgEl.closest('figure') || document.createElement('figure');
-          if (!imgEl.closest('figure')) {
-            imgEl.parentNode?.insertBefore(figure, imgEl);
-            figure.appendChild(imgEl);
+          const wrap = imgEl.closest('.c2pa-media-wrap') as HTMLElement | null;
+          const nodeToMove = wrap || imgEl;
+          const existingFigure = nodeToMove.closest('figure');
+          const figure = existingFigure || document.createElement('figure');
+          if (!existingFigure) {
+            nodeToMove.parentNode?.insertBefore(figure, nodeToMove);
+            figure.appendChild(nodeToMove);
           }
           const caption = document.createElement('figcaption');
           caption.className = 'image-caption';

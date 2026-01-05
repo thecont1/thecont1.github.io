@@ -448,6 +448,26 @@
   line-height: 1;
 }
 
+ .c2pa-media-wrap {
+   position: relative;
+   display: inline-block;
+   line-height: 0;
+   max-width: 100%;
+ }
+
+ .c2pa-media-wrap > img,
+ .c2pa-media-wrap > picture,
+ .c2pa-media-wrap > picture > img {
+   display: block;
+   max-width: 100%;
+   height: auto;
+ }
+
+ figure > .c2pa-media-wrap {
+   margin-left: auto;
+   margin-right: auto;
+ }
+
 /* Exclude info panel button from base indicator positioning and visibility */
 .c2pa-indicator.info-panel-cr-button {
   position: relative !important;
@@ -475,19 +495,26 @@
 
 .c2pa-indicator.c2pa-injected {
   top: 15px;
-  right: 5px; /* Just slightly inside the edge */
+  right: 5px;
 }
 
 /* Show indicator in ochre when hovering the image container (exclude lightbox) */
 [data-c2pa-container]:hover .c2pa-indicator.c2pa-injected,
 .album-item:hover .c2pa-indicator.c2pa-injected,
-body.screen-mode .c2pa-indicator.c2pa-injected,
-.post-body p:hover .c2pa-indicator.c2pa-injected {
+.post-body p:hover .c2pa-indicator.c2pa-injected,
+figure:hover .c2pa-indicator.c2pa-injected {
   opacity: 1 !important;
   visibility: visible !important;
-  right: 5px; /* Keep consistent positioning on hover */
+  right: 0px; /* Keep consistent positioning on hover */
   color: #d04b36 !important;
   background: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Hide CR indicator when Screen mode is ON */
+body.screen-mode .c2pa-indicator.c2pa-injected {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 /* Disable hover CR indicator in lightbox - use static button instead */
@@ -569,8 +596,3 @@ body.screen-mode .c2pa-indicator.c2pa-injected,
   opacity: 1 !important;
 }
 
-/* Screen mode: always show indicator in ochre */
-body.screen-mode .c2pa-indicator {
-  color: #d04b36 !important;
-  background: rgba(255, 255, 255, 0.85) !important;
-}
