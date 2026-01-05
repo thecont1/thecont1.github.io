@@ -123,8 +123,8 @@ async function handleRequest(request: Request, url: URL) {
     }
   } catch (e) {}
 
-  // Ensure it's a major photograph from the originals library
-  if (!pathname.includes('/library/originals/')) {
+  // Ensure it's a major photograph from the originals library (either local or R2)
+  if (!pathname.includes('/originals/') && !pathname.includes('library/originals/')) {
     return new Response(JSON.stringify({ 
       error: 'Unauthorized path', 
       path: pathname,
@@ -138,8 +138,14 @@ async function handleRequest(request: Request, url: URL) {
   try {
     const rootDir = process.cwd();
     const publicDir = path.join(rootDir, 'public');
-    const relativePath = pathname.startsWith('/') ? pathname.slice(1) : pathname;
-    const absoluteImagePath = path.join(publicDir, relativePath);
+    // Extract the path after 'originals/'
+    let relativePath = pathname;
+    if (pathname.includes('/originals/')) {
+      relativePath = '/library' + pathname.substring(pathname.indexOf('/originals/'));
+    } else if (!pathname.startsWith('/')) {
+      relativePath = '/' + pathname;
+    }
+    const absoluteImagePath = path.join(publicDir, relativePath.startsWith('/') ? relativePath.slice(1) : relativePath);
     
     // Check file existence
     try {

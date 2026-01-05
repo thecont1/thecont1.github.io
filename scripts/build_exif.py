@@ -2,6 +2,7 @@
 """
 Build-time EXIF extraction script - Version 2
 Creates organized metadata files that mirror the directory structure
+Note: This script processes local files for upload to R2 CDN
 """
 
 import os
@@ -232,7 +233,7 @@ def main():
         "--file",
         dest="file",
         default="",
-        help="Limit processing to a single image file path under public/library/originals.",
+        help="Limit processing to a single image file path under public/library/originals (note: images are now served from R2 CDN).",
     )
     args = parser.parse_args()
 
@@ -316,7 +317,7 @@ def main():
     
     print(f"\n✅ Processed {total_processed} images across {len(directories_processed)} directories")
     print(f"💾 Created {len(directories_processed)} metadata files (co-located with images)")
-    print(f"📁 Metadata files are co-located in public/library/originals/")
+    print(f"📁 Metadata files are co-located in public/library/originals/ (upload to R2 CDN)")
     
     # Test specific image mentioned by user (only in full scan)
     if not args.dir and not args.file:

@@ -38,6 +38,7 @@ const projectContent = allContent.filter(
 // Or we can group them by layout type.
 
 // 3. Also fetch images for the Carousel
+// Note: Images are now on R2 CDN, but metadata.json is still local during build
 const allImages = import.meta.glob(
   "/public/library/originals/**/*.{jpg,jpeg,png,webp,avif}"
 );

@@ -29,7 +29,7 @@ export interface ExifMetadata {
 
 /**
  * Get EXIF metadata for an image by its path
- * @param imagePath - Path to image (e.g., "/library/originals/TheAfricanPortraits/image.jpg")
+ * @param imagePath - Path to image (e.g., "https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/TheAfricanPortraits/image.jpg")
  * @returns EXIF metadata or null if not found
  */
 export async function getImageMetadata(imagePath: string): Promise<ExifMetadata | null> {
@@ -46,8 +46,8 @@ export async function getImageMetadata(imagePath: string): Promise<ExifMetadata 
     
     const directory = pathParts[originalsIndex + 1];
     
-    // Fetch the co-located metadata from the same directory as the images
-    const metadataUrl = `/library/originals/${directory}/metadata.json`;
+    // Fetch the co-located metadata from R2 CDN
+    const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
     const response = await fetch(metadataUrl);
     
     if (!response.ok) {
@@ -141,8 +141,8 @@ export async function getAvailableDirectories(): Promise<string[]> {
  */
 export function getDebugInfo() {
   return {
-    note: 'Metadata files are co-located with images in public/library/originals/',
-    architecture: 'Co-located metadata files',
+    note: 'Metadata files are co-located with images on R2 CDN',
+    architecture: 'Co-located metadata files on Cloudflare R2',
     discovery: 'Dynamic discovery based on image paths'
   };
 }

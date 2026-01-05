@@ -90,7 +90,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         
         const updateIndicator = () => {
           const src = imgEl.getAttribute('src');
-          if (!src || !src.includes('/library/originals/')) return;
+          if (!src || !(src.includes('/library/originals/') || src.includes('r2.dev/originals/'))) return;
 
           // Post pages: avoid redundant in-image indicators.
           // Content Credentials can be opened from the hover InfoPanel and from the Lightbox.

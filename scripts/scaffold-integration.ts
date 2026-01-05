@@ -86,7 +86,7 @@ function generateFrontmatter(keys: string[], collectionName: string) {
     } else if (key === 'date' || key === 'lastUpdated' || key === 'fetchedAt') {
       yaml += `${key}: ${today}\n`;
     } else if (key === 'heroImage') {
-      yaml += `${key}: "/library/originals/2016-LastDaysofManmohan/MS201403-02TrivandrumTharoor0001.jpg"\n`;
+      yaml += `${key}: "https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/2016-LastDaysofManmohan/MS201403-02TrivandrumTharoor0001.jpg"\n`;
     } else if (key === 'lightbox') {
       yaml += `${key}:\n  gallery: true\n`;
     } else if (key === 'notebook' && collectionName === 'datastory') {

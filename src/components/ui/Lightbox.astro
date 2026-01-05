@@ -103,7 +103,7 @@ const { selector = "main", gallery = true } = Astro.props;
         if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) return {};
         
         const directory = pathParts[originalsIndex + 1];
-        const metadataUrl = `/library/originals/${directory}/metadata.json`;
+        const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
         
         const response = await fetch(metadataUrl);
         if (!response.ok) return {};

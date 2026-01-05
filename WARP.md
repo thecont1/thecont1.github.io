@@ -64,6 +64,7 @@ npm run astro            # Access Astro CLI directly
   - `src/content/**` to auto-scaffold new empty `.md/.mdx`
   - `public/library/originals/**/*.{jpg,jpeg}` to keep `metadata.json` up-to-date by running the scoped Python extractor
 - **Startup sync in dev**: on `npm run dev`, the integration scans `public/library/originals/` and regenerates metadata for any folder whose newest JPG/JPEG is newer than `metadata.json`.
+- **R2 CDN Migration**: Images are now served from Cloudflare R2 (https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/). Local `public/library/originals/` is maintained for metadata extraction and C2PA processing.
 
 ### Homepage Featured Content
 - **Manual Control**: `src/data/featured.ts` - curated list of featured items
@@ -101,9 +102,10 @@ npm run astro            # Access Astro CLI directly
 - **Dynamic routes**: Collections generate pages via `[...slug].astro` pattern
 - **Index**: Home page at `src/pages/index.astro`
 - **Static assets**: `public/` directory (served as-is)
-- **High-resolution media**: `public/library/` for photography and visual content
+- **High-resolution media**: Served from Cloudflare R2 CDN (https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/)
+- **Local library**: `public/library/originals/` maintained locally for metadata extraction and C2PA processing
 - **About images**: `public/library/about/` (used by `src/components/home/About.astro`)
-- **Metadata**: `metadata.json` files in image folders contain EXIF data, descriptions, and technical details
+- **Metadata**: `metadata.json` files in image folders contain EXIF data, descriptions, and technical details (also uploaded to R2)
 
 ### Styling
 - **Vanilla CSS3**: No CSS framework.
