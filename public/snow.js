@@ -103,9 +103,9 @@ class PixelDust {
     const { minOpacity, maxOpacity } = this.options;
     const opacity = minOpacity + Math.random() * (maxOpacity - minOpacity);
     const colorOptions = [
-      `rgba(255, 20, 20, ${opacity})`,    // Hard red
-      `rgba(20, 255, 20, ${opacity})`,    // Hard green
-      `rgba(20, 20, 255, ${opacity})`     // Hard blue
+      `rgba(255, 255, 255, ${opacity})`,    // Hard red
+      `rgba(255, 255, 255, ${opacity})`,    // Hard green
+      `rgba(255, 255, 255, ${opacity})`     // Hard blue
     ];
     return colorOptions[Math.floor(Math.random() * colorOptions.length)];
   }

@@ -382,7 +382,7 @@ html {
 /* Fallback for literal <note> tag */
 .post-body note {
   display: block;
-  --note-gutter: 330px;
+  --note-gutter: 280px;
   float: right;
   clear: right;
   width: 280px;

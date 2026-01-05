@@ -28,6 +28,8 @@ const formattedDate = post.data.date?.toLocaleDateString("en-US", {
 
 // Category/Theme labels
 const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
+
+const lightboxEnabled = post.data.lightbox?.gallery !== false;
 ---
 
 <article class="editorial-post" id="top" style={`--page-bg: ${backgroundColor};`}>
@@ -83,7 +85,9 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     </div>
   </div>
 
-  <Lightbox selector=".post-body" includeHero={post.data.showhero !== false && !!post.data.heroImage} gallery={post.data.lightbox?.gallery} />
+  {lightboxEnabled && (
+    <Lightbox selector=".post-body" includeHero={post.data.showhero !== false && !!post.data.heroImage} gallery={true} />
+  )}
 
   <ScreenToggle />
   <C2PAOverlay />

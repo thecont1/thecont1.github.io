@@ -20,6 +20,8 @@ const backgroundColor = post.data.backgroundColor || "#ffffff";
 const chapters = headings.filter((h) => h.depth === 2);
 const allHeadings = headings.filter((h) => h.depth === 2 || h.depth === 3);
 
+const lightboxEnabled = post.data.lightbox?.gallery !== false;
+
 // Build nested TOC structure
 interface TocItem {
   slug: string;
@@ -114,7 +116,9 @@ const totalChapters = chapters.length;
     )}
   </div>
 
-  <Lightbox selector=".post-body" gallery={post.data.lightbox?.gallery} />
+  {lightboxEnabled && (
+    <Lightbox selector=".post-body" gallery={true} />
+  )}
   <ScreenToggle />
   <C2PAOverlay />
 </article>
