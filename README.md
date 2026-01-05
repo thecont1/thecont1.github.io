@@ -45,6 +45,7 @@ Personal website for Mahesh Shantaram (thecontrarian.in) — a documentary photo
   - `public/library/originals/**/*.{jpg,jpeg}` to keep `metadata.json` up-to-date by running the scoped Python extractor
 - **Startup sync in dev**: on `npm run dev`, the integration scans `public/library/originals/` and regenerates metadata for any folder whose newest JPG/JPEG is newer than `metadata.json`.
 - **R2 CDN Migration**: Images are now served from Cloudflare R2 (https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/). Local `public/library/originals/` is maintained for metadata extraction and C2PA processing.
+- **Metadata Sync**: Run `scripts/sync_r2_metadata.sh` to download images from R2, regenerate metadata.json files, and upload metadata back to R2. This keeps metadata in sync across both local and CDN.
 
 ### Homepage Featured Content
 - **Manual Control**: `src/data/featured.ts` - curated list of featured items
