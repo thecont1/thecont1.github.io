@@ -269,7 +269,12 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       if (!container) return;
 
       if (gallery) {
-        let images = Array.from(container.querySelectorAll("img")).filter(i => !i.closest("a") && !i.classList.contains("no-lightbox"));
+        let images = Array.from(container.querySelectorAll("img")).filter(i => {
+          if (i.closest("a") || i.classList.contains("no-lightbox")) return false;
+          const src = i.currentSrc || i.getAttribute('src') || '';
+          if (!src) return false;
+          return true;
+        });
         
         if (includeHero) {
           const heroImg = document.querySelector(".post-hero img") as HTMLImageElement;
