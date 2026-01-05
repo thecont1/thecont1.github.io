@@ -17,6 +17,8 @@ const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") :
 const publicDir = fileURLToPath(new URL("../../../public/", import.meta.url));
 const hasPublicFile = (p?: string) => {
   if (!p) return false;
+  // Remote/CDN assets won't exist in local public/
+  if (/^https?:\/\//i.test(p)) return true;
   let rel = p.replace(/^\/+/, "");
   if (rel.startsWith("public/")) {
     rel = rel.replace(/^public\//, "");
@@ -108,7 +110,7 @@ const typeIcons: Record<string, string> = {
                 <div class="card-media">
                   {(() => {
                     const heroSrc = normalizePublicPath(item.heroImage);
-                    return heroSrc && hasPublicFile(heroSrc) ? (
+                    return heroSrc && (heroSrc.startsWith('http') || hasPublicFile(heroSrc)) ? (
                       <img src={heroSrc} alt={item.title} />
                     ) : (
                       <div class="card-placeholder-icon">
@@ -141,7 +143,7 @@ const typeIcons: Record<string, string> = {
                 <div class="card-media">
                   {(() => {
                     const heroSrc = normalizePublicPath(item.heroImage);
-                    return heroSrc && hasPublicFile(heroSrc) ? (
+                    return heroSrc && (heroSrc.startsWith('http') || hasPublicFile(heroSrc)) ? (
                       <img src={heroSrc} alt={item.title} />
                     ) : (
                       <div class="card-placeholder-icon">

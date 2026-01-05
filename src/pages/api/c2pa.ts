@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs/promises';
+import os from 'os';
 
 export const prerender = false;
 
@@ -135,36 +136,72 @@ async function handleRequest(request: Request, url: URL) {
     });
   }
 
+  const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
+
   try {
     const rootDir = process.cwd();
-    const publicDir = path.join(rootDir, 'public');
-    // Extract the path after 'originals/'
-    let relativePath = pathname;
-    if (pathname.includes('/originals/')) {
-      relativePath = '/library' + pathname.substring(pathname.indexOf('/originals/'));
-    } else if (!pathname.startsWith('/')) {
-      relativePath = '/' + pathname;
+    // Always fetch image bytes from the public R2 CDN (R2 is source of truth)
+    const originalsIdx = pathname.indexOf('/originals/');
+    if (originalsIdx === -1) {
+      return new Response(JSON.stringify({
+        error: 'Invalid path',
+        path: pathname,
+        details: 'Expected a /originals/ path.'
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-    const absoluteImagePath = path.join(publicDir, relativePath.startsWith('/') ? relativePath.slice(1) : relativePath);
-    
-    // Check file existence
-    try {
-      await fs.access(absoluteImagePath);
-    } catch (e) {
-      return new Response(JSON.stringify({ 
-        error: 'Image file not found on server', 
-        path: absoluteImagePath 
+
+    const cdnUrl = new URL(pathname, CDN_ORIGIN);
+    const cdnResp = await fetch(cdnUrl.toString(), { method: 'GET' });
+    if (!cdnResp.ok) {
+      return new Response(JSON.stringify({
+        error: 'Failed to fetch image from CDN',
+        status: cdnResp.status,
+        url: cdnUrl.toString()
       }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
+    const contentType = cdnResp.headers.get('content-type') || '';
+    if (!contentType.toLowerCase().includes('image/')) {
+      const text = await cdnResp.text();
+      return new Response(JSON.stringify({
+        error: 'CDN returned non-image response',
+        url: cdnUrl.toString(),
+        contentType,
+        bodyPreview: text.slice(0, 200)
+      }), {
+        status: 502,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const imgBuf = Buffer.from(await cdnResp.arrayBuffer());
+    const baseName = path.basename(pathname);
+    const tmpPath = path.join(os.tmpdir(), `c2pa-${Date.now()}-${Math.random().toString(16).slice(2)}-${baseName}`);
+    await fs.writeFile(tmpPath, imgBuf);
+
     const pythonPath = path.join(rootDir, '.venv', 'bin', 'python3');
     const scriptPath = path.join(rootDir, 'scripts', 'c2pa_xtract.py');
 
-    const command = `"${pythonPath}" "${scriptPath}" "${absoluteImagePath}" --json`;
-    const { stdout, stderr } = await execPromise(command);
+    const command = `"${pythonPath}" "${scriptPath}" "${tmpPath}" --json`;
+    let stdout = '';
+    let stderr = '';
+    try {
+      const result = await execPromise(command);
+      stdout = result.stdout;
+      stderr = result.stderr;
+    } finally {
+      try {
+        await fs.unlink(tmpPath);
+      } catch {
+        // ignore
+      }
+    }
 
     if (stderr && !stdout) {
       return new Response(JSON.stringify({ 

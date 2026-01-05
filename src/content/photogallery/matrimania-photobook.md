@@ -4,7 +4,7 @@ project: matrimania
 title: "MATRIMANIA"
 subtitle: "A fictional narrative through one dreary wedding night in an India tearing at its seams."
 author: "Mahesh Shantaram"
-heroImage: "/publichttps://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA-book/_DSF3283.jpg"
+heroImage: "https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA-book/_DSF3283.jpg"
 date: 2015-06-01
 layoutType: tile
 backgroundColor: "#ff44ee44"

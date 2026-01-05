@@ -7,8 +7,6 @@ import Carousel from "../carousel/Carousel.tsx";
 import "../../styles/photogallery.css";
 import "../../styles/carousel.css";
 import "../../styles/info-panel.css";
-import fs from 'node:fs';
-import path from 'node:path';
 
 interface Props {
   post: CollectionEntry<"photogallery">;
@@ -45,20 +43,29 @@ function getOriginalsDirFromSrc(imgSrc: string): string | null {
   return parts.slice(0, parts.length - 1).join('/');
 }
 
-function loadMetadataForDir(dirPathFromWebRoot: string): Record<string, any> {
-  const metadataPath = path.join(process.cwd(), 'public', dirPathFromWebRoot, 'metadata.json');
-  try {
-    if (fs.existsSync(metadataPath)) {
-      const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
-      return JSON.parse(metadataContent);
-    }
-  } catch (e) {
-    console.warn('Could not load metadata.json:', metadataPath, e);
-  }
-  return {};
-}
+const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
+const dirMetadataCache = new Map<string, any>();
 
-const dirMetadataCache = new Map<string, Record<string, any>>();
+async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
+  // Expecting a web-root-like path that includes /originals/<DIR>
+  const parts = dirPathFromWebRoot.split('/').filter(Boolean);
+  const originalsIndex = parts.indexOf('originals');
+  if (originalsIndex === -1 || originalsIndex >= parts.length) return null;
+  const directory = parts[originalsIndex + 1];
+  if (!directory) return null;
+
+  if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
+  try {
+    const metadataUrl = `${CDN_ORIGIN}/originals/${directory}/metadata.json`;
+    const resp = await fetch(metadataUrl);
+    const data = resp.ok ? await resp.json() : null;
+    dirMetadataCache.set(directory, data);
+    return data;
+  } catch {
+    dirMetadataCache.set(directory, null);
+    return null;
+  }
+}
 ---
 
 {layoutType === "carousel" ? (
@@ -68,23 +75,20 @@ const dirMetadataCache = new Map<string, Record<string, any>>();
       <!-- Fixed carousel layer -->
       <div class="carousel-hero-fixed">
         <Carousel 
-          images={images.map(img => {
+          images={await Promise.all(images.map(async (img) => {
             const filename = img.src.split('/').pop() || '';
             const dir = getOriginalsDirFromSrc(img.src);
             let meta: any = {};
             if (dir) {
-              if (!dirMetadataCache.has(dir)) {
-                dirMetadataCache.set(dir, loadMetadataForDir(dir));
-              }
-              const dirMeta = dirMetadataCache.get(dir) || {};
-              meta = dirMeta[filename]?.photography || {};
+              const dirMeta = await loadMetadataForDir(dir);
+              meta = dirMeta?.[filename]?.photography || {};
             }
             return {
               src: img.src,
               caption: img.caption,
               metadata: meta
             };
-          })}
+          }))}
           client:load
         />
       </div>

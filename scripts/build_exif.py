@@ -252,7 +252,21 @@ def main():
         print(f"❌ Scan path not found: {scan_root}")
         sys.exit(1)
 
-    # Clean existing metadata files
+    # If there are no images locally, do not delete existing metadata.json.
+    # This repo keeps images on R2 (gitignored), so local folders can contain only metadata.json.
+    image_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif'}
+    has_any_images = False
+    for root, dirs, files in os.walk(scan_root):
+        if any(any(file.lower().endswith(ext) for ext in image_extensions) for file in files):
+            has_any_images = True
+            break
+
+    if not has_any_images:
+        print(f"🔍 Scanning for images in: {scan_root}")
+        print("ℹ️  No local images found; leaving existing metadata.json untouched.")
+        sys.exit(0)
+
+    # Clean existing metadata files (only when we have images to regenerate from)
     clean_root = originals_dir if (not args.dir and not args.file) else scan_root
     for root, dirs, files in os.walk(clean_root):
         metadata_file = Path(root) / "metadata.json"
@@ -263,7 +277,6 @@ def main():
     print(f"🔍 Scanning for images in: {scan_root}")
     
     # Find all image files organized by directory
-    image_extensions = {'.jpg', '.jpeg', '.png', '.tiff', '.tif'}
     directories_processed = {}
     total_processed = 0
     

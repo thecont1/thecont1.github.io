@@ -11,9 +11,33 @@ NC='\033[0m' # No Color
 echo -e "${BLUE}=== Upload Images to R2 ===${NC}"
 echo ""
 
+# Load environment variables (local dev)
+if [ -f ".env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    source ".env"
+    set +a
+fi
+
 # Configuration
-R2_REMOTE="myR2:thecontrarian-library"
 LOCAL_ORIGINALS="public/library/originals"
+
+# Required env vars
+if [ -z "${CLOUDFLARE_ACCESS_KEY_ID}" ] || [ -z "${CLOUDFLARE_SECRET_ACCESS_KEY}" ] || [ -z "${CLOUDFLARE_R2_ENDPOINT}" ] || [ -z "${CLOUDFLARE_BUCKET_NAME}" ]; then
+    echo -e "${RED}Error: Missing required Cloudflare R2 env vars${NC}"
+    echo "Expected: CLOUDFLARE_ACCESS_KEY_ID, CLOUDFLARE_SECRET_ACCESS_KEY, CLOUDFLARE_R2_ENDPOINT, CLOUDFLARE_BUCKET_NAME"
+    exit 1
+fi
+
+# rclone S3 remote via env vars (avoid relying on global rclone config)
+R2_REMOTE=":s3:${CLOUDFLARE_BUCKET_NAME}"
+RCLONE_S3_PROVIDER="Cloudflare"
+RCLONE_S3_ENV_AUTH="true"
+RCLONE_S3_ACCESS_KEY_ID="${CLOUDFLARE_ACCESS_KEY_ID}"
+RCLONE_S3_SECRET_ACCESS_KEY="${CLOUDFLARE_SECRET_ACCESS_KEY}"
+RCLONE_S3_ENDPOINT="${CLOUDFLARE_R2_ENDPOINT}"
+RCLONE_S3_REGION="${CLOUDFLARE_REGION:-auto}"
+RCLONE_S3_ACL="private"
 
 # Check if directory argument is provided
 DIR_ARG=""

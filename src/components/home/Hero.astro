@@ -9,28 +9,32 @@ import ExifReader from "exifreader";
 import fs from "node:fs";
 import path from "node:path";
 
-function getOriginalsDirFromSrc(imgSrc: string): string | null {
+function getOriginalsDirAndFilenameFromSrc(imgSrc: string): { directory: string; filename: string } | null {
   const parts = imgSrc.split('/').filter(Boolean);
   const originalsIndex = parts.indexOf('originals');
   if (originalsIndex === -1) return null;
   if (originalsIndex >= parts.length - 2) return null;
-  return parts.slice(0, parts.length - 1).join('/');
+  const filename = parts[parts.length - 1];
+  const directory = parts[originalsIndex + 1];
+  return { directory, filename };
 }
 
-function loadMetadataForDir(dirPathFromWebRoot: string): Record<string, any> {
-  const metadataPath = path.join(process.cwd(), 'public', dirPathFromWebRoot, 'metadata.json');
+const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
+const dirMetadataCache = new Map<string, any>();
+
+async function loadMetadataForDirectory(directory: string): Promise<any> {
+  if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
   try {
-    if (fs.existsSync(metadataPath)) {
-      const metadataContent = fs.readFileSync(metadataPath, 'utf-8');
-      return JSON.parse(metadataContent);
-    }
-  } catch (e) {
-    console.warn('Could not load metadata.json:', metadataPath, e);
+    const metadataUrl = `${CDN_ORIGIN}/originals/${directory}/metadata.json`;
+    const resp = await fetch(metadataUrl);
+    const data = resp.ok ? await resp.json() : null;
+    dirMetadataCache.set(directory, data);
+    return data;
+  } catch {
+    dirMetadataCache.set(directory, null);
+    return null;
   }
-  return {};
 }
-
-const dirMetadataCache = new Map<string, Record<string, any>>();
 
 async function getSmartCaption(imgSrc: string) {
   // Only process local images in public folder
@@ -122,15 +126,11 @@ async function getSmartCaption(imgSrc: string) {
 
 const images = await Promise.all(
   CAROUSEL_IMAGES.map(async (img) => {
-    const filename = img.src.split('/').pop() || '';
-    const dir = getOriginalsDirFromSrc(img.src);
+    const parsed = getOriginalsDirAndFilenameFromSrc(img.src);
     let meta: any = {};
-    if (dir) {
-      if (!dirMetadataCache.has(dir)) {
-        dirMetadataCache.set(dir, loadMetadataForDir(dir));
-      }
-      const dirMeta = dirMetadataCache.get(dir) || {};
-      meta = dirMeta[filename]?.photography || {};
+    if (parsed) {
+      const dirMeta = await loadMetadataForDirectory(parsed.directory);
+      meta = dirMeta?.[parsed.filename]?.photography || {};
     }
     return {
       src: img.src,

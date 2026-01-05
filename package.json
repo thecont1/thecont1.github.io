@@ -9,7 +9,9 @@
     "astro": "astro",
     "generate:repo": "node scripts/generate-repo-content.js",
     "scaffold": "node scripts/scaffold.js",
-    "extract:exif": "uv run python scripts/build_exif.py"
+    "extract:exif": "uv run python scripts/build_exif.py",
+    "r2:sync": "bash scripts/r2_two_way_sync.sh",
+    "r2:metadata": "bash scripts/upload_to_r2.sh"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
