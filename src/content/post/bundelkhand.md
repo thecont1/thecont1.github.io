@@ -55,8 +55,7 @@ asures. The soaring spires of 16th-century Chaturbhuj Temple rise dramatically a
 
 - Orchha adventure activities on River Betwa
 
-![River Cruise on Betwa River](/library/throwaways/bundelkhand/image
-10.png)                                                             
+![River Cruise on Betwa River](/library/throwaways/bundelkhand/image10.png)                                                             
 Embrace adventure along the tranquil Betwa River that winds through 
 Orchha. The river offers gentle kayaking and river rafting experiences suitable for all skill levels, allowing you to view the heritage town from a completely different perspective. After your water adventures, find peace at Kanchana Ghat where the setting sun paints the ancient temples in warm hues. The combination of adrenaline and tranquility makes this day perfectly balanced.                          
 ## **Wed, Jan 28 🚖 Orchha \- Khajuraho** 
@@ -64,8 +63,7 @@ Orchha. The river offers gentle kayaking and river rafting experiences suitable 
 - 3 hour drive to SYNA Heritage Hotel  
 - Visit Aadivart tribal museum
 
-![Tribal Art Museum in Lakheri, Khajuraho](/library/throwaways/bunde
-lkhand/tribal-art-museum.jpg)                                       
+![Tribal Art Museum in Lakheri, Khajuraho](/library/throwaways/bundelkhand/tribal-art-museum.jpg)                                       
 Journey deeper into Madhya Pradesh's cultural heartland with a sceni
 c drive to Khajuraho. Check into the elegant **SYNA Heritage Hotel** before immersing yourself in the vibrant world of tribal art at Aadivart Museum. This hidden gem showcases the rich traditions of Madhya Pradesh's seven major tribes through recreated village houses, traditional artifacts, and stunning tribal art galleries. The museum offers an intimate glimpse into indigenous life, from Gond art with its distinctive dotted patterns to the spiritual Pithora paintings that invoke rain gods.                                                 
 ## **Thu, Jan 29 🗽 Khajuraho**
@@ -73,8 +71,7 @@ c drive to Khajuraho. Check into the elegant **SYNA Heritage Hotel** before imme
 - Western group of temples in the morning  
 - Eastern group of temples in the afternoon
 
-![Rock Carvings at Khajuraho](/library/throwaways/bundelkhand/image3
-.jpg)                                                               
+![Rock Carvings at Khajuraho](/library/throwaways/bundelkhand/image3.jpg)                                                               
 Prepare to be awestruck by Khajuraho's architectural marvels. Start 
 with the Western Group, home to the magnificent Kandariya Mahadeva Temple with its soaring spires and intricate sculptures. These 10th-century temples showcase the pinnacle of Chandela architecture, where every surface tells stories from daily life, mythology, and yes, even love. The Eastern Group offers a more intimate experience with smaller temples like the Jain temples, where you can appreciate the delicate carvings in relative solitude. The contrast between the grandeur of the Western Group and the serene beauty of the Eastern temples provides a complete picture of Khajuraho's artistic evolution.    
 ## **Fri, Jan 30 🚖 Khajuraho \- Jabalpur**
@@ -93,10 +90,8 @@ tacular landscapes. We will make stops at Raneh Falls and at the mystical Pandav
 - Dhuandhar Falls viewpoint (early morning)  
 - Marble Rock river cruise and sightseeing (evening)
 
-![Marble Rocks, Bhedaghat](/library/throwaways/bundelkhand/image2.jp
-g)                                                                  
-Rise early to witness the thundering Dhuandhar Falls where the Narma
-da River crashes through marble rocks, creating a misty spectacle that gives the falls their name ("dhuan" meaning smoke). The best viewing is at sunrise when the light creates rainbows in the mist. In the evening, embark on the unforgettable Marble Rocks boat cruise through the 3-kilometer gorge of glittering marble cliffs that rise up to 100 feet on either side. As your boat glides through the moonlit canyon, the marble walls glow with an ethereal beauty that has made this one of India's most romantic experiences.                       
+![Marble Rocks, Bhedaghat](/library/throwaways/bundelkhand/image2.jpg)                                                                  
+Rise early to witness the thundering Dhuandhar Falls where the Narmada River crashes through marble rocks, creating a misty spectacle that gives the falls their name ("dhuan" meaning smoke). The best viewing is at sunrise when the light creates rainbows in the mist. In the evening, embark on the unforgettable Marble Rocks boat cruise through the 3-kilometer gorge of glittering marble cliffs that rise up to 100 feet on either side. As your boat glides through the moonlit canyon, the marble walls glow with an ethereal beauty that has made this one of India's most romantic experiences.                       
 ## **Sun, Feb 1 🛬 Jabalpur to Bangalore**
 
 - Indigo A320–Neo  – 13:15 JLR \- BLR 15:30

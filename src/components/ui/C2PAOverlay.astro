@@ -90,7 +90,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         
         const updateIndicator = () => {
           const src = imgEl.getAttribute('src');
-          if (!src || !(src.includes('/library/originals/') || src.includes('r2.dev/originals/'))) return;
+          if (!src || !(src.includes('/library/') || src.includes('/library/originals/') || src.includes('r2.dev/originals/'))) return;
 
           // Skip injection inside the lightbox itself (it has its own CR button)
           const inLightbox = !!(imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure'));
@@ -350,14 +350,14 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
                 
                 <div class="c2pa-status c2pa-status-missing">
                   ${SHIELD_X_SVG}
-                  Not Found
+                  Unverified
                 </div>
 
                 <p class="c2pa-message">This image does not contain embedded Content Credentials.</p>
                 
                 <div class="c2pa-info-box">
-                  <p><strong>What does this mean?</strong></p>
-                  <p>Content Credentials provide transparency about how an image was created and edited. Many images do not yet have this information embedded, or it may have been removed during processing.</p>
+                  <p><strong>Why might they be missing?</strong></p>
+                  <p>Many images simply don’t include Content Credentials yet. Credentials can also be lost if an image is re-saved, re-compressed, resized, converted between formats, or passed through some platforms and editors that strip metadata.</p>
                 </div>
               </div>
             `;
@@ -368,6 +368,44 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         this.render(data, cleanSrc);
       } catch (err: any) {
         if (this.content) {
+          const msg = String(err?.message || '');
+          const looksLikeNoCredentials =
+            msg.includes('No Credentials Found') ||
+            msg.includes('Content Credentials only available') ||
+            msg.includes('404') ||
+            msg.includes('not found');
+
+          if (looksLikeNoCredentials) {
+            this.content.innerHTML = `
+              <div class="c2pa-no-results">
+                <div class="c2pa-no-results-watermark">
+                  ${CR_LOGO_SVG}
+                </div>
+
+                <div class="c2pa-status c2pa-status-missing">
+                  ${SHIELD_X_SVG}
+                  Unverified
+                </div>
+
+                <p class="c2pa-message">Content Credentials unavailable for this image.</p>
+
+                <div class="c2pa-info-box">
+                  <p><strong>What does this mean?</strong></p>
+                  <p>Content Credentials are still a new feature, and not all images include them yet. They can also be removed when an image is re-saved, resized, re-compressed, converted between formats, or processed by some platforms and editors.</p>
+                </div>
+
+                <details class="c2pa-debug-info" style="margin-top: 1.25rem; opacity: 0.85;">
+                  <summary style="cursor: pointer;">Technical details</summary>
+                  <div style="margin-top: 0.75rem;">
+                    <strong>Requested Path:</strong> ${imgSrc}<br/>
+                    <strong>Error:</strong> ${msg}
+                  </div>
+                </details>
+              </div>
+            `;
+            return;
+          }
+
           this.content.innerHTML = `
             <div class="c2pa-error">
               <h3 class="c2pa-error-title">Live Extraction Failed</h3>

@@ -193,9 +193,9 @@
 }
 
 .c2pa-status-missing {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.9);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(208, 75, 54, 0.18);
+  color: #ffb4aa;
+  border-color: rgba(208, 75, 54, 0.45);
 }
 
 .c2pa-status-section {
