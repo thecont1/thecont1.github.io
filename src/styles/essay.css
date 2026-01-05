@@ -207,7 +207,7 @@ html {
 /* Image styling */
 .post-body img {
   display: block;
-  margin: 3rem auto;
+  margin: 0rem auto;
   max-width: 100%;
   border: 10px solid white;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
@@ -225,6 +225,10 @@ html {
   margin-right: auto;
 }
 
+.post-body figure {
+  margin: 3rem auto;
+}
+
 .post-body figcaption,
 .post-body .image-caption {
   display: block;
@@ -238,7 +242,7 @@ html {
 
 /* When an image is followed by its caption inside a figure, tighten the join */
 .post-body figure > img {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.65rem;
 }
 
 /* Footer Section */
@@ -267,7 +271,7 @@ html {
   margin: 5rem auto;
   border: none;
   border-top: 1px solid var(--hairline);
-  width: 80px;
+  width: 280px;
 }
 
 /* Editorial Elements */
@@ -293,7 +297,7 @@ html {
   font-family: "Fraunces", serif;
   margin-right: -0.75rem;
   margin-left: -0.35rem;
-  padding: 0.5rem 1.0rem 0rem 0rem;
+  padding: 0.8rem 1.0rem 0rem 0rem;
   color: var(--accent);
 }
 
@@ -309,7 +313,7 @@ html {
 /* Pull Quotes (Markdown blockquote with .pull-quote class) */
 .post-body blockquote.pull-quote {
   margin: 2.25rem -2.5rem;
-  padding: 3rem 0;
+  padding: 2rem 1rem;
   border-top: 1px solid var(--hairline);
   border-bottom: 1px solid var(--hairline);
   border-left: none;

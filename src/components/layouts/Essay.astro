@@ -43,8 +43,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     {post.data.subtitle && <p class="post-subtitle">{post.data.subtitle}</p>}
 
     <div class="post-author-line">
-      <span class="by">By</span>
-      <span class="author-name">{post.data.author}</span>
+      <span class="by">By</span><span class="author-name">{post.data.author}</span>
     </div>
 
     {formattedDate && (
