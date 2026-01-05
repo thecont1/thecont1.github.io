@@ -23,6 +23,10 @@ class PixelDust {
     this.time = 0;
     this.wind = 0;
     this.resizeTimeout = null;
+    this.colorMode = this.options.colors;
+    this.fadingOut = false;
+    this.fadeStart = 0;
+    this.fadeDuration = 650;
     this.init();
   }
 
@@ -99,13 +103,67 @@ class PixelDust {
     });
   }
 
+  getBackgroundIsDark() {
+    const bg = getComputedStyle(document.body).backgroundColor || "rgb(255, 255, 255)";
+    const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+    if (!m) return false;
+    const r = Number(m[1]);
+    const g = Number(m[2]);
+    const b = Number(m[3]);
+
+    // Relative luminance (sRGB)
+    const srgb = [r, g, b].map((v) => {
+      const x = v / 255;
+      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    });
+    const lum = 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
+    return lum < 0.45;
+  }
+
+  updateColorMode() {
+    if (this.options.colors !== "auto") {
+      this.colorMode = this.options.colors;
+      return;
+    }
+    const isDark = this.getBackgroundIsDark();
+    // Hard/saturated on light backgrounds, soft/pastel on dark backgrounds
+    this.colorMode = isDark ? "pastel" : "hard";
+  }
+
   randomColor() {
     const { minOpacity, maxOpacity } = this.options;
     const opacity = minOpacity + Math.random() * (maxOpacity - minOpacity);
+
+    const mode = this.colorMode || this.options.colors;
+
+    if (mode === "pastel") {
+      const pastel = [
+        [255, 179, 186],
+        [255, 223, 186],
+        [255, 255, 186],
+        [186, 255, 201],
+        [186, 225, 255],
+        [220, 198, 255],
+      ];
+      const [r, g, b] = pastel[Math.floor(Math.random() * pastel.length)];
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+
+    if (mode === "hard") {
+      const hard = [
+        [255, 77, 79],
+        [255, 179, 0],
+        [255, 230, 109],
+        [82, 196, 26],
+        [22, 119, 255],
+        [114, 46, 209],
+      ];
+      const [r, g, b] = hard[Math.floor(Math.random() * hard.length)];
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+
     const colorOptions = [
-      `rgba(255, 255, 255, ${opacity})`,    // Hard red
-      `rgba(255, 255, 255, ${opacity})`,    // Hard green
-      `rgba(255, 255, 255, ${opacity})`     // Hard blue
+      `rgba(255, 255, 255, ${opacity})`,
     ];
     return colorOptions[Math.floor(Math.random() * colorOptions.length)];
   }
@@ -138,6 +196,7 @@ class PixelDust {
   }
 
   createParticles() {
+    this.updateColorMode();
     const { maxParticles } = this.options;
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
@@ -155,7 +214,7 @@ class PixelDust {
     this.createParticles();
   }
 
-  update() {
+  update(fadeOut = false) {
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
     const { maxSpeed, minSpeed } = this.options;
@@ -177,8 +236,13 @@ class PixelDust {
 
       // Wrap particles
       if (p.y > h + p.size * 2) {
-        const newP = this.spawnParticle(w, h, false);
-        Object.assign(p, newP);
+        if (fadeOut) {
+          // During fade-out, don't respawn; keep moving off screen
+          p.y = h + p.size * 3;
+        } else {
+          const newP = this.spawnParticle(w, h, false);
+          Object.assign(p, newP);
+        }
       }
 
       if (p.x < -p.size * 2) p.x = w + p.size * 2;
@@ -187,7 +251,7 @@ class PixelDust {
   }
 
   draw() {
-    if (!this.enabled || !this.ctx) return;
+    if ((!this.enabled && !this.fadingOut) || !this.ctx) return;
 
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
@@ -195,11 +259,31 @@ class PixelDust {
     this.ctx.clearRect(0, 0, w, h);
     this.ctx.globalCompositeOperation = "lighter";
 
+    let fadeMul = 1;
+    if (this.fadingOut) {
+      const t = performance.now();
+      const p = Math.min(1, Math.max(0, (t - this.fadeStart) / this.fadeDuration));
+      // Ease out
+      fadeMul = 1 - (1 - p) * (1 - p);
+      fadeMul = 1 - fadeMul;
+    }
+
     for (const p of this.particles) {
       this.ctx.save();
       this.ctx.translate(p.x, p.y);
       this.ctx.rotate(p.rotation);
-      this.ctx.fillStyle = p.color;
+      if (this.fadingOut) {
+        // Replace alpha with faded alpha
+        const m = String(p.color).match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/i);
+        if (m) {
+          const a = Number(m[4]) * fadeMul;
+          this.ctx.fillStyle = `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${a})`;
+        } else {
+          this.ctx.fillStyle = p.color;
+        }
+      } else {
+        this.ctx.fillStyle = p.color;
+      }
 
       if (p.shape === "square") {
         this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
@@ -213,7 +297,22 @@ class PixelDust {
     }
 
     this.ctx.globalCompositeOperation = "source-over";
-    this.update();
+
+    if (this.fadingOut) {
+      const done = performance.now() - this.fadeStart >= this.fadeDuration;
+      if (done) {
+        this.fadingOut = false;
+        this.pause();
+        if (this.canvas) this.canvas.style.display = "none";
+        this.clear();
+        return;
+      }
+      this.update(true);
+      this.raf = requestAnimationFrame(() => this.draw());
+      return;
+    }
+
+    this.update(false);
     this.raf = requestAnimationFrame(() => this.draw());
   }
 
@@ -230,16 +329,18 @@ class PixelDust {
   }
 
   applyState() {
-    if (this.canvas) {
-      this.canvas.style.display = this.enabled ? "block" : "none";
-    }
     this.setAriaPressed(this.enabled);
 
     if (this.enabled) {
+      this.fadingOut = false;
+      if (this.canvas) this.canvas.style.display = "block";
       this.draw();
     } else {
-      this.pause();
-      this.clear();
+      // Fade out gently when disabling
+      this.fadingOut = true;
+      this.fadeStart = performance.now();
+      if (this.canvas) this.canvas.style.display = "block";
+      this.draw();
     }
   }
 
@@ -281,7 +382,7 @@ new PixelDust({
   maxSpeed: 0.7,
   minSpeed: 0.1,
   shape: "circle",
-  colors: "primary",
+  colors: "auto",
   minOpacity: 0.5,  // Particles will range from 30% to 80% opacity
   maxOpacity: 1.0
 });
