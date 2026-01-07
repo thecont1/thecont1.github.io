@@ -7,13 +7,12 @@ const geographyEnum = z.enum([
   "bangalore", "india", "africa", "europe", "usa", "asia", "middle-east", "airtime"
 ]);
 const themeEnum = z.enum([
-  "weddings", "travel", "society", "justice", "technology", "motorcycling", 
+  "weddings", "travel", "society", "justice", "technology", "motorcycling", "patriarchy",
   "humour", "interview", "lore", "night", "racism", "india", "portraits"
 ]);
 const containerEnum = z.enum([
-  "matrimania", "the-african-portraits", "last-days-of-manmohan", 
-  "magazine-work", "indiacomestogether", "caerdydd-diary", 
-  "bruxelles-diary", "conakry-diary"
+  "matrimania", "the-african-portraits", "last-days-of-manmohan", "magazine-work", 
+  "indiacomestogether", "caerdydd-diary", "bruxelles-diary", "conakry-diary", "facebook"
 ]);
 
 // ============================================================================

@@ -57,14 +57,15 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
     title: "Travels",
     items: [
       { type: "post", slug: "bundelkhand", label: "Itinerary" },
+      { type: "post", slug: "writefathername", label: "Patriarchy" },
     ]
   },
 
   {
     title: "MATRIMANIA",
     items: [
-      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage", label: "Essay"},
-      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Name's Bond: A Surmise", label: "Post"},
+      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
+      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
     ]
   },
 

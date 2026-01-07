@@ -5,6 +5,7 @@ author: "Vihaan Kashyap"
 status: "published"
 date: 2026-01-03
 heroImage: /library/throwaways/bundelkhand/image10.png
+backgroundColor: "#07e3"
 geography: [india]
 theme: [travel]
 lightbox:

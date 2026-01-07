@@ -11,22 +11,31 @@ class PixelDust {
       colors: "primary",
       minOpacity: 0.5,  // New: Minimum opacity (0.0-1.0)
       maxOpacity: 1.0,  // New: Maximum opacity (0.0-1.0)
+      glow: true,
+      glowSize: 2.2,
+      glowOpacity: 0.22,
       storageKey: "pixel_dust_enabled",
+      fps: 30,
       ...options,
     };
     this.canvas = null;
     this.ctx = null;
     this.toggleBtn = null;
-    this.raf = null;
+    this.raf = 0;
     this.enabled = true;
+    this.lastFrameAt = 0;
+    this.navAlpha = 0;
+    this.navAlphaTimer = 0;
     this.particles = [];
     this.time = 0;
     this.wind = 0;
     this.resizeTimeout = null;
     this.colorMode = this.options.colors;
     this.fadingOut = false;
+    this.fadingIn = false;
     this.fadeStart = 0;
     this.fadeDuration = 650;
+
     this.init();
   }
 
@@ -73,18 +82,27 @@ class PixelDust {
   }
 
   bindEvents() {
-    window.addEventListener("resize", () => {
+    const onResize = () => {
       clearTimeout(this.resizeTimeout);
       this.resizeTimeout = setTimeout(() => this.resize(), 150);
-    }, { passive: true });
+    };
 
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        this.pause();
-      } else if (this.enabled) {
-        this.resume();
-      }
-    });
+    window.addEventListener("resize", onResize, { passive: true });
+    onResize();
+    this.startNavAlphaPolling();
+    this.draw();
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (document.hidden) this.pause();
+        else if (this.enabled) this.resume();
+      },
+      { passive: true }
+    );
+
+    window.addEventListener("blur", () => this.pause(), { passive: true });
+    window.addEventListener("focus", () => this.resume(), { passive: true });
 
     if (this.toggleBtn && !this.toggleBtn.dataset.hasDustListener) {
       this.toggleBtn.addEventListener("click", () => this.toggle());
@@ -101,6 +119,26 @@ class PixelDust {
         this.init();
       }
     });
+  }
+
+  readNavAlpha() {
+    const raw = getComputedStyle(document.body).getPropertyValue("--nav-bg-alpha");
+    const n = Number.parseFloat(raw);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(1, n));
+  }
+
+  startNavAlphaPolling() {
+    this.stopNavAlphaPolling();
+    this.navAlpha = this.readNavAlpha();
+    this.navAlphaTimer = window.setInterval(() => {
+      this.navAlpha = this.readNavAlpha();
+    }, 250);
+  }
+
+  stopNavAlphaPolling() {
+    if (this.navAlphaTimer) window.clearInterval(this.navAlphaTimer);
+    this.navAlphaTimer = 0;
   }
 
   getBackgroundIsDark() {
@@ -146,7 +184,7 @@ class PixelDust {
         [220, 198, 255],
       ];
       const [r, g, b] = pastel[Math.floor(Math.random() * pastel.length)];
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      return { r, g, b, a: opacity };
     }
 
     if (mode === "hard") {
@@ -159,13 +197,10 @@ class PixelDust {
         [114, 46, 209],
       ];
       const [r, g, b] = hard[Math.floor(Math.random() * hard.length)];
-      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      return { r, g, b, a: opacity };
     }
 
-    const colorOptions = [
-      `rgba(255, 255, 255, ${opacity})`,
-    ];
-    return colorOptions[Math.floor(Math.random() * colorOptions.length)];
+    return { r: 255, g: 255, b: 255, a: opacity };
   }
 
   getShape() {
@@ -179,6 +214,7 @@ class PixelDust {
     // Fixed velocity system that respects maxSpeed
     const speed = minSpeed + Math.random() * (maxSpeed - minSpeed);
     const angle = Math.random() * Math.PI * 2;
+    const color = this.randomColor();
 
     return {
       x: Math.random() * w,
@@ -186,13 +222,19 @@ class PixelDust {
       vx: Math.cos(angle) * speed,
       vy: Math.sin(angle) * speed,
       size,
-      color: this.randomColor(),
+      color,
       shape: this.getShape(),
       opacity: 0.7 + Math.random() * 0.3,
       rotation: Math.random() * Math.PI * 2,
       rotationSpeed: (Math.random() - 0.5) * 0.05,
       drift: Math.sin(Math.random() * Math.PI * 2) * 0.2,
     };
+  }
+
+  parseRgba(color) {
+    const m = String(color).match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/i);
+    if (!m) return null;
+    return { r: Number(m[1]), g: Number(m[2]), b: Number(m[3]), a: Number(m[4]) };
   }
 
   createParticles() {
@@ -250,8 +292,15 @@ class PixelDust {
     }
   }
 
-  draw() {
-    if ((!this.enabled && !this.fadingOut) || !this.ctx) return;
+  draw(now = performance.now()) {
+    if (!this.enabled && !this.fadingOut) return;
+
+    const frameMs = 1000 / (this.options.fps || 30);
+    if (now - this.lastFrameAt < frameMs) {
+      this.raf = window.requestAnimationFrame((t) => this.draw(t));
+      return;
+    }
+    this.lastFrameAt = now;
 
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
@@ -263,31 +312,48 @@ class PixelDust {
     if (this.fadingOut) {
       const t = performance.now();
       const p = Math.min(1, Math.max(0, (t - this.fadeStart) / this.fadeDuration));
-      // Ease out
+      // Ease out (1 -> 0)
+      fadeMul = (1 - p) * (1 - p);
+    } else if (this.fadingIn) {
+      const t = performance.now();
+      const p = Math.min(1, Math.max(0, (t - this.fadeStart) / this.fadeDuration));
+      // Ease in (0 -> 1)
       fadeMul = 1 - (1 - p) * (1 - p);
-      fadeMul = 1 - fadeMul;
     }
 
     for (const p of this.particles) {
       this.ctx.save();
       this.ctx.translate(p.x, p.y);
       this.ctx.rotate(p.rotation);
-      if (this.fadingOut) {
-        // Replace alpha with faded alpha
-        const m = String(p.color).match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/i);
-        if (m) {
-          const a = Number(m[4]) * fadeMul;
-          this.ctx.fillStyle = `rgba(${m[1]}, ${m[2]}, ${m[3]}, ${a})`;
-        } else {
-          this.ctx.fillStyle = p.color;
-        }
-      } else {
-        this.ctx.fillStyle = p.color;
-      }
+
+      const base = p.color;
+      const rgba = {
+        r: base.r,
+        g: base.g,
+        b: base.b,
+        a: base.a * fadeMul,
+      };
+
+      const color = `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${rgba.a})`;
+      this.ctx.fillStyle = color;
 
       if (p.shape === "square") {
         this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
       } else {
+        if (this.options.glow && rgba) {
+          const r = p.size / 2;
+          const outer = r * this.options.glowSize;
+          const g = this.ctx.createRadialGradient(0, 0, r * 0.2, 0, 0, outer);
+          const ga = Math.max(0, Math.min(1, rgba.a * this.options.glowOpacity));
+          g.addColorStop(0, `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, ${ga})`);
+          g.addColorStop(1, `rgba(${rgba.r}, ${rgba.g}, ${rgba.b}, 0)`);
+          this.ctx.fillStyle = g;
+          this.ctx.beginPath();
+          this.ctx.arc(0, 0, outer, 0, Math.PI * 2);
+          this.ctx.fill();
+
+          this.ctx.fillStyle = color;
+        }
         this.ctx.beginPath();
         this.ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
         this.ctx.fill();
@@ -308,12 +374,19 @@ class PixelDust {
         return;
       }
       this.update(true);
-      this.raf = requestAnimationFrame(() => this.draw());
+      this.raf = window.requestAnimationFrame((t) => this.draw(t));
       return;
     }
 
+    if (this.fadingIn) {
+      const done = performance.now() - this.fadeStart >= this.fadeDuration;
+      if (done) {
+        this.fadingIn = false;
+      }
+    }
+
     this.update(false);
-    this.raf = requestAnimationFrame(() => this.draw());
+    this.raf = window.requestAnimationFrame((t) => this.draw(t));
   }
 
   toggle() {
@@ -333,11 +406,14 @@ class PixelDust {
 
     if (this.enabled) {
       this.fadingOut = false;
+      this.fadingIn = true;
+      this.fadeStart = performance.now();
       if (this.canvas) this.canvas.style.display = "block";
       this.draw();
     } else {
       // Fade out gently when disabling
       this.fadingOut = true;
+      this.fadingIn = false;
       this.fadeStart = performance.now();
       if (this.canvas) this.canvas.style.display = "block";
       this.draw();
@@ -345,16 +421,17 @@ class PixelDust {
   }
 
   pause() {
-    if (this.raf) {
-      cancelAnimationFrame(this.raf);
-      this.raf = null;
-    }
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = 0;
+    this.lastFrameAt = 0;
+    this.stopNavAlphaPolling();
   }
 
   resume() {
-    if (!this.raf && this.enabled) {
-      this.draw();
-    }
+    if (!this.enabled) return;
+    if (this.raf) return;
+    this.startNavAlphaPolling();
+    this.draw();
   }
 
   clear() {
@@ -377,12 +454,15 @@ class PixelDust {
 
 // Initialize with working defaults
 new PixelDust({
-  maxParticles: 300,
-  maxSize: 8,
-  maxSpeed: 0.7,
+  maxParticles: 250,
+  maxSize: 10,
+  maxSpeed: 0.9,
   minSpeed: 0.1,
   shape: "circle",
   colors: "auto",
-  minOpacity: 0.5,  // Particles will range from 30% to 80% opacity
-  maxOpacity: 1.0
+  minOpacity: 0.5,
+  maxOpacity: 0.9,
+  glow: true,
+  glowSize: 1.6,
+  glowOpacity: 0.24
 });

@@ -23,7 +23,7 @@
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--accent, #d04b36);
-  margin-bottom: 1rem;
+  margin-bottom: -0.5rem;
   display: flex;
   gap: 0.75rem;
   align-items: center;
@@ -187,15 +187,15 @@
 
 /* Layout Structure */
 .simple-post .post-layout-container {
-  max-width: 680px;
+  max-width: 650px;
   margin: 0 auto;
 }
 
 /* Post Body Content - High legibility serif */
 .simple-post .post-body {
-  font-family: "Charter", "Bitstream Charter", "Sitka Text", "Cambria", "Georgia", serif;
-  font-size: 1.25rem;
-  line-height: 1.65;
+  font-family: "Inter", sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.5;
   color: #292929;
   letter-spacing: -0.003em;
 }
@@ -288,7 +288,7 @@
 
 /* Images */
 .post-body img {
-  width: 95%;
+  width: 100%;
   height: auto;
   margin: 0.5rem auto;
   display: block;

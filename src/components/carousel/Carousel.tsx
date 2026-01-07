@@ -2,6 +2,12 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
 import InfoPanel from "./InfoPanel";
 
+declare global {
+  interface Window {
+    __imageMetadataBySrc?: Map<string, any>;
+  }
+}
+
 type ImageMetadata = {
   camera_make?: string;
   camera_model?: string;
@@ -34,6 +40,21 @@ export default function Carousel({ images }: { images: Image[] }) {
   const programmaticNavUntilRef = useRef(0);
   const ioRef = useRef<IntersectionObserver | null>(null);
   const ioTickRef = useRef<number | null>(null);
+
+  // Publish a global lookup so the Lightbox (plain JS) can display the same metadata.
+  useEffect(() => {
+    const map = (window.__imageMetadataBySrc ||= new Map());
+    images.forEach((img) => {
+      if (!img?.src || !img?.metadata) return;
+      const wrapped = { photography: img.metadata };
+      map.set(img.src, wrapped);
+      try {
+        const path = new URL(img.src, window.location.origin).pathname;
+        map.set(path, wrapped);
+      } catch {
+      }
+    });
+  }, [images]);
 
   useEffect(() => {
     if (index >= images.length) setIndex(0);

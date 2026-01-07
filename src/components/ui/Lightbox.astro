@@ -1,13 +1,9 @@
 ---
-/* 
-  Lightbox Component
-  - Auto-attaches to images within a specified selector or globally if none provided.
-  - Handles opening, closing, and basic accessibility.
-*/
 import "../../styles/lightbox.css";
 import "../../styles/info-panel.css";
 import IconBulb from "../icons/IconBulb.astro";
 import IconCR from "../icons/IconCR.astro";
+import ExifReader from "exifreader";
 
 interface Props {
   selector?: string; // CSS selector to scope image listeners (e.g., '.post-content')
@@ -31,7 +27,6 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
   <aside class="lightbox-sidebar">
     <div class="sidebar-content">
       <div id="lightbox-meta" class="lightbox-meta">
-        <h3 id="lightbox-caption" class="lightbox-caption"></h3>
         <div id="lightbox-exif" class="lightbox-exif"></div>
       </div>
     </div>
@@ -79,7 +74,6 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
     const selector = lightbox.dataset.selector || "main";
     const includeHero = lightbox.dataset.includeHero === "true";
     const lightboxImages = document.querySelectorAll(".lightbox-img");
-    const caption = document.getElementById("lightbox-caption");
     const closeBtn = document.getElementById("lightbox-close");
     const prevBtn = document.getElementById("lightbox-prev");
     const nextBtn = document.getElementById("lightbox-next");
@@ -89,7 +83,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
     const exifContainer = document.getElementById("lightbox-exif");
     const c2paBtn = document.getElementById("lightbox-c2pa");
 
-    if (!lightbox || !caption || !closeBtn || !overlay) return;
+    if (!lightbox || !closeBtn || !overlay) return;
 
     let currentImages = [];
     let currentIndex = -1;
@@ -134,8 +128,71 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       };
     };
 
+    const extractExifMetadata = async (imgUrl) => {
+      try {
+        const resp = await fetch(imgUrl);
+        if (!resp.ok) return null;
+        const arrayBuffer = await resp.arrayBuffer();
+        const tags = ExifReader.load(arrayBuffer);
+
+        const exif = {
+          ImageDescription:
+            tags["ImageDescription"]?.description ||
+            tags["Description"]?.description ||
+            tags["Caption/Abstract"]?.description ||
+            "",
+        };
+
+        const photography = {
+          camera_make: tags["Make"]?.description || "",
+          camera_model: tags["Model"]?.description || "",
+          lens_model: tags["LensModel"]?.description || "",
+          aperture: tags["FNumber"]?.description
+            ? `f/${tags["FNumber"].description}`
+            : undefined,
+          shutter_speed: (() => {
+            const exp = tags["ExposureTime"]?.value || tags["ExposureTime"]?.description;
+            if (!exp) return undefined;
+            const num = typeof exp === "number" ? exp : parseFloat(exp);
+            if (!num || Number.isNaN(num)) return undefined;
+            if (num >= 1) return `${num.toFixed(1)}s`;
+            const denom = Math.round(1 / num);
+            return `1/${denom}s`;
+          })(),
+          iso:
+            (Array.isArray(tags["ISOSpeedRatings"]?.value)
+              ? tags["ISOSpeedRatings"].value[0]
+              : tags["ISOSpeedRatings"]?.value) ||
+            tags["ISO"]?.value,
+          focal_length: tags["FocalLength"]?.description || undefined,
+          date_original: tags["DateTimeOriginal"]?.description || undefined,
+          copyright: tags["Copyright"]?.description || undefined,
+        };
+
+        return { photography, exif };
+      } catch {
+        return null;
+      }
+    };
+
+    const normalizeToPathname = (imgUrl) => {
+      try {
+        return new URL(imgUrl, window.location.origin).pathname;
+      } catch {
+        return imgUrl;
+      }
+    };
+
     const getMetadata = async (imgUrl) => {
       try {
+        // Prefer metadata embedded on the page (e.g. provided by Carousel)
+        const globalMap = window.__imageMetadataBySrc;
+        if (globalMap) {
+          const pathname = normalizeToPathname(imgUrl);
+          const direct = globalMap.get(imgUrl) || globalMap.get(pathname);
+          if (direct) return direct;
+        }
+
         const url = new URL(imgUrl, window.location.origin);
         const imagePath = url.pathname;
         const pathParts = imagePath.split('/');
@@ -151,76 +208,114 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
           metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
         }
         const dirMeta = metadataCache.get(cacheKey);
-        return dirMeta && dirMeta[filename] ? dirMeta[filename] : null;
+        if (dirMeta && dirMeta[filename]) return dirMeta[filename];
+
+        const exifMeta = await extractExifMetadata(imgUrl);
+        return exifMeta;
       } catch {
         return null;
       }
     };
 
     const updateCaptionAndMeta = async (targetImgEl) => {
+      if (!exifContainer) return;
+
+      // Prefer caption from figure/figcaption when present, else alt.
       let capText = "";
       const fig = targetImgEl.closest("figure");
       if (fig) {
         const cap = fig.querySelector("figcaption");
-        if (cap) capText = cap.textContent;
+        if (cap) capText = cap.textContent || "";
       }
-      
-      let initialCaption = capText || targetImgEl.alt || "Untitled";
-      caption.textContent = initialCaption;
 
-      if (exifContainer) {
-        exifContainer.innerHTML = '<p class="loading-meta">Fetching metadata...</p>';
-        try {
-          const meta = await getMetadata(targetImgEl.currentSrc || targetImgEl.src);
-          if (!meta) {
-            exifContainer.innerHTML = `<p class="exif-row"><strong>Dimensions:</strong> ${targetImgEl.naturalWidth} × ${targetImgEl.naturalHeight}</p>`;
-            return;
-          }
+      exifContainer.innerHTML = '<p class="loading-meta">Fetching metadata...</p>';
 
-          const m = toInfoPanelMetadata(meta);
-          const camera = formatCamera(m.camera_make, m.camera_model);
-          const date = formatDate(m.date_original);
-          const specs = [m.focal_length, m.aperture, m.shutter_speed, m.iso ? `ISO ${m.iso}` : null]
-            .filter(Boolean)
-            .join(' · ');
-
-          if (!capText && m.description && m.description.length > 10) {
-            caption.textContent = m.description;
-          }
-
-          const rows = [];
-          if (camera) rows.push({ label: 'Camera', value: camera });
-          if (m.lens_model) rows.push({ label: 'Lens', value: m.lens_model });
-          if (specs) rows.push({ label: 'Settings', value: specs });
-          if (date) rows.push({ label: 'Date', value: date });
-
+      try {
+        const meta = await getMetadata(targetImgEl.currentSrc || targetImgEl.src);
+        if (!meta) {
+          const fallbackTitle = capText || targetImgEl.alt || "Untitled";
           exifContainer.innerHTML = `
             <div class="carousel-info-panel">
               <div class="info-panel-header">
                 <span class="info-panel-title">Metadata</span>
               </div>
-
-              ${m.description ? `<p class="info-panel-description"></p>` : ''}
-
+              ${fallbackTitle ? `<p class="info-panel-description"></p>` : ''}
               <div class="info-panel-details">
-                ${rows
-                  .map(
-                    (r) => `<div class="info-panel-row"><span class="info-panel-label">${r.label}</span><span class="info-panel-value">${r.value}</span></div>`
-                  )
-                  .join('')}
+                <div class="info-panel-row">
+                  <span class="info-panel-label">Dimensions</span>
+                  <span class="info-panel-value">${targetImgEl.naturalWidth} × ${targetImgEl.naturalHeight}</span>
+                </div>
               </div>
-
-              ${m.copyright ? `<div class="info-panel-copyright">${m.copyright}</div>` : ''}
+              <button class="c2pa-indicator info-panel-cr-button" aria-label="View Content Credentials">
+                <span class="c2pa-indicator-label">content credentials</span>
+              </button>
             </div>
           `;
-
-          if (m.description) {
-            const descEl = exifContainer.querySelector('.info-panel-description');
-            if (descEl) descEl.textContent = m.description;
+          const descEl = exifContainer.querySelector('.info-panel-description');
+          if (descEl) descEl.textContent = fallbackTitle;
+          const crBtn = exifContainer.querySelector('.info-panel-cr-button');
+          if (crBtn) {
+            crBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (targetImgEl?.src) window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc: targetImgEl.src } }));
+            });
           }
-        } catch (err) {
-          exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
+          return;
         }
+
+        const m = toInfoPanelMetadata(meta);
+        const camera = formatCamera(m.camera_make, m.camera_model);
+        const date = formatDate(m.date_original);
+        const specs = [m.focal_length, m.aperture, m.shutter_speed, m.iso ? `ISO ${m.iso}` : null]
+          .filter(Boolean)
+          .join(' · ');
+
+        // Match InfoPanel behavior: description comes from metadata when present.
+        const description = m.description || capText || targetImgEl.alt || '';
+
+        const rows = [];
+        if (camera) rows.push({ label: 'Camera', value: camera });
+        if (m.lens_model) rows.push({ label: 'Lens', value: m.lens_model });
+        if (specs) rows.push({ label: 'Settings', value: specs });
+        if (date) rows.push({ label: 'Date', value: date });
+
+        exifContainer.innerHTML = `
+          <div class="carousel-info-panel">
+            <div class="info-panel-header">
+              <span class="info-panel-title">Metadata</span>
+            </div>
+
+            ${description ? `<p class="info-panel-description"></p>` : ''}
+
+            <div class="info-panel-details">
+              ${rows
+                .map(
+                  (r) => `<div class="info-panel-row"><span class="info-panel-label">${r.label}</span><span class="info-panel-value">${r.value}</span></div>`
+                )
+                .join('')}
+            </div>
+
+            ${m.copyright ? `<div class="info-panel-copyright">${m.copyright}</div>` : ''}
+
+            <button class="c2pa-indicator info-panel-cr-button" aria-label="View Content Credentials">
+              <span class="c2pa-indicator-label">content credentials</span>
+            </button>
+          </div>
+        `;
+
+        const descEl = exifContainer.querySelector('.info-panel-description');
+        if (descEl) descEl.textContent = description;
+
+        const crBtn = exifContainer.querySelector('.info-panel-cr-button');
+        if (crBtn) {
+          crBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const currentImgEl = lightboxImages[activeImgIndex] as HTMLImageElement;
+            if (currentImgEl?.src) window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc: currentImgEl.src } }));
+          });
+        }
+      } catch (err) {
+        exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
       }
     };
 
@@ -363,19 +458,29 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       }
     };
 
+    let attachTimer = 0;
+    const scheduleAttachListeners = () => {
+      if (attachTimer) window.clearTimeout(attachTimer);
+      attachTimer = window.setTimeout(() => {
+        attachTimer = 0;
+        attachListeners();
+      }, 50);
+    };
+
     // Expose for subsequent Astro page transitions without re-initializing controls.
-    window.__attachLightboxListeners = attachListeners;
+    window.__attachLightboxListeners = scheduleAttachListeners;
 
     // Initialize
     attachListeners();
     
     // Support Astro ViewTransitions
-    document.addEventListener("astro:page-load", attachListeners);
-    document.addEventListener("astro:after-swap", attachListeners);
+    document.addEventListener("astro:page-load", scheduleAttachListeners);
+    document.addEventListener("astro:after-swap", scheduleAttachListeners);
     
     // Fallback for dynamically added content
-    const observer = new MutationObserver(attachListeners);
-    observer.observe(document.body, { childList: true, subtree: true });
+    const observer = new MutationObserver(scheduleAttachListeners);
+    const container = document.querySelector(selector);
+    if (container) observer.observe(container, { childList: true, subtree: true });
     closeBtn.addEventListener("click", closeLightbox);
     overlay.addEventListener("click", closeLightbox);
     
