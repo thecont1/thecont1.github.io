@@ -266,18 +266,11 @@ def main():
         print("ℹ️  No local images found; leaving existing metadata.json untouched.")
         sys.exit(0)
 
-    # Clean existing metadata files (only when we have images to regenerate from)
-    clean_root = originals_dir if (not args.dir and not args.file) else scan_root
-    for root, dirs, files in os.walk(clean_root):
-        metadata_file = Path(root) / "metadata.json"
-        if metadata_file.exists():
-            metadata_file.unlink()
-            print(f"🗑️  Removed old metadata: {metadata_file.relative_to(project_root)}")
-
     print(f"🔍 Scanning for images in: {scan_root}")
     
     # Find all image files organized by directory
     directories_processed = {}
+    directories_skipped = 0
     total_processed = 0
     
     # Walk through all subdirectories
@@ -292,6 +285,33 @@ def main():
         
         if not image_files:
             continue
+            
+        # Check if metadata needs regeneration
+        metadata_file = root_path / "metadata.json"
+        should_regenerate = False
+        
+        if not metadata_file.exists():
+            should_regenerate = True
+        else:
+            # Compare newest image mtime with metadata mtime
+            try:
+                metadata_mtime = metadata_file.stat().st_mtime
+                newest_image_mtime = max(img.stat().st_mtime for img in image_files)
+                
+                if newest_image_mtime > metadata_mtime:
+                    should_regenerate = True
+            except Exception as e:
+                # If we can't check, regenerate to be safe
+                should_regenerate = True
+        
+        # Skip if metadata is up-to-date
+        if not should_regenerate:
+            directories_skipped += 1
+            continue
+        
+        # Delete old metadata if regenerating
+        if metadata_file.exists():
+            metadata_file.unlink()
             
         # Get relative path from originals directory
         rel_dir = root_path.relative_to(originals_dir)
@@ -330,6 +350,8 @@ def main():
     
     print(f"\n✅ Processed {total_processed} images across {len(directories_processed)} directories")
     print(f"💾 Created {len(directories_processed)} metadata files (co-located with images)")
+    if directories_skipped > 0:
+        print(f"⏭️  Skipped {directories_skipped} directories (metadata up-to-date)")
     print(f"📁 Metadata files are co-located in public/library/originals/ (upload to R2 CDN)")
     
     # Test specific image mentioned by user (only in full scan)
