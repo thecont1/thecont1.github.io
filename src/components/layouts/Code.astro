@@ -29,7 +29,7 @@ const formattedDate = post.data.lastUpdated?.toLocaleDateString("en-US", {
 
 // Generate language color based on language
 const getLanguageColor = (language: string) => {
-  const colors = {
+  const colors: Record<string, string> = {
     'JavaScript': '#f1e05a',
     'TypeScript': '#3178c6',
     'Python': '#3572A5',
@@ -229,9 +229,9 @@ const languageColor = post.data.language ? getLanguageColor(post.data.language) 
       
       // Smooth scroll for anchor links
       document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
+        anchor.addEventListener('click', function (this: HTMLAnchorElement, e: Event) {
           e.preventDefault();
-          const target = document.querySelector(this.getAttribute('href'));
+          const target = document.querySelector(this.getAttribute('href') || '');
           if (target) {
             target.scrollIntoView({
               behavior: 'smooth',
@@ -242,16 +242,17 @@ const languageColor = post.data.language ? getLanguageColor(post.data.language) 
       });
 
       // Add loading animation for images
-      document.querySelectorAll('.markdown-content img').forEach(img => {
-        img.addEventListener('load', function() {
+      document.querySelectorAll('.markdown-content img').forEach((img: Element) => {
+        const imgEl = img as HTMLImageElement;
+        imgEl.addEventListener('load', function(this: HTMLImageElement) {
           this.style.opacity = '1';
           this.style.transform = 'translateY(0)';
         });
         
         // Set initial state
-        img.style.opacity = '0';
-        img.style.transform = 'translateY(20px)';
-        img.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        imgEl.style.opacity = '0';
+        imgEl.style.transform = 'translateY(20px)';
+        imgEl.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
       });
 
       // Parallax effect for background
@@ -259,7 +260,7 @@ const languageColor = post.data.language ? getLanguageColor(post.data.language) 
       
       function updateParallax() {
         const scrolled = window.pageYOffset;
-        const parallax = document.querySelector('.bg-animation');
+        const parallax = document.querySelector('.bg-animation') as HTMLElement;
         
         if (parallax) {
           const speed = scrolled * 0.5;

@@ -16,7 +16,7 @@ interface Props {
 const { post } = Astro.props;
 const { Content } = await post.render();
 
-const backgroundColor = post.data.backgroundColor || post.data['background-color'] || "#ffffff";
+const backgroundColor = post.data.backgroundColor || "#ffffff";
 
 // Formatting date - Economist style: "Mar 29th 2024"
 const formattedDate = post.data.date?.toLocaleDateString("en-GB", {
@@ -85,7 +85,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
   <header class="post-header">
     <div class="post-kicker">
       <span class="collection-type">Post</span>
-      {post.data.category && <span class="category">{post.data.category}</span>}
+      {(post.data as any).category && <span class="category">{(post.data as any).category}</span>}
     </div>
     
     <h1 class="post-title">{post.data.title}</h1>
@@ -134,7 +134,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     // Handle image orientation and aspect ratio for C2PA positioning
     const images = postBody.querySelectorAll('img');
     images.forEach(img => {
-      const handleImg = (el) => {
+      const handleImg = (el: HTMLImageElement) => {
         const ratio = el.naturalWidth / el.naturalHeight;
         el.style.setProperty('--aspect-ratio', ratio.toString());
         
@@ -186,7 +186,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 
     // Hover metadata panel (Post pages)
     const metadataCache = (window.__postMetadataCache ||= new Map());
-    const getMetadataForImage = async (imgUrl) => {
+    const getMetadataForImage = async (imgUrl: string) => {
       try {
         const url = new URL(imgUrl, window.location.origin);
         const imagePath = url.pathname;
@@ -210,7 +210,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       }
     };
 
-    const formatDate = (dateStr) => {
+    const formatDate = (dateStr: string) => {
       if (!dateStr) return '';
       try {
         const [datePart] = dateStr.split(' ');
@@ -222,7 +222,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       }
     };
 
-    const formatCamera = (make, model) => {
+    const formatCamera = (make: string, model: string) => {
       if (!model) return '';
       const cleanModel = make && model.includes(make) ? model.replace(make, '').trim() : model;
       return cleanModel;
@@ -237,10 +237,10 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       document.body.appendChild(hoverPanel);
     }
 
-    let hideTimer = null;
+    let hideTimer: ReturnType<typeof setTimeout> | null = null;
     const hidePanel = () => {
-      hoverPanel.style.display = 'none';
-      hoverPanel.innerHTML = '';
+      hoverPanel!.style.display = 'none';
+      hoverPanel!.innerHTML = '';
     };
 
     const scheduleHide = () => {
@@ -248,7 +248,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
       hideTimer = setTimeout(hidePanel, 120);
     };
 
-    const showPanelForImage = async (img) => {
+    const showPanelForImage = async (img: HTMLImageElement) => {
       if (hideTimer) clearTimeout(hideTimer);
 
       // Position first (hidden) so the panel doesn't appear in a default position and then jump.

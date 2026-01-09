@@ -12,12 +12,12 @@ interface Props {
 const { post } = Astro.props;
 
 // 1. Fetch referenced content from the project frontmatter
-const photogalleries = await Promise.all((post.data.photogalleries || []).map((ref) => ref()));
-const essays = await Promise.all((post.data.essays || []).map((ref) => ref()));
-const longforms = await Promise.all((post.data.longforms || []).map((ref) => ref()));
-const posts = await Promise.all((post.data.posts || []).map((ref) => ref()));
-const datastories = await Promise.all((post.data.datastories || []).map((ref) => ref()));
-const code = await Promise.all((post.data.code || []).map((ref) => ref()));
+const photogalleries = await Promise.all((post.data.photogalleries || []).map((ref: any) => ref()));
+const essays = await Promise.all((post.data.essays || []).map((ref: any) => ref()));
+const longforms = await Promise.all((post.data.longforms || []).map((ref: any) => ref()));
+const posts = await Promise.all((post.data.posts || []).map((ref: any) => ref()));
+const datastories = await Promise.all((post.data.datastories || []).map((ref: any) => ref()));
+const code = await Promise.all((post.data.code || []).map((ref: any) => ref()));
 
 const projectContent = [...photogalleries, ...essays, ...longforms, ...posts, ...datastories, ...code]
   .filter((p) => p?.data?.status === "published");
@@ -61,7 +61,7 @@ async function loadMetadataForDirectory(directory: string): Promise<any> {
 
 const carouselImages = (
   await Promise.all(
-    photogalleries.flatMap((g) => (g?.data?.images || []).map(async (img) => {
+    photogalleries.flatMap((g: any) => (g?.data?.images || []).map(async (img: any) => {
       const parsed = parseOriginalsDirAndFilename(img.src);
       let meta: any = {};
       if (parsed) {
@@ -98,11 +98,11 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
   <!-- RELATED CONTENT / MODULES -->
   <section class="project-modules">
     <div class="modules-grid">
-      {projectContent.map((module) => (
+      {projectContent.map((module: any) => (
         <a href={`/${module.collection}/${module.slug}`} class="module-card">
-          <span class="module-type">{module.data.layout || module.collection}</span>
+          <span class="module-type">{(module.data as any).layout || module.collection}</span>
           <h2 class="module-title">{module.data.title}</h2>
-          <p class="module-subtitle">{module.data.subtitle}</p>
+          <p class="module-subtitle">{(module.data as any).subtitle}</p>
           <span class="read-more">Explore &rarr;</span>
         </a>
       ))}

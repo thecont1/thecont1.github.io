@@ -51,7 +51,9 @@ const baseSchema = z.object({
 // ============================================================================
 // 1. POST - Simple text page (blog post)
 // ============================================================================
-const postSchema = baseSchema;
+const postSchema = baseSchema.extend({
+  category: z.string().optional(),
+});
 
 // ============================================================================
 // 2. ESSAY - More complex, designed for reading (The New Yorker style)
@@ -60,6 +62,7 @@ const essaySchema = baseSchema.extend({
   // Essays typically have more metadata
   readingTime: z.number().optional(), // minutes
   series: z.string().optional(),
+  category: z.string().optional(),
 });
 
 // ============================================================================
@@ -73,6 +76,7 @@ const longformSchema = baseSchema.extend({
   })).optional(),
   currentPart: z.number().optional(),
   totalParts: z.number().optional(),
+  category: z.string().optional(),
 });
 
 // ============================================================================
@@ -204,6 +208,7 @@ const photogallerySchema = z.object({
 const projectSchema = z.object({
   title: z.string(),
   subtitle: z.string(),
+  author: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   

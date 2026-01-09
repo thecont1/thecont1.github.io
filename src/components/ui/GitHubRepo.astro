@@ -27,6 +27,7 @@ const mockPost = repoData ? {
   collection: 'code' as const,
   data: {
     title: repoData.title,
+    author: repoData.repoOwner,
     description: repoData.description,
     status: 'published' as const,
     layout: 'code' as const,
@@ -46,7 +47,7 @@ const mockPost = repoData ? {
     devDependencies: repoData.devDependencies,
     apiData: {
       fetchedAt: new Date(),
-      readme: repoData.readme ? 'cached' : null,
+      readme: repoData.readme ? 'cached' : undefined,
       fileTree: repoData.fileTree,
       languages: repoData.languages
     }
@@ -118,11 +119,11 @@ const mockPost = repoData ? {
         body += `## README\n\n${repoData.readme}\n`;
       }
 
-      return body;
+      return { __html: body };
     },
     headings: [],
     remarkPluginFrontmatter: {}
-  })
+  }) as any
 } : null;
 ---
 

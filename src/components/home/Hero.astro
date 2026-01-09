@@ -138,7 +138,7 @@ const images = await Promise.all(
     }
     return {
       src: img.src,
-      caption: img.caption || (await getSmartCaption(img.src)),
+      caption: (img as any).caption || (await getSmartCaption(img.src)),
       metadata: meta
     };
   })
