@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import "../styles/home.css";
@@ -17,7 +17,7 @@ const { title } = Astro.props;
     <meta charset="utf-8" />
     <title>{title} | Mahesh Shantaram</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <ViewTransitions />
+    <ClientRouter />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,8 +40,8 @@ const { title } = Astro.props;
     <!-- FOOTER -->
     <SiteFooter />
 
-    <script src="/textmode.js" defer></script>
-    <script src="/curtain-scroll-fallback.js" defer></script>
-    <script src="/snow.js" defer></script>
+    <script is:inline src="/textmode.js" defer></script>
+    <script is:inline src="/curtain-scroll-fallback.js" defer></script>
+    <script is:inline src="/snow.js" defer></script>
   </body>
 </html>

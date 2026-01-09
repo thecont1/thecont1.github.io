@@ -34,6 +34,8 @@ export interface ExifMetadata {
  */
 export async function getImageMetadata(imagePath: string): Promise<ExifMetadata | null> {
   try {
+    const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
+
     // Parse the directory structure from the path
     const pathParts = imagePath.split('/');
     const filename = pathParts[pathParts.length - 1];
@@ -47,7 +49,7 @@ export async function getImageMetadata(imagePath: string): Promise<ExifMetadata 
     const directory = pathParts[originalsIndex + 1];
     
     // Fetch the co-located metadata from R2 CDN
-    const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
+    const metadataUrl = `${CDN_ORIGIN}/originals/${directory}/metadata.json`;
     const response = await fetch(metadataUrl);
     
     if (!response.ok) {
@@ -66,7 +68,7 @@ export async function getImageMetadata(imagePath: string): Promise<ExifMetadata 
  * Note: This is not possible with the co-located approach since files are in public/
  * Use the async version instead
  */
-export function getImageMetadataSync(directory: string, filename: string): ExifMetadata | null {
+export function getImageMetadataSync(_directory: string, _filename: string): ExifMetadata | null {
   return null;
 }
 

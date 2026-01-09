@@ -166,7 +166,7 @@ async function handleRequest(request: Request, url: URL) {
     });
   }
 
-  const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
+  const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || process.env.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
 
   try {
     const rootDir = process.cwd();

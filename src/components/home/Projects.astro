@@ -50,8 +50,8 @@ async function getFeaturedContent(item: FeaturedItem) {
       ...item,
       entry,
       title: item.displayTitle || entry.data.title,
-      subtitle: item.displaySubtitle || entry.data.subtitle || entry.data.description || "",
-      heroImage: item.displayImage || entry.data.heroImage,
+      subtitle: item.displaySubtitle || (entry.data as any).subtitle || (entry.data as any).description || "",
+      heroImage: item.displayImage || (entry.data as any).heroImage,
       url: getContentUrl(item.type, item.slug),
     };
   } catch (e) {

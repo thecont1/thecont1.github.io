@@ -1,5 +1,5 @@
 ---
-import { fetchRepoData, parseRepoIdentifier } from '../../integrations/github';
+import { fetchRepoData } from '../../integrations/github';
 import Code from '../layouts/Code.astro';
 
 interface Props {
@@ -10,13 +10,13 @@ interface Props {
 const { repo, githubToken = import.meta.env.GITHUB_TOKEN } = Astro.props;
 
 // Fetch repository data at build time
-let repoData;
-let error;
+let repoData: any;
+let error: Error | undefined;
 
 try {
   repoData = await fetchRepoData(repo, githubToken);
 } catch (e) {
-  error = e;
+  error = e as Error;
 }
 
 // Create a mock post object that matches the CollectionEntry interface
@@ -81,12 +81,12 @@ const mockPost = repoData ? {
         
         if (repoData.dependencies.length > 0) {
           body += `### Dependencies\n`;
-          body += repoData.dependencies.map(dep => `- ${dep}`).join('\n') + '\n\n';
+          body += repoData.dependencies.map((dep: string) => `- ${dep}`).join('\n') + '\n\n';
         }
         
         if (repoData.devDependencies.length > 0) {
           body += `### Development Dependencies\n`;
-          body += repoData.devDependencies.map(dep => `- ${dep}`).join('\n') + '\n\n';
+          body += repoData.devDependencies.map((dep: string) => `- ${dep}`).join('\n') + '\n\n';
         }
       }
 
@@ -94,19 +94,19 @@ const mockPost = repoData ? {
       if (repoData.fileTree.length > 0) {
         body += `## Project Structure\n\n`;
         body += '```\n';
-        body += repoData.fileTree.map(dir => `📁 ${dir}/`).join('\n');
+        body += repoData.fileTree.map((dir: string) => `📁 ${dir}/`).join('\n');
         body += '\n```\n\n';
       }
 
       // Languages
       if (Object.keys(repoData.languages).length > 0) {
-        const total = Object.values(repoData.languages).reduce((sum, bytes) => sum + bytes, 0);
+        const total = Object.values(repoData.languages).reduce((sum: number, bytes: any) => sum + bytes, 0);
         body += `## Languages\n\n`;
         
         Object.entries(repoData.languages)
-          .sort(([,a], [,b]) => b - a)
+          .sort(([,a], [,b]) => (b as number) - (a as number))
           .forEach(([lang, bytes]) => {
-            const percentage = ((bytes / total) * 100).toFixed(1);
+            const percentage = ((bytes as number / total) * 100).toFixed(1);
             body += `- **${lang}**: ${percentage}%\n`;
           });
         
@@ -119,7 +119,9 @@ const mockPost = repoData ? {
       }
 
       return body;
-    }
+    },
+    headings: [],
+    remarkPluginFrontmatter: {}
   })
 } : null;
 ---
@@ -128,7 +130,7 @@ const mockPost = repoData ? {
   <div class="error-container">
     <h1>Error Loading Repository</h1>
     <p>Failed to load repository data for: <code>{repo}</code></p>
-    <p class="error-message">{error.message}</p>
+    <p class="error-message">{(error as Error)?.message}</p>
     <p class="error-help">
       Make sure the repository exists and is public, or provide a valid GitHub token for private repositories.
     </p>

@@ -8,7 +8,7 @@ import Note from "../ui/Note.astro";
 import "../../styles/longform.css";
 
 interface Props {
-  post: CollectionEntry<"longform" | "photography" | "writing" | "datastories">;
+  post: CollectionEntry<"longform">;
 }
 
 const { post } = Astro.props;
@@ -49,7 +49,6 @@ const formattedDate = post.data.date?.toLocaleDateString("en-US", {
   day: "numeric",
 });
 
-const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 const totalChapters = chapters.length;
 ---
 

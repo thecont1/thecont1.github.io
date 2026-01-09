@@ -239,7 +239,8 @@ def main():
 
     # Paths
     project_root = Path(__file__).parent.parent
-    originals_dir = project_root / "public" / "library" / "originals"
+    library_dir = project_root / "public" / "library"
+    originals_dir = library_dir / "originals"
 
     # Determine scan root
     scan_root = originals_dir
@@ -251,6 +252,23 @@ def main():
     if not scan_root.exists():
         print(f"❌ Scan path not found: {scan_root}")
         sys.exit(1)
+    
+    # Purge junk files from all directories under public/library/
+    junk_patterns = [".DS_Store", "Thumbs.db", ".localized"]
+    junk_deleted = 0
+    print(f"🧹 Purging junk files from: {library_dir}")
+    for root, dirs, files in os.walk(library_dir):
+        for file in files:
+            if file in junk_patterns:
+                junk_file = Path(root) / file
+                try:
+                    junk_file.unlink()
+                    junk_deleted += 1
+                    print(f"  🗑️  Deleted: {junk_file.relative_to(project_root)}")
+                except Exception as e:
+                    print(f"  ⚠️  Failed to delete {junk_file.name}: {e}")
+    if junk_deleted > 0:
+        print(f"✅ Purged {junk_deleted} junk files from public/library/\n")
 
     # If there are no images locally, do not delete existing metadata.json.
     # This repo keeps images on R2 (gitignored), so local folders can contain only metadata.json.

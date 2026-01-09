@@ -10,7 +10,7 @@ import "../../styles/post.css";
 import "../../styles/info-panel.css";
 
 interface Props {
-  post: CollectionEntry<"post" | "photography" | "writing" | "datastories">;
+  post: CollectionEntry<"post">;
 }
 
 const { post } = Astro.props;
@@ -198,7 +198,8 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
         const directory = pathParts[originalsIndex + 1];
         const cacheKey = `originals:${directory}`;
         if (!metadataCache.has(cacheKey)) {
-          const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
+          const cdnOrigin = (window.__PUBLIC_R2_CDN_ORIGIN ||= 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev');
+          const metadataUrl = `${cdnOrigin}/originals/${directory}/metadata.json`;
           const resp = await fetch(metadataUrl);
           metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
         }

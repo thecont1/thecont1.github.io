@@ -89,13 +89,13 @@ import "../styles/home.css";
       <SiteFooter />
     </main>
     <C2PAOverlay />
-    <script src="/textmode.js" defer></script>
-    <script src="/curtain-scroll-fallback.js" defer></script>
-    <script src="/snow.js" defer></script>
+    <script is:inline src="/textmode.js" defer></script>
+    <script is:inline src="/curtain-scroll-fallback.js" defer></script>
+    <script is:inline src="/snow.js" defer></script>
     <script>
       // WhatsApp Form Handler
       const form = document.getElementById('wa-form');
-      const messageInput = document.getElementById('wa-message');
+      const messageInput = document.getElementById('wa-message') as HTMLTextAreaElement;
       const PHONE_NUMBER = "919980129770";
 
       if (form && messageInput) {

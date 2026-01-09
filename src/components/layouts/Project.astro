@@ -1,71 +1,81 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import { getCollection } from "astro:content";
-import ContentDispatcher from "./ContentDispatcher.astro";
 import Carousel from "../carousel/Carousel.tsx";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/home.css";
 
 interface Props {
-  post: CollectionEntry<"photography" | "writing" | "datascience">;
+  post: CollectionEntry<"project">;
 }
 
 const { post } = Astro.props;
 
-// 1. Identify the container (Project ID)
-const container = post.data.container || post.slug;
+// 1. Fetch referenced content from the project frontmatter
+const photogalleries = await Promise.all((post.data.photogalleries || []).map((ref) => ref()));
+const essays = await Promise.all((post.data.essays || []).map((ref) => ref()));
+const longforms = await Promise.all((post.data.longforms || []).map((ref) => ref()));
+const posts = await Promise.all((post.data.posts || []).map((ref) => ref()));
+const datastories = await Promise.all((post.data.datastories || []).map((ref) => ref()));
+const code = await Promise.all((post.data.code || []).map((ref) => ref()));
 
-// 2. Fetch all content associated with this container
-const allPhotography = await getCollection("photography");
-const allWriting = await getCollection("writing");
-const allData = await getCollection("datascience");
-
-const allContent = [...allPhotography, ...allWriting, ...allData];
-
-// Filter for items in this project, EXCLUDING the current project meta-post itself
-const projectContent = allContent.filter(
-  (p) =>
-    (p.data.container === container || p.slug === container) &&
-    p.id !== post.id &&
-    p.data.status === "published"
-);
+const projectContent = [...photogalleries, ...essays, ...longforms, ...posts, ...datastories, ...code]
+  .filter((p) => p?.data?.status === "published");
 
 // Sort by date or some other metric if needed?
 // For now, maybe we just list them or let the user define an order in frontmatter?
 // Or we can group them by layout type.
 
-// 3. Also fetch images for the Carousel
-// Note: Images are now on R2 CDN, but metadata.json is still local during build
-const allImages = import.meta.glob(
-  "/public/library/originals/**/*.{jpg,jpeg,png,webp,avif}"
-);
-const filterPath = `/public/library/originals/${container}/`;
-const imagePaths = Object.keys(allImages)
-  .filter((path) => path.includes(filterPath))
-  .sort((a, b) => a.localeCompare(b));
-
-// Load metadata for carousel images (R2 CDN is source of truth)
+// 2. Derive carousel images from referenced photogalleries (frontmatter-defined)
 const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
-let imageMetadata: Record<string, any> = {};
-if (container) {
+const dirMetadataCache = new Map<string, any>();
+
+function parseOriginalsDirAndFilename(imgSrc: string): { directory: string; filename: string } | null {
   try {
-    const metadataUrl = `${CDN_ORIGIN}/originals/${container}/metadata.json`;
-    const resp = await fetch(metadataUrl);
-    if (resp.ok) imageMetadata = await resp.json();
+    const u = new URL(imgSrc, 'http://localhost');
+    const parts = u.pathname.split('/').filter(Boolean);
+    const originalsIndex = parts.indexOf('originals');
+    if (originalsIndex === -1 || originalsIndex >= parts.length - 2) return null;
+    const directory = parts[originalsIndex + 1];
+    const filename = parts[parts.length - 1];
+    if (!directory || !filename) return null;
+    return { directory, filename };
   } catch {
+    return null;
   }
 }
 
-const carouselImages = imagePaths.map((path) => {
-  const filename = path.split('/').pop() || '';
-  const meta = imageMetadata[filename]?.photography || {};
-  return {
-    src: path.replace("/public", ""),
-    caption: path.split("/").pop()?.replace(/\.[^/.]+$/, ""),
-    metadata: meta
-  };
-});
+async function loadMetadataForDirectory(directory: string): Promise<any> {
+  if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
+  try {
+    const metadataUrl = `${CDN_ORIGIN}/originals/${directory}/metadata.json`;
+    const resp = await fetch(metadataUrl);
+    const data = resp.ok ? await resp.json() : null;
+    dirMetadataCache.set(directory, data);
+    return data;
+  } catch {
+    dirMetadataCache.set(directory, null);
+    return null;
+  }
+}
+
+const carouselImages = (
+  await Promise.all(
+    photogalleries.flatMap((g) => (g?.data?.images || []).map(async (img) => {
+      const parsed = parseOriginalsDirAndFilename(img.src);
+      let meta: any = {};
+      if (parsed) {
+        const dirMeta = await loadMetadataForDirectory(parsed.directory);
+        meta = dirMeta?.[parsed.filename]?.photography || {};
+      }
+      return {
+        src: img.src,
+        caption: img.caption || img.alt || parsed?.filename?.replace(/\.[^/.]+$/, '') || '',
+        metadata: meta
+      };
+    }))
+  )
+).filter(Boolean);
 
 const backgroundColor = post.data.backgroundColor || "var(--paper)";
 ---

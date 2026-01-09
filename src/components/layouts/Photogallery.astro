@@ -46,6 +46,9 @@ function getOriginalsDirFromSrc(imgSrc: string): string | null {
 const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
 const dirMetadataCache = new Map<string, any>();
 
+// Make CDN origin available to client-side scripts/components
+globalThis.__PUBLIC_R2_CDN_ORIGIN = CDN_ORIGIN;
+
 async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
   // Expecting a web-root-like path that includes /originals/<DIR>
   const parts = dirPathFromWebRoot.split('/').filter(Boolean);

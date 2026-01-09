@@ -3,7 +3,6 @@ import "../../styles/lightbox.css";
 import "../../styles/info-panel.css";
 import IconBulb from "../icons/IconBulb.astro";
 import IconCR from "../icons/IconCR.astro";
-import ExifReader from "exifreader";
 
 interface Props {
   selector?: string; // CSS selector to scope image listeners (e.g., '.post-content')
@@ -85,7 +84,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
 
     if (!lightbox || !closeBtn || !overlay) return;
 
-    let currentImages = [];
+    let currentImages: HTMLImageElement[] = [];
     let currentIndex = -1;
     let activeImgIndex = 0;
     let isTransitioning = false;
@@ -93,7 +92,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
     // Cache metadata by directory to avoid redundant fetches
     const metadataCache = (window.__lightboxMetadataCache ||= new Map());
 
-    const formatDate = (dateStr) => {
+    const formatDate = (dateStr: string) => {
       if (!dateStr) return '';
       try {
         const [datePart] = dateStr.split(' ');
@@ -105,13 +104,13 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       }
     };
 
-    const formatCamera = (make, model) => {
+    const formatCamera = (make: string, model: string) => {
       if (!model) return '';
       const cleanModel = make && model.includes(make) ? model.replace(make, '').trim() : model;
       return cleanModel;
     };
 
-    const toInfoPanelMetadata = (meta) => {
+    const toInfoPanelMetadata = (meta: any) => {
       const photo = meta?.photography || {};
       const description = meta?.exif?.ImageDescription || meta?.description || '';
       return {
@@ -128,11 +127,12 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       };
     };
 
-    const extractExifMetadata = async (imgUrl) => {
+    const extractExifMetadata = async (imgUrl: string) => {
       try {
         const resp = await fetch(imgUrl);
         if (!resp.ok) return null;
         const arrayBuffer = await resp.arrayBuffer();
+        // @ts-ignore - ExifReader is loaded as UMD global
         const tags = ExifReader.load(arrayBuffer);
 
         const exif = {
@@ -153,7 +153,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
           shutter_speed: (() => {
             const exp = tags["ExposureTime"]?.value || tags["ExposureTime"]?.description;
             if (!exp) return undefined;
-            const num = typeof exp === "number" ? exp : parseFloat(exp);
+            const num = typeof exp === "number" ? exp : parseFloat(String(exp));
             if (!num || Number.isNaN(num)) return undefined;
             if (num >= 1) return `${num.toFixed(1)}s`;
             const denom = Math.round(1 / num);
@@ -175,7 +175,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       }
     };
 
-    const normalizeToPathname = (imgUrl) => {
+    const normalizeToPathname = (imgUrl: string) => {
       try {
         return new URL(imgUrl, window.location.origin).pathname;
       } catch {
@@ -183,7 +183,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       }
     };
 
-    const getMetadata = async (imgUrl) => {
+    const getMetadata = async (imgUrl: string) => {
       try {
         // Prefer metadata embedded on the page (e.g. provided by Carousel)
         const globalMap = window.__imageMetadataBySrc;
@@ -203,7 +203,8 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
         const directory = pathParts[originalsIndex + 1];
         const cacheKey = `originals:${directory}`;
         if (!metadataCache.has(cacheKey)) {
-          const metadataUrl = `https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/${directory}/metadata.json`;
+          const cdnOrigin = (window as any).__PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
+          const metadataUrl = `${cdnOrigin}/originals/${directory}/metadata.json`;
           const resp = await fetch(metadataUrl);
           metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
         }
@@ -217,7 +218,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       }
     };
 
-    const updateCaptionAndMeta = async (targetImgEl) => {
+    const updateCaptionAndMeta = async (targetImgEl: HTMLImageElement) => {
       if (!exifContainer) return;
 
       // Prefer caption from figure/figcaption when present, else alt.
@@ -319,7 +320,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       }
     };
 
-    const updateLightbox = (index, withTransition = false) => {
+    const updateLightbox = (index: number, withTransition = false) => {
       if (index < 0 || index >= currentImages.length) return;
       const target = currentImages[index];
       const isVertical = target.naturalHeight > target.naturalWidth;
@@ -359,12 +360,12 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       currentIndex = index;
     };
 
-    const openLightbox = (imageElement) => {
+    const openLightbox = (imageElement: HTMLImageElement) => {
       const container = document.querySelector(selector);
       if (!container) return;
 
       if (gallery) {
-        let images = Array.from(container.querySelectorAll("img")).filter(i => {
+        let images = Array.from(container.querySelectorAll("img")).filter((i: HTMLImageElement) => {
           if (i.closest("a") || i.classList.contains("no-lightbox")) return false;
           const src = i.currentSrc || i.getAttribute('src') || '';
           if (!src) return false;

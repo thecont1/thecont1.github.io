@@ -33,9 +33,14 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
 <script>
   import "../../styles/c2pa.css";
-  import { CR_LOGO_SVG, CHECKMARK_SVG, SHIELD_CHECK_SVG, SHIELD_X_SVG } from "../icons/cr-logo-svg";
+  import { CR_LOGO_SVG, SHIELD_CHECK_SVG, SHIELD_X_SVG } from "../icons/cr-logo-svg";
 
   class C2PAManager {
+    overlay: HTMLElement | null;
+    content: HTMLElement | null;
+    closeBtn: HTMLElement | null;
+    backdrop: HTMLElement | null;
+
     constructor() {
       this.overlay = document.getElementById('c2pa-overlay');
       this.content = document.getElementById('c2pa-content');

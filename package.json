@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "uv run python scripts/build_exif.py && astro build",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "generate:repo": "node scripts/generate-repo-content.js",

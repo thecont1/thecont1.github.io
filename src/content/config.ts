@@ -124,7 +124,8 @@ const codeSchema = z.object({
 // ============================================================================
 const datastorySchema = z.object({
   title: z.string(),
-  subtitle: z.string(),
+  subtitle: z.string().optional(),
+  author: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   
@@ -141,6 +142,14 @@ const datastorySchema = z.object({
   
   // Dates
   date: z.date().optional(),
+  
+  // Lightbox settings
+  lightbox: z.object({
+    gallery: z.boolean().optional().default(true),
+  }).optional().default({ gallery: true }),
+
+  // Table of Contents control
+  toc: z.boolean().optional().default(false),
   
   // Appearance
   backgroundColor: z.string().optional(),
@@ -160,6 +169,8 @@ const photogallerySchema = z.object({
   // Core content
   title: z.string(),
   subtitle: z.string(),
+  author: z.string(),
+  category: z.string().optional(),
   heroImage: z.string().optional(),
   date: z.date().optional(),
   

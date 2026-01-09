@@ -1,8 +1,3 @@
-# images
-public/**/*.jpg
-public/**/*.png
-public/**/*.webp
-
 # build output
 dist/
 
@@ -11,16 +6,12 @@ dist/
 
 # dependencies
 node_modules/
-npm-debug.log*
-yarn-error.log*
-yarn-debug.log*
-.pnpm-debug.log*
 
 # logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
+.pnpm-debug.log*
 
 # virtual environments
 .venv/
@@ -31,12 +22,12 @@ pnpm-debug.log*
 .env.*.local
 .env.production
 
-# macOS-specific files
+# local media library (now hosted on R2 CDN)
+public/library/
+
+# macOS / Windows
 .DS_Store
 Thumbs.db
-
-# jetbrains setting folder
-.idea/
 
 # IDE / editor
 .idea/
@@ -45,13 +36,7 @@ Thumbs.db
 .windsurf/
 *.swp
 *.swo
-.DS_Store
-Thumbs.db
 
-# Agents
-WARP.md
-CLAUDE.md
-SITE_SPEC.md
+# misc
 dirstruct.txt
 .cursorrules
-.github/copilot-instructions.md

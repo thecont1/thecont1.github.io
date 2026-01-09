@@ -16,11 +16,18 @@ npm run build            # Build production site to ./dist/
 npm run preview          # Preview production build locally
 npm run astro check      # Run Astro type checking
 ```
-    
-### Direct Astro CLI
+
+### Utility Scripts
 ```bash
 npm run astro            # Access Astro CLI directly
+npm run extract:exif     # Extract EXIF metadata locally (see use cases below)
+npm run r2:upload        # End-to-end: extract metadata + upload to R2
 ```
+
+**EXIF Extraction Use Cases:**
+- **Local-only updates**: `npm run extract:exif` - Regenerate all metadata without R2 upload
+- **Specific directory**: `npm run extract:exif -- --dir DIRECTORY` - Update one folder only
+- **End-to-end workflow**: `npm run r2:upload` - Extract metadata AND upload to R2 (recommended for new images)
 
 ## Architecture
 
@@ -36,7 +43,7 @@ npm run astro            # Access Astro CLI directly
   - `project` - Collection of related content using Collection References
 - **Content Location**: Markdown files in `src/content/{collection-name}/`
 - **Schema Structure**:
-  - Required: `title`, `excerpt`, `status` (private/draft/published)
+  - Required: `title`, `subtitle`, `status` (private/draft/published)
   - Taxonomy: `geography[]`, `theme[]`
   - Optional: `date`, `heroImage`, `lightbox` settings, `backgroundColor` (for page background)
   - Datastory: requires `notebook` object with `engine` (marimo/jupyter) and `entry`
@@ -53,19 +60,24 @@ npm run astro            # Access Astro CLI directly
 
 ### Content Credentials (C2PA)
 - **Live Extraction**: Managed via `src/pages/api/c2pa.ts`, which calls a Python extraction script.
-- **Tools**: Requires `c2patool` in a sibling directory (`../c2patool/.venv/bin/python3`).
+- **Python Dependencies**: Uses `c2pa-python` library (v0.27.0+) installed via UV in local `.venv`
+- **API Endpoint**: `/api/c2pa` accepts image path and returns full manifest with validation status
+- **Python Resolution**: Automatically finds Python in `.venv/bin/python3` or falls back to system Python
 - **Styles**: Custom overlay and indicator styles in `src/styles/c2pa.css`.
-- **Scripts**: Core extraction logic lives in `scripts/c2pa_xtract.py`.
+- **Scripts**: Core extraction logic in `scripts/c2pa_xtract.py` (uses `c2pa` Python package from Reader class)
 
 ### Image Metadata (EXIF) + `metadata.json`
-- **Build-time extraction**: `scripts/build_exif.py` scans `public/library/originals/` and writes co-located `metadata.json` files per directory.
+- **Manual extraction**: `scripts/build_exif.py` scans `public/library/originals/` and writes co-located `metadata.json` files per directory.
 - **Scoped extraction**: `scripts/build_exif.py --dir <TOP_FOLDER>` regenerates metadata only for that subtree under `public/library/originals/`.
-- **Dev-time watcher**: `scripts/scaffold-integration.ts` (Astro integration) watches:
-  - `src/content/**` to auto-scaffold new empty `.md/.mdx`
-  - `public/library/originals/**/*.{jpg,jpeg}` to keep `metadata.json` up-to-date by running the scoped Python extractor
-- **Startup sync in dev**: on `npm run dev`, the integration scans `public/library/originals/` and regenerates metadata for any folder whose newest JPG/JPEG is newer than `metadata.json`.
+- **Junk file purging**: Script automatically purges system junk files (`.DS_Store`, `Thumbs.db`, `.localized`) from all directories under `public/library/` on every run.
+- **Dev-time scaffolding**: `scripts/scaffold-integration.ts` (Astro integration) watches `src/content/**` to auto-scaffold new empty `.md/.mdx`.
 - **R2 CDN Migration**: Images are now served from Cloudflare R2 (https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/). Local `public/library/originals/` is maintained for metadata extraction and C2PA processing.
-- **Metadata Sync**: Run `scripts/sync_r2_metadata.sh` to download images from R2, regenerate metadata.json files, and upload metadata back to R2. This keeps metadata in sync across both local and CDN.
+- **R2 Upload**: Run `scripts/upload_to_r2.sh` to generate metadata and sync entire `public/library/` to R2 (local is source of truth, remote files not in local will be deleted). Optionally pass a directory name to sync only that subdirectory: `scripts/upload_to_r2.sh <DIR_NAME>`.
+  1. Generate metadata.json files locally
+  2. Purge junk files from all directories
+  3. Upload both images and metadata to R2 using rclone
+  - Optionally target specific directory: `bash scripts/upload_to_r2.sh DIRECTORY`
+  - Requires env vars: `CLOUDFLARE_ACCESS_KEY_ID`, `CLOUDFLARE_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_ENDPOINT`, `CLOUDFLARE_BUCKET_NAME`
 
 ### Homepage Featured Content
 - **Manual Control**: `src/data/featured.ts` - curated list of featured items
@@ -81,6 +93,7 @@ npm run astro            # Access Astro CLI directly
 - **Main sections**: `/photogallery`, `/essay`, `/longform`, `/post`, `/datastory`, `/code`, `/project`
 - **Dynamic routes**: Collections generate pages via `[...slug].astro` pattern
 - **Index**: Home page at `src/pages/index.astro`
+- **Auto-scaffolding**: `scripts/scaffold-integration.ts` - Astro integration that auto-creates empty markdown files for new content and watches for image changes
 
 ### Carousel System
 - **Components**: 
@@ -115,6 +128,8 @@ npm run astro            # Access Astro CLI directly
   - `src/styles/carousel.css` - All carousel-related styles (homepage hero, photogallery carousel layout, controls, animations, curtain effects)
   - `src/styles/hero.css` - Homepage hero-specific styles (minimal after carousel refactor)
   - `src/styles/photogallery.css` - Photogallery layouts (tile, one-up)
+  - `src/styles/post.css` - Post layout styling with hover info panels
+  - `src/styles/info-panel.css` - Metadata info panel styling for both carousel and post layouts
   - `src/styles/code.css` - Code layout styling
   - `src/styles/c2pa.css` - C2PA overlay and indicator styles
 - **Carousel Layout Features**:
@@ -140,9 +155,11 @@ The site integrates computational notebooks for data storytelling:
 ## Deployment
 
 - **Platform**: GitHub Pages
-- **Workflow**: `.github/workflows/astro.yml` handles CI/CD
+- **Workflow**: `.github/workflows/astro.yml` handles CI/CD with UV and Python setup
+- **Build process**: Builds Astro site
 - **Build output**: Static site to `./dist/`
 - **Site URL**: https://thecont1.github.io
+- **Requirements**: Node.js 20, Python 3.12, UV package manager
 
 ## Content Authoring
 
@@ -154,6 +171,16 @@ When creating new content:
 5. Specify `layout` to control rendering template
 6. For notebooks, add `notebook` object with engine and entry details
 
+## Post Layout Features
+
+- **Hover Info Panels**: Images in Post layout show metadata panel on hover
+- **Metadata Display**: Dynamically loads `metadata.json` for each image's directory
+- **C2PA Integration**: Content Credentials button integrated into info panel
+- **Background Color Support**: Custom `backgroundColor` frontmatter property applies to entire page, header, and body
+- **Image Captions**: Auto-generates `<figure>` and `<figcaption>` from markdown alt text
+- **Orientation Detection**: Automatically detects and styles vertical/horizontal images
+- **Note Component**: Supports floating callouts in Post and Essay layouts via `<Note>` component
+
 ## Key Constraints
 
 - Content must validate against Zod schemas in `src/content/config.ts`
@@ -161,3 +188,4 @@ When creating new content:
 - Status must be one of: private, draft, published
 - React version 19 requires compatible component patterns
 - Astro 5.x uses latest conventions (check docs for breaking changes from v4)
+- Python environment managed via UV (specified in `pyproject.toml`)

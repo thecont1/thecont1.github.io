@@ -259,7 +259,7 @@ class PixelDust {
   update(fadeOut = false) {
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
-    const { maxSpeed, minSpeed } = this.options;
+    const { maxSpeed } = this.options;
 
     // Gentle wind effect
     this.wind = Math.sin(this.time * 0.001) * 0.2;

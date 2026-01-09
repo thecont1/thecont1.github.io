@@ -215,7 +215,7 @@ function generateReadmeSection(readme: string): string {
   // Fix relative image paths (basic implementation)
   processedReadme = processedReadme.replace(
     /!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g,
-    (match, alt, src) => {
+    (match) => {
       // Convert relative paths to GitHub raw URLs
       // This is a simplified approach - you might want to make this more robust
       return match; // For now, keep as-is
@@ -228,7 +228,7 @@ function generateReadmeSection(readme: string): string {
 // CLI-style function for manual content generation
 export async function generateFromCLI(repoIdentifier: string, token?: string): Promise<void> {
   try {
-    const filename = await generateCodeContent(repoIdentifier, {
+    await generateCodeContent(repoIdentifier, {
       githubToken: token,
       overwrite: true
     });

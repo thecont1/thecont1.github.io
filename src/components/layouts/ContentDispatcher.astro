@@ -2,24 +2,22 @@
 import Post from "./Post.astro";
 import Essay from "./Essay.astro";
 import Longform from "./Longform.astro";
-import Gallery from "./Gallery.astro";
 import Code from "./Code.astro";
 import Datastory from "./Datastory.astro";
 import Project from "./Project.astro";
 
 const { post } = Astro.props;
 
-const layouts = {
+const layouts: Record<string, any> = {
   post: Post,
   essay: Essay,
   longform: Longform,
-  gallery: Gallery,
   code: Code,
   datastory: Datastory,
   project: Project,
 };
 
-const Component = layouts[post.data.layout] || Post;
+const Component = layouts[post.data.layout as string] || Post;
 ---
 
 <Component post={post} />
