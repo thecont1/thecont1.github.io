@@ -19,17 +19,12 @@ function getOriginalsDirAndFilenameFromSrc(imgSrc: string): { directory: string;
   return { directory, filename };
 }
 
-const CDN_ORIGIN = (import.meta as any).env?.PUBLIC_R2_CDN_ORIGIN || 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev';
 const dirMetadataCache = new Map<string, any>();
-
-// Make CDN origin available to client-side scripts/components
-// (Any changes should be made via PUBLIC_R2_CDN_ORIGIN)
-globalThis.__PUBLIC_R2_CDN_ORIGIN = CDN_ORIGIN;
 
 async function loadMetadataForDirectory(directory: string): Promise<any> {
   if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
   try {
-    const metadataUrl = `${CDN_ORIGIN}/originals/${directory}/metadata.json`;
+    const metadataUrl = `/library/originals/${directory}/metadata.json`;
     const resp = await fetch(metadataUrl);
     const data = resp.ok ? await resp.json() : null;
     dirMetadataCache.set(directory, data);

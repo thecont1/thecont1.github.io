@@ -30,43 +30,41 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
 ---
 
 <style is:global>
-  {`
-    /* Immediate application to avoid flash of default background */
-    html, body {
-      background-color: ${backgroundColor} !important;
-    }
+  /* Immediate application to avoid flash of default background */
+  html, body {
+    background-color: var(--page-bg, #ffffff) !important;
+  }
 
-    :root {
-      --page-bg: ${backgroundColor};
-    }
+  :root {
+    --page-bg: #ffffff;
+  }
 
-    /* Ensure transparency in layout parents */
-    main,
-    #snow-canvas {
-      background: transparent !important;
-      background-color: transparent !important;
-    }
+  /* Ensure transparency in layout parents */
+  main,
+  #snow-canvas {
+    background: transparent !important;
+    background-color: transparent !important;
+  }
 
-    .site-header {
-      background-color: ${backgroundColor} !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-    }
+  .site-header {
+    background-color: var(--page-bg, #ffffff) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
 
-    .site-header-inner {
-      background-color: transparent !important;
-    }
+  .site-header-inner {
+    background-color: transparent !important;
+  }
 
-    /* Improved contrast detection using data-bg attribute on html or body */
-    html[data-bg^="#0"],
-    html[data-bg^="#1"],
-    html[data-bg^="#2"],
-    html[data-bg="black"] {
-      --ink: #eee;
-      --muted: #aaa;
-      --hairline: #333;
-    }
-  `}
+  /* Improved contrast detection using data-bg attribute on html or body */
+  html[data-bg^="#0"],
+  html[data-bg^="#1"],
+  html[data-bg^="#2"],
+  html[data-bg="black"] {
+    --ink: #eee;
+    --muted: #aaa;
+    --hairline: #333;
+  }
 </style>
 
 <script is:inline define:vars={{ backgroundColor }}>
@@ -74,9 +72,11 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
     const bg = backgroundColor || '#ffffff';
     // Set data-bg on html for CSS targeting
     document.documentElement.setAttribute('data-bg', bg);
+    document.documentElement.style.setProperty('--page-bg', bg);
     document.documentElement.style.setProperty('background-color', bg, 'important');
     // Also set on body to be safe
     document.body.setAttribute('data-bg', bg);
+    document.body.style.setProperty('--page-bg', bg);
     document.body.style.setProperty('background-color', bg, 'important');
   })();
 </script>
@@ -198,8 +198,7 @@ const tags = [...(post.data.theme || []), ...(post.data.geography || [])];
         const directory = pathParts[originalsIndex + 1];
         const cacheKey = `originals:${directory}`;
         if (!metadataCache.has(cacheKey)) {
-          const cdnOrigin = (window.__PUBLIC_R2_CDN_ORIGIN ||= 'https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev');
-          const metadataUrl = `${cdnOrigin}/originals/${directory}/metadata.json`;
+          const metadataUrl = `/library/originals/${directory}/metadata.json`;
           const resp = await fetch(metadataUrl);
           metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
         }
