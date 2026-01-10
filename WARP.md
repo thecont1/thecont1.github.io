@@ -22,6 +22,7 @@ npm run astro check      # Run Astro type checking
 npm run astro            # Access Astro CLI directly
 npm run extract:exif     # Extract EXIF metadata locally (see use cases below)
 npm run r2:upload        # End-to-end: extract metadata + upload to R2
+npm run deploy           # Full deployment: R2 sync + build + FTP upload
 ```
 
 **EXIF Extraction Use Cases:**
@@ -154,10 +155,33 @@ The site integrates computational notebooks for data storytelling:
 
 ## Deployment
 
+### Production Deployment (thecontrarian.in)
+- **Platform**: cPanel hosting via FTP
+- **Script**: `npm run deploy` (wraps `deploy.sh`)
+- **Build output**: Static site to `./dist/client/` (client) and `./dist/server/` (server)
+- **Site URL**: https://thecontrarian.in
+- **Deployment Steps**:
+  1. R2 Sync: Extract EXIF metadata + upload to Cloudflare R2
+  2. Build: Astro static build with server-side rendering
+  3. Clean: Remove `dist/client/library` (served from R2 CDN)
+  4. FTP Upload: Deploy to remote `public_html/` and `server/` via lftp
+- **Scripts**:
+  - `deploy.sh` - Master orchestration script
+  - `scripts/deploy_ftp.sh` - FTP mirroring with lftp
+  - `scripts/upload_to_r2.sh` - R2 sync via rclone
+- **Options**:
+  - `--skip-r2` - Skip R2 sync
+  - `--skip-build` - Skip Astro build
+  - `--skip-ftp` - Skip FTP deployment
+  - `--r2-dir DIR` - Only sync specific directory to R2
+- **Requirements**: 
+  - `lftp` for FTP mirroring
+  - `rclone` for R2 sync
+  - Environment variables: `THECONT1_FTP_PASSWORD`, R2 credentials
+
+### Development Deployment (GitHub Pages)
 - **Platform**: GitHub Pages
-- **Workflow**: `.github/workflows/astro.yml` handles CI/CD with UV and Python setup
-- **Build process**: Builds Astro site
-- **Build output**: Static site to `./dist/`
+- **Workflow**: `.github/workflows/astro.yml` handles CI/CD
 - **Site URL**: https://thecont1.github.io
 - **Requirements**: Node.js 20, Python 3.12, UV package manager
 
@@ -181,6 +205,51 @@ When creating new content:
 - **Orientation Detection**: Automatically detects and styles vertical/horizontal images
 - **Note Component**: Supports floating callouts in Post and Essay layouts via `<Note>` component
 
+## TypeScript Configuration
+
+### Type Safety Status
+- **100% type coverage** across all Astro components
+- **Clean TypeScript compilation** with strict type checking
+- **Zero errors, zero warnings** in `npm run astro check`
+- **Global type declarations**: `src/types/global.d.ts` for custom window properties
+
+### Major Type Safety Improvements (Jan 2026)
+Completed comprehensive TypeScript error resolution (183 errors → 0 errors):
+
+**Schema Enhancements:**
+- Added `category` field to essay, longform, and post schemas
+- Added `author` field to project and photogallery schemas  
+- Enhanced datastory schema with `author`, `lightbox`, and `toc` fields
+- Fixed collection naming: `datastory` (not `datastories`)
+
+**Type Declarations:**
+- Created `src/types/global.d.ts` for window/globalThis properties:
+  - `__PUBLIC_R2_CDN_ORIGIN`: CDN origin URL
+  - `__postMetadataCache`: Post metadata caching
+  - `__lightboxMetadataCache`: Lightbox metadata caching  
+  - `__attachLightboxListeners`: Lightbox listener function
+- Added class property declarations to C2PAManager
+- Fixed implicit `any` types across all components
+
+**Component Type Safety:**
+- All DOM manipulation code properly typed (Element → HTMLElement)
+- Event handlers with explicit `this` typing
+- Proper typing for `setTimeout` return values (`ReturnType<typeof setTimeout>`)
+- Collection reference map operations with type assertions
+- Fixed language color maps with `Record<string, string>`
+
+**Astro 5.x Compatibility:**
+- Migrated from deprecated `ViewTransitions` to `ClientRouter`
+- Added `is:inline` directives to all external script tags
+- Updated script handling for new Astro 5.x behavior
+
+**Best Practices:**
+- Use type assertions (`as HTMLElement`) for DOM queries
+- Prefix unused parameters with underscore (`_param`)
+- Use `ReturnType<typeof fn>` for complex return types
+- Cast browser-specific properties: `(element.style as any).webkitBackdropFilter`
+- Type collection references: `.map((ref: any) => ref())`
+
 ## Key Constraints
 
 - Content must validate against Zod schemas in `src/content/config.ts`
@@ -189,3 +258,4 @@ When creating new content:
 - React version 19 requires compatible component patterns
 - Astro 5.x uses latest conventions (check docs for breaking changes from v4)
 - Python environment managed via UV (specified in `pyproject.toml`)
+- TypeScript strict mode enabled - all components must be fully typed

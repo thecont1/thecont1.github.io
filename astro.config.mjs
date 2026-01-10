@@ -9,5 +9,11 @@ export default defineConfig({
   // site intentionally omitted for platform deployments (set when you have a stable domain)
   integrations: [react(), scaffold()],
   output: 'static', // Changed to 'static' to support API endpoints
-  adapter: node({ mode: 'standalone' })
+  adapter: node({ mode: 'standalone' }),
+  vite: {
+    build: {
+      cssMinify: true,
+      minify: 'esbuild' // Keep JS minification enabled
+    }
+  }
 });

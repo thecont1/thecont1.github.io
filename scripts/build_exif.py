@@ -256,8 +256,8 @@ def main():
     # Purge junk files from all directories under public/library/
     junk_patterns = [".DS_Store", "Thumbs.db", ".localized"]
     junk_deleted = 0
-    print(f"🧹 Purging junk files from: {library_dir}")
-    for root, dirs, files in os.walk(library_dir):
+    print(f"🧹 Purging junk files from: {project_root}")
+    for root, dirs, files in os.walk(project_root):
         for file in files:
             if file in junk_patterns:
                 junk_file = Path(root) / file
@@ -268,7 +268,7 @@ def main():
                 except Exception as e:
                     print(f"  ⚠️  Failed to delete {junk_file.name}: {e}")
     if junk_deleted > 0:
-        print(f"✅ Purged {junk_deleted} junk files from public/library/\n")
+        print(f"✅ Purged {junk_deleted} junk files from {project_root}\n")
 
     # If there are no images locally, do not delete existing metadata.json.
     # This repo keeps images on R2 (gitignored), so local folders can contain only metadata.json.
@@ -285,15 +285,20 @@ def main():
         sys.exit(0)
 
     print(f"🔍 Scanning for images in: {scan_root}")
+    print("")
     
     # Find all image files organized by directory
     directories_processed = {}
     directories_skipped = 0
     total_processed = 0
+    all_scanned_dirs = []
     
     # Walk through all subdirectories
     for root, dirs, files in os.walk(scan_root):
         root_path = Path(root)
+        
+        # Track all directories with images
+        rel_dir = root_path.relative_to(originals_dir)
         
         # Skip if no image files in this directory
         image_files = []
@@ -303,6 +308,9 @@ def main():
         
         if not image_files:
             continue
+        
+        # Record this directory as scanned
+        all_scanned_dirs.append(str(rel_dir))
             
         # Check if metadata needs regeneration
         metadata_file = root_path / "metadata.json"
@@ -330,9 +338,6 @@ def main():
         # Delete old metadata if regenerating
         if metadata_file.exists():
             metadata_file.unlink()
-            
-        # Get relative path from originals directory
-        rel_dir = root_path.relative_to(originals_dir)
         
         print(f"📁 Processing directory: {rel_dir} ({len(image_files)} images)")
         
@@ -371,6 +376,12 @@ def main():
     if directories_skipped > 0:
         print(f"⏭️  Skipped {directories_skipped} directories (metadata up-to-date)")
     print(f"📁 Metadata files are co-located in public/library/originals/ (upload to R2 CDN)")
+    
+    # Print all scanned directories
+    if all_scanned_dirs:
+        print(f"\n📂 Directories scanned ({len(all_scanned_dirs)}):")
+        for dir_name in sorted(all_scanned_dirs):
+            print(f"  • {dir_name}")
     
     # Test specific image mentioned by user (only in full scan)
     if not args.dir and not args.file:

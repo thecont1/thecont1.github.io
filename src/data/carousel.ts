@@ -2,7 +2,7 @@ export const CAROUSEL_IMAGES = [
   { src: `/library/originals/TheNeighbourhood/MS200706-TheHood491.jpg` },
   { src: `/library/originals/WEDDINGS/MS201201-UrviNikhil0384.jpg` },
   { src: `/library/originals/GUINEA/MS201804-FIDHGuinea0264.jpg` },
-  { src: `/library/originals/BANGALORE/MS202303-DerSpiegel0117.jpg` },
+  { src: `/library/originals/BANGALORE/2023/MS202303-DerSpiegel0117.jpg` },
   { src: `/library/originals/GHANA/DSCF9412.jpg` },
   { src: `/library/originals/HONGKONG/MS202309-HongKong0636-Enhanced-NR.jpg` },
   { src: `/library/originals/NAGALAND/MS201912-Nagaland0030.jpg` },
