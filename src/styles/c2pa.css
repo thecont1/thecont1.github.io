@@ -93,6 +93,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px; /* Ensure minimum touch target size */
+  min-height: 44px;
+}
+
+/* Mobile touch target optimization for C2PA close button */
+@media (max-width: 768px) {
+  .c2pa-close-btn {
+    min-width: 48px; /* Comfortable touch target size */
+    min-height: 48px;
+    /* Enhanced touch feedback */
+    transition: all 120ms ease, transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .c2pa-close-btn:active {
+    transform: scale(0.95) rotate(45deg);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
 }
 
 .c2pa-close-btn:hover {
@@ -446,6 +465,28 @@
   padding: 0;
   box-sizing: border-box;
   line-height: 1;
+}
+
+/* Mobile touch target optimization for C2PA indicators */
+@media (max-width: 768px) {
+  .c2pa-indicator {
+    height: 48px; /* Minimum 44px touch target, using 48px for comfort */
+    width: 48px;
+    border-radius: 24px; /* Adjust border radius to match new size */
+    /* Enhanced touch feedback */
+    transition: all 120ms cubic-bezier(0.4, 0, 0.2, 1), transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .c2pa-indicator:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .c2pa-indicator.c2pa-injected svg {
+    width: 20px; /* Slightly larger icon for better visibility on larger button */
+    height: 20px;
+  }
 }
 
  .c2pa-media-wrap {

@@ -6,6 +6,11 @@ body {
   margin: 0;
   font-family: Inter, system-ui, sans-serif;
 
+  /* Responsive Breakpoints */
+  --breakpoint-mobile: 768px;
+  --breakpoint-tablet: 1024px;
+  --breakpoint-desktop: 1025px;
+
   /* Core palette */
   --ink: #111;
   --paper: #fff;
@@ -57,6 +62,18 @@ body {
   --projects-label-weight: 100;
   --projects-label-letter-spacing: 0.005em;
   --projects-label-nudge: 3vw;
+
+  /* Mobile-First Responsive Variables */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+  
+  /* Mobile-first container and layout */
+  --container-padding: var(--spacing-sm);
+  --content-max-width: 100%;
+  --touch-target-min: 44px;
 }
 
 main {
@@ -90,4 +107,77 @@ body.text-only .card-media,
 body.text-only .post-hero,
 body.text-only .lightbox-main {
   display: none !important;
+}
+
+/* =========================
+   RESPONSIVE ARCHITECTURE
+   ========================= */
+
+/* Tablet and up */
+@media (min-width: 769px) {
+  body {
+    --container-padding: var(--spacing-md);
+    --spacing-lg: 2.5rem;
+    --spacing-xl: 4rem;
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1025px) {
+  body {
+    --container-padding: var(--spacing-lg);
+    --content-max-width: 1200px;
+    --spacing-xl: 5rem;
+  }
+}
+
+/* Mobile-first utility classes */
+.container {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 0 var(--container-padding);
+}
+
+.touch-target {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+}
+
+/* Responsive text sizing */
+.text-responsive {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+}
+
+.heading-responsive {
+  font-size: clamp(1.5rem, 5vw, 3rem);
+}
+
+/* Hide/show utilities for responsive design */
+.mobile-only {
+  display: block;
+}
+
+.tablet-up {
+  display: none;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
+  }
+  
+  .tablet-up {
+    display: block;
+  }
+}
+
+@media (min-width: 1025px) {
+  .desktop-only {
+    display: block;
+  }
 }

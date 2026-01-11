@@ -1,4 +1,20 @@
 {
+  "TCNWM_psy-03.png": {
+    "filename": "TCNWM_psy-03.png",
+    "format": "PNG",
+    "size": [
+      3456,
+      1940
+    ],
+    "width": 3456,
+    "height": 1940,
+    "exif": {
+      "ExifOffset": 26.0,
+      "ExifImageWidth": 3456.0,
+      "ExifImageHeight": 1940.0
+    },
+    "photography": {}
+  },
   "TheWork13b-obv.jpg": {
     "filename": "TheWork13b-obv.jpg",
     "format": "JPEG",
@@ -9,6 +25,54 @@
     "width": 4000,
     "height": 2500,
     "exif": {},
+    "photography": {}
+  },
+  "TCNWM_psy-01.png": {
+    "filename": "TCNWM_psy-01.png",
+    "format": "PNG",
+    "size": [
+      3456,
+      1940
+    ],
+    "width": 3456,
+    "height": 1940,
+    "exif": {
+      "ExifOffset": 26.0,
+      "ExifImageWidth": 3456.0,
+      "ExifImageHeight": 1940.0
+    },
+    "photography": {}
+  },
+  "TCNWM_psy-05.png": {
+    "filename": "TCNWM_psy-05.png",
+    "format": "PNG",
+    "size": [
+      3456,
+      1940
+    ],
+    "width": 3456,
+    "height": 1940,
+    "exif": {
+      "ExifOffset": 26.0,
+      "ExifImageWidth": 3456.0,
+      "ExifImageHeight": 1940.0
+    },
+    "photography": {}
+  },
+  "TCNWM_psy-07.png": {
+    "filename": "TCNWM_psy-07.png",
+    "format": "PNG",
+    "size": [
+      3456,
+      1940
+    ],
+    "width": 3456,
+    "height": 1940,
+    "exif": {
+      "ExifOffset": 26.0,
+      "ExifImageWidth": 3456.0,
+      "ExifImageHeight": 1940.0
+    },
     "photography": {}
   },
   "TheWork15-obv.jpg": {
@@ -57,6 +121,22 @@
     "width": 8000,
     "height": 6000,
     "exif": {},
+    "photography": {}
+  },
+  "TCNWM_psy-09.png": {
+    "filename": "TCNWM_psy-09.png",
+    "format": "PNG",
+    "size": [
+      3456,
+      1940
+    ],
+    "width": 3456,
+    "height": 1940,
+    "exif": {
+      "ExifOffset": 26.0,
+      "ExifImageWidth": 3456.0,
+      "ExifImageHeight": 1940.0
+    },
     "photography": {}
   },
   "TheWork14e-obv.jpg": {

@@ -5,7 +5,7 @@ author: "Mahesh Shantaram"
 status: published
 container: facebook
 date: 2019-01-19
-heroImage: "https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/FAMILY/MS201802-Vietnam0225.jpg"
+heroImage: "/library/originals/FAMILY/MS201802-Vietnam0225.jpg"
 showHero: false
 backgroundColor: "#ccc3"
 geography: [india]
@@ -14,7 +14,7 @@ lightbox:
   gallery: false
 ---
 
-![The parents. Vietnam, 2018](https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/FAMILY/MS201802-Vietnam0225.jpg)
+![The parents. Vietnam, 2018](/library/originals/FAMILY/MS201802-Vietnam0225.jpg)
 
 Now that the 21st century is almost here in India, and the government has copies of my retina and fingerprints, I don't understand or agree to why one's father's name is mandatory on all official IDs. It's been two years since the Delhi High Court ruled against this age-old requirement that, no doubt, takes root in patriarchy. 
 

@@ -220,6 +220,22 @@
   transition: all 0.2s ease;
 }
 
+/* Mobile touch target optimization for lightbox */
+@media (max-width: 768px) {
+  .lightbox .icon-btn {
+    width: 48px; /* Minimum 44px touch target, using 48px for comfort */
+    height: 48px;
+    /* Enhanced touch feedback */
+    transition: all 120ms ease, transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .lightbox .icon-btn:active {
+    transform: scale(0.95);
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
 .lightbox .icon-btn:hover {
   color: var(--ink, #111);
   background: rgba(0,0,0,0.05);

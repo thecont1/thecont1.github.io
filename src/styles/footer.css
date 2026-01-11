@@ -9,7 +9,7 @@
   border-top: 1px solid var(--hairline);
   margin-top: 0;
   background-color: var(--surface) !important; /* Explicitly use the page surface color */
-  padding: 2rem 6vw;
+  padding: 1rem 4vw;
   color: var(--muted-2);
   font-size: 1.5rem;
 }
@@ -26,12 +26,34 @@
   gap: 1.5rem;
 }
 
+/* Mobile spacing optimization for touch targets */
+@media (max-width: 768px) {
+  .footer-socials {
+    gap: 0.75rem; /* Slightly tighter gap to accommodate larger touch targets */
+    flex-wrap: wrap; /* Allow wrapping if needed */
+    justify-content: center;
+  }
+}
+
 .footer-socials a {
   color: var(--ink);
   transition: color 0.2s ease, transform 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Ensure adequate touch target size */
+  min-width: 48px; /* Minimum 44px touch target, using 48px for comfort */
+  min-height: 48px;
+  padding: 0rem; /* Add padding for better touch area */
+}
+
+/* Mobile touch feedback */
+@media (max-width: 768px) {
+  .footer-socials a:active {
+    transform: scale(0.95) translateY(-1px);
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
 }
 
 .footer-socials a:hover {

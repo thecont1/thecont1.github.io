@@ -62,15 +62,37 @@
   display: block;
 }
 
-/* Responsive fitting */
-@media (min-aspect-ratio: 4/3) {
+/* Mobile-specific carousel image optimization */
+@media (max-width: 768px) {
+  .carousel-image {
+    height: 100vh; /* Full viewport height for mobile */
+    width: auto;
+    max-width: none; /* Remove max-width constraint to allow horizontal overflow */
+    min-width: 100vw; /* Ensure image fills at least full width */
+    object-fit: cover; /* Cover to fill height while maintaining aspect ratio */
+    object-position: left center; /* Align to left edge as specified in requirements */
+  }
+  
+  .carousel-slide {
+    height: 100vh; /* Ensure slide container is full height */
+    overflow: hidden; /* Hide any vertical overflow */
+  }
+  
+  .carousel-track {
+    overflow-x: auto; /* Allow horizontal scrolling for overflow */
+    overflow-y: hidden; /* Prevent vertical scrolling */
+  }
+}
+
+/* Responsive fitting for desktop */
+@media (min-width: 769px) and (min-aspect-ratio: 4/3) {
   .carousel-image {
     height: 100%;
     width: auto;
   }
 }
 
-@media (max-aspect-ratio: 4/3) {
+@media (min-width: 769px) and (max-aspect-ratio: 4/3) {
   .carousel-image {
     height: 100%;
     width: auto;
@@ -113,6 +135,39 @@
   color: var(--controls-glyph);
   outline: none;
   transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+/* Mobile-specific touch optimizations */
+@media (max-width: 768px) {
+  .carousel-controls {
+    bottom: 2rem; /* Adjust positioning for mobile */
+    right: 1.5rem;
+    gap: 0.75rem; /* Slightly tighter spacing for mobile */
+  }
+  
+  .carousel-controls button {
+    width: 48px; /* Minimum 44px touch target, using 48px for comfort */
+    height: 48px;
+    border-width: 2px; /* Slightly thinner border for mobile */
+    /* Enhanced touch feedback */
+    transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .carousel-controls button:active {
+    transform: scale(0.95) translateY(1px);
+    background: rgba(255, 255, 255, 0.35);
+    border-color: rgba(208, 75, 54, 0.6);
+    box-shadow:
+      0 0 0 2px rgba(208, 75, 54, 0.2),
+      0 0 12px rgba(208, 75, 54, 0.4),
+      0 0 24px rgba(208, 75, 54, 0.2);
+  }
+  
+  /* Ensure adequate spacing between touch targets */
+  .carousel-controls button + button {
+    margin-left: 0.25rem; /* Additional spacing between buttons */
+  }
 }
 
 .carousel-controls button:hover,
@@ -236,13 +291,13 @@ body.controls-visible .carousel-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0vh 0vw;
+  padding: 6rem 0.25rem 4rem; /* Increased top padding significantly to avoid menubar clash */
   margin: 0;
 
   font-family: "DM Sans", sans-serif;
-  font-size: clamp(4.5rem, 8vw, 9.5rem);
+  font-size: clamp(5rem, 15vw, 12rem); /* Increased for super-sizing */
   font-weight: 700;
-  line-height: 1.02;
+  line-height: 0.9; /* Slightly increased for better readability on desktop */
   text-align: center;
 
   color: rgba(255, 255, 255, 0.95);
@@ -254,7 +309,67 @@ body.controls-visible .carousel-controls {
 
   pointer-events: none;
   backdrop-filter: blur(10px);
-  height: 105%;
+  height: 100vh;
+  max-height: 100vh;
+  box-sizing: border-box;
+  
+  /* Ensure text doesn't overflow vertically or horizontally */
+  overflow: hidden;
+  word-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Mobile-specific hero statement optimizations */
+@media (max-width: 768px) {
+  .hero-statement {
+    font-size: clamp(4rem, 16vw, 7rem); /* Increased for mobile super-sizing */
+    padding: 0.25rem 2.5rem; /* Significantly increased horizontal margin to prevent word bleeding */
+    line-height: 0.85; /* Slightly increased for better mobile readability */
+    height: 100vh;
+    max-height: 100vh;
+    box-sizing: border-box;
+    /* Ensure text fills the available space better */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+}
+
+/* Desktop-specific hero statement optimizations */
+@media (min-width: 1200px) {
+  .hero-statement {
+    font-size: clamp(8rem, 12vw, 14rem); /* Super-sized for large desktops */
+    line-height: 0.8; /* Slightly increased for better line separation */
+    padding: 6rem 0.25rem 4rem; /* Increased top padding to avoid menubar clash */
+  }
+}
+
+/* Extra large desktop optimization */
+@media (min-width: 1600px) {
+  .hero-statement {
+    font-size: clamp(10rem, 10vw, 16rem); /* Maximum super-sizing for very large screens */
+    line-height: 0.75; /* Slightly increased for better line separation */
+    padding: 7rem 0.25rem 5rem; /* Increased top padding for larger screens */
+  }
+}
+
+/* Ultra-wide desktop optimization */
+@media (min-width: 2000px) {
+  .hero-statement {
+    font-size: clamp(12rem, 9vw, 18rem); /* Controlled scaling for ultra-wide */
+    line-height: 0.73; /* Slightly increased for better line separation */
+    padding: 8rem 0.5rem 6rem; /* Increased top padding for ultra-wide screens */
+  }
+}
+
+/* Additional mobile landscape optimization */
+@media (max-width: 768px) and (orientation: landscape) {
+  .hero-statement {
+    font-size: clamp(2.6rem, 12vw, 4.5rem); /* Optimized for landscape mobile */
+    line-height: 1.0; /* Slightly increased for better readability */
+    padding: 0.25rem 2rem; /* Increased horizontal margin for landscape */
+  }
 }
 
 /* Homepage scroll interactions */

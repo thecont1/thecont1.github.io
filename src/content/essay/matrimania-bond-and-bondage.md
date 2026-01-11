@@ -6,7 +6,7 @@ status: published
 date: 2018-08-18
 container: matrimania
 backgroundColor: "#f9e4e4"
-heroImage: https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA/MS201306-BipashaAashish0192.jpg
+heroImage: /library/originals/MATRIMANIA/MS201306-BipashaAashish0192.jpg
 showhero: true
 toc: true
 lightbox:
@@ -31,7 +31,7 @@ And a posse of bodyguards for me.
 
 The great Indian wedding, like the great Indian waistline, has bloated to keep up with great Indian aspirations. A yuppie investment banker-type with a switched-on accent is trying on a tuxedo for the first time. This is momentous and must be captured by the official photographer, he believes. He does that action—how shall I put it? The equivalent of snapping fingers at a waiter in a restaurant—and snaps me out of my reverie of how I’m creating important work that will one day end up at the MoMA or some such. “Take a picture,” he commands. I decline the invitation. “You're a photographer, right? Then what’s the problem?” Earlier, I would have mumbled something about how I’m a documentary photographer and so on. But that’s just bullshit. I feel like a brain surgeon who has to each time explain what a brain is.  
 
-![Needless to say, in the diabetes capital of the world, business is booming.](https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA/MS201202-DivyaMantar04-003.jpg)
+![Needless to say, in the diabetes capital of the world, business is booming.](/library/originals/MATRIMANIA/MS201202-DivyaMantar04-003.jpg)
 
 <Note>
 Avni’s father was an affable man, a respectable man, a man of faith. He was her personal Ganesha, a remover of obstacles. He doted on his daughter, as dads of daughters often do, and promised to make all her dreams come true. That was until she brought home a guy and said this was the man she wanted to marry.
@@ -57,7 +57,7 @@ An Indian couple typically gets married twice in their lifetime. The first is th
 
 In the heart of Delhi’s Cantonment is an auditorium with a large garden. You can’t miss it, thanks to the Hawker Hunter fighter jet that hangs prominently above the adjacent Air Force School. This haunting tribute to settling differences with neighbours will form the backdrop of today’s wedding. Sakshi’s mother, who taught mathematics at the school for 27 years, was able to use her influence with the Principal to rent the garden for a reasonable price.
 
-![As much as Sakshi wanted to keep it limited to their closest friends and family, her mother had veto power.](https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA/MS201211-NupoorArijit1559.jpg)
+![As much as Sakshi wanted to keep it limited to their closest friends and family, her mother had veto power.](/library/originals/MATRIMANIA/MS201211-NupoorArijit1559.jpg)
 
 The beat of drums gets louder. They announce the arrival of the man of the moment, who inches his way through city traffic on a horse—always a mare, to be precise, deaf, dumb, and blindfolded to cope with the violence around her. The baraat procession is led by a wedding band whose professional ancestors must have served Maharajas in the times of the British Raj. Tonight, they have just one job: to stir up men, women, and children into an electric frenzy with their rehearsed cacophony. To make sure they stay motivated to the task, uncles and cousins jump in the fray, gyrate their hips, and fling 10 or 20 rupee notes at the bandwallahs or stuff it in their drums or into the drummers’ mouths.  
 
@@ -71,7 +71,7 @@ Meanwhile, in the dressing room, Sakshi makes final tweaks to her understated pe
 
 Meera got married in Perambalur, a tiny district in Tamil Nadu that many would struggle to point out on a map. Her fiancé, also a doctor, was native to the place and his grandfather was an important man there. He built the first schools, colleges and universities in this small town. Many prosperous administrators and civil servants graduated from these institutions, and their gratitude went all the way up to the grandfather. They were all on the guest list as was the whole town of Perambalur. Every billboard in the town was bought out to announce the wedding. The university’s football field was cleared, and a papier-mâché castle was erected on site for the occasion. There were 12,000 guests in attendance.  
 
-![Meera’s wedding reception was a relatively more intimate event at only 9,000 guests.](https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA/MS201002-SaranyaVinoth1384-2.jpg)
+![Meera’s wedding reception was a relatively more intimate event at only 9,000 guests.](/library/originals/MATRIMANIA/MS201002-SaranyaVinoth1384-2.jpg)
 
 Meera’s wedding reception was a relatively more intimate event at only 9,000 guests. Her family insisted on hosting it on their home turf in Chennai, by the beach. Not to be outdone, and also slightly miffed that the Perambalur party had it their way for the wedding, her brother took it upon himself to be the architect of a visual spectacle of “much better taste”, as he put it to me. It was going to be an Alice in Wonderland theme. Everyone who was anyone was there to witness it. Even the “X-Men” were present: an ex-president, an ex-minister, an ex-chairman of some board of control, and even the ex-chief justice of the Supreme Court. (He had had his knees replaced at their hospital.)
 
@@ -83,7 +83,7 @@ To know India is to know its scale. In the US, one wedding planning website regi
 
 In India, family bonds run marathons. The fact that her beau was Muslim reduced the matter to an open-and-shut case. Well-meaning elders then stepped in to save the day. They sent out feelers through an extensive network of Brahmin matchmakers, middlemen and meddlers to find a boy who met everyone’s expectations, maybe even Avni’s! With boy found, horoscopes matched, and date fixed, the marriage was conducted as per the sacred traditions described in the holy reference manual.
 
-![He was her personal Ganesha, a remover of obstacles. He doted on his daughter, as dads of daughters often do, and promised to make all her dreams come true.](https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/MATRIMANIA/MS201205-HemaSrihari0384.jpg)
+![He was her personal Ganesha, a remover of obstacles. He doted on his daughter, as dads of daughters often do, and promised to make all her dreams come true.](/library/originals/MATRIMANIA/MS201205-HemaSrihari0384.jpg)
 
 It was a disaster, to say the least. Two years after balancing a punishing career as a tech consultant against a domestic life of violence and dowry demands, Avni filed for divorce. Once the papers came through, however, her father wasted no time in arranging a new match for her. He saw it as his duty to do so. Now, everybody gets a second chance, but in a country so divided along caste and class lines, you are expected to fish in the same pond reserved for people who share your traits. That’s why there are matchmaking portals like secondshaadi.com: ‘The No. 1 matrimonial site for Indians divorced or widowed or looking to start late in life.’
 

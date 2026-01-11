@@ -2,7 +2,8 @@
   <div class="site-header-inner">
     <a href="/" class="site-title">thecontrarian.in</a>
 
-    <nav class="site-nav">
+    <!-- Desktop Navigation -->
+    <nav class="site-nav desktop-nav">
       <a href="/#">Home</a>
       <a href="/#projects">The Projects</a>
       <a href="/#about">About Me</a>
@@ -36,6 +37,30 @@
           <line x1="16.5" y1="16.5" x2="22" y2="22"/>
         </svg>
       </button>
+
+      <!-- Mobile Navigation Toggle - moved to end of site-actions -->
+      <button class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
     </div>
+
+    <!-- Mobile Navigation Menu -->
+    <nav class="site-nav mobile-nav" aria-hidden="true">
+      <div class="mobile-nav-overlay"></div>
+      <div class="mobile-nav-content">
+        <button class="mobile-nav-close" aria-label="Close navigation menu">
+          <svg viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+        <a href="/#">Home</a>
+        <a href="/#projects">The Projects</a>
+        <a href="/#about">About Me</a>
+        <a href="/#contact">Contact</a>
+      </div>
+    </nav>
   </div>
 </header>

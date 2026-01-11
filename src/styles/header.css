@@ -21,6 +21,14 @@
   transition: background 220ms linear;
 }
 
+/* Mobile header adjustments */
+@media (max-width: 768px) {
+  .site-header-inner {
+    padding: 0 1rem 0 1rem; /* Reduced left padding, minimal right padding for hamburger */
+    padding-right: 0.5rem; /* Move hamburger closer to right edge */
+  }
+}
+
 .site-header a,
 .site-header svg {
   color: white;
@@ -53,6 +61,10 @@
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-decoration: none;
+  min-height: 44px; /* Ensure minimum touch target height */
+  display: flex; /* Change to flex to center content vertically */
+  align-items: center; /* Center content vertically */
+  box-sizing: border-box; /* Include padding and border in height calculation */
 }
 
 .site-nav {
@@ -72,6 +84,16 @@
   gap: 1.6rem;
   margin-left: 3rem;
   pointer-events: auto;
+  justify-content: flex-end; /* Right-align the toggle set */
+}
+
+/* Mobile adjustments to prevent overflow */
+@media (max-width: 768px) {
+  .site-actions {
+    gap: 0.5rem; /* 8px spacing to meet accessibility requirements */
+    margin-left: 0.5rem; /* Reduced margin to save space */
+    justify-content: flex-end; /* Ensure right alignment on mobile */
+  }
 }
 
 .icon-btn {
@@ -85,6 +107,22 @@
   align-items: center;
   justify-content: center;
   border-radius: 4px; /* Optional: adds subtle rounded corner if background is ever added */
+}
+
+/* Mobile touch target optimization */
+@media (max-width: 768px) {
+  .icon-btn {
+    width: 48px; /* Minimum 44px touch target, using 48px for comfort */
+    height: 48px;
+    /* Enhanced touch feedback */
+    transition: background 120ms ease, transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .icon-btn:active {
+    transform: scale(0.95);
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .icon-btn svg {
@@ -105,4 +143,191 @@
 
 body.text-only .eye-slash {
   opacity: 1;
+}
+
+/* ======================================================
+   MOBILE NAVIGATION STYLES
+   ====================================================== */
+
+/* Mobile menu toggle button (hamburger) */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 48px; /* Increased from 2.5rem (40px) to meet 44px minimum */
+  height: 48px; /* Increased from 2.5rem (40px) to meet 44px minimum */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  gap: 0.25rem;
+  pointer-events: auto;
+}
+
+.hamburger-line {
+  width: 1.5rem;
+  height: 2px;
+  background: white;
+  transition: all 0.3s ease;
+  transform-origin: center;
+}
+
+@supports (color: color-mix(in srgb, #fff, #000)) {
+  .hamburger-line {
+    background: color-mix(in srgb, var(--paper) calc((1 - var(--nav-bg-alpha)) * 100%), var(--ink) calc(var(--nav-bg-alpha) * 100%));
+  }
+}
+
+/* Hamburger animation when menu is open */
+.mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(1) {
+  transform: rotate(45deg) translate(0.375rem, 0.375rem);
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger-line:nth-child(3) {
+  transform: rotate(-45deg) translate(0.375rem, -0.375rem);
+}
+
+/* Mobile navigation menu */
+.mobile-nav {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.mobile-nav[aria-hidden="false"] {
+  display: block;
+  pointer-events: auto;
+}
+
+.mobile-nav-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.mobile-nav[aria-hidden="false"] .mobile-nav-overlay {
+  opacity: 1;
+}
+
+.mobile-nav-content {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 280px;
+  max-width: 80vw;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Blur effect for modern browsers */
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  gap: 1rem; /* Reduced gap between menu items */
+}
+
+.mobile-nav[aria-hidden="false"] .mobile-nav-content {
+  transform: translateX(0);
+}
+
+.mobile-nav-close {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 48px; /* Minimum 44px touch target, using 48px for comfort */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink);
+  /* Enhanced touch feedback */
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+/* Touch feedback - active state for mobile taps */
+.mobile-nav-close:active {
+  transform: scale(0.95);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.mobile-nav-close svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.mobile-nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.4rem; /* Increased font size for better visibility */
+  font-weight: 500; /* Slightly bolder text */
+  padding: 0.75rem 0; /* Reduced vertical padding for tighter spacing */
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* More subtle border */
+  transition: color 0.2s ease, background 0.2s ease;
+  /* Ensure adequate touch target height */
+  min-height: 48px; /* Minimum 44px touch target, using 48px for comfort */
+  display: flex;
+  align-items: center;
+  border-radius: 4px; /* Subtle rounded corners */
+}
+
+.mobile-nav a:hover {
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.05); /* Subtle background on hover */
+}
+
+.mobile-nav a:last-child {
+  border-bottom: none;
+}
+
+/* Responsive display logic */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+  
+  .mobile-menu-toggle {
+    display: flex;
+  }
+  
+  .mobile-nav {
+    display: block;
+  }
+  
+  /* Hide search button on mobile to make room for hamburger */
+  .site-actions .icon-btn[aria-label="Search"] {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .desktop-nav {
+    display: flex;
+  }
+  
+  .mobile-menu-toggle {
+    display: none;
+  }
+  
+  .mobile-nav {
+    display: none;
+  }
 }

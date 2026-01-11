@@ -11,7 +11,10 @@
     "generate:repo": "node scripts/generate-repo-content.js",
     "scaffold": "node scripts/scaffold.js",
     "extract:exif": "uv run python scripts/build_exif.py",
-    "r2:upload": "bash scripts/upload_to_r2.sh"
+    "r2:upload": "bash scripts/upload_to_r2.sh",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
@@ -25,5 +28,9 @@
     "react-dom": "^19.2.3",
     "typescript": "^5.9.3",
     "zod-to-json-schema": "^3.25.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "playwright": "^1.57.0"
   }
 }

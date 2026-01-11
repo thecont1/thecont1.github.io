@@ -4,7 +4,7 @@ subtitle: "The Most Memorable Marvels Of Madhya Pradesh"
 author: "Vihaan Kashyap"
 status: "published"
 date: 2026-01-03
-heroImage: /library/throwaways/bundelkhand/image10.png
+heroImage: /library/throwaways/bundelkhand/image10.jpg
 backgroundColor: "#07e3"
 geography: [india]
 theme: [travel]
@@ -48,7 +48,7 @@ ugh rural Madhya Pradesh to reach Orchha by 5 PM – perfect timing to witness o
 
 - Chaturbhuj Temple, Orchha fort, cenotaphs
 
-![Orchcha Fort](/library/throwaways/bundelkhand/image1.png)
+![Orchcha Fort](/library/throwaways/bundelkhand/image1.jpg)
 
 Today unfolds like a dream as you explore Orchha's architectural tre
 asures. The soaring spires of 16th-century Chaturbhuj Temple rise dramatically against the sky – climb the steep staircase to the roof for panoramic views of the entire town and surrounding countryside. The temple's unique blend of temple, fort, and palace architecture tells the fascinating story of how it was built to house a Rama idol that never moved in. Wander through the Orchha Fort complex where royal palaces and temples stand frozen in time, their walls whispering tales of Bundela kings and queens.                                  
@@ -56,7 +56,7 @@ asures. The soaring spires of 16th-century Chaturbhuj Temple rise dramatically a
 
 - Orchha adventure activities on River Betwa
 
-![River Cruise on Betwa River](/library/throwaways/bundelkhand/image10.png)                                                             
+![River Cruise on Betwa River](/library/throwaways/bundelkhand/image10.jpg)                                                             
 Embrace adventure along the tranquil Betwa River that winds through 
 Orchha. The river offers gentle kayaking and river rafting experiences suitable for all skill levels, allowing you to view the heritage town from a completely different perspective. After your water adventures, find peace at Kanchana Ghat where the setting sun paints the ancient temples in warm hues. The combination of adrenaline and tranquility makes this day perfectly balanced.                          
 ## **Wed, Jan 28 🚖 Orchha \- Khajuraho** 

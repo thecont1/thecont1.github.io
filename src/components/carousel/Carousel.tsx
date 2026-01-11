@@ -175,7 +175,7 @@ export default function Carousel({ images }: { images: Image[] }) {
     return () => clearTimeout(timer);
   }, [index]);
 
-  // Detect user interaction: trackpad scroll, drag, or keyboard on the track
+  // Detect user interaction: trackpad scroll, drag, touch swipe, or keyboard on the track
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -190,7 +190,13 @@ export default function Carousel({ images }: { images: Image[] }) {
       }
     };
 
-    // Detect scroll changes on the track (catches all scroll methods)
+    // Detect touch interactions to stop auto-scroll (without interfering with natural scrolling)
+    const handleTouchStart = (e: TouchEvent) => {
+      // User started touching the carousel, stop auto-scroll
+      setUserTookControl(true);
+    };
+
+    // Detect scroll changes on the track (catches all scroll methods including touch swipes)
     const handleScroll = () => {
       const currentScrollLeft = track.scrollLeft;
       const scrollDelta = Math.abs(currentScrollLeft - lastScrollLeft);
@@ -212,11 +218,13 @@ export default function Carousel({ images }: { images: Image[] }) {
 
     track.addEventListener('wheel', handleWheel, { passive: true });
     track.addEventListener('scroll', handleScroll, { passive: true });
+    track.addEventListener('touchstart', handleTouchStart, { passive: true });
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
       track.removeEventListener('wheel', handleWheel);
       track.removeEventListener('scroll', handleScroll);
+      track.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [images.length, index]);

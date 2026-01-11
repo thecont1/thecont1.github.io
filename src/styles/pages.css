@@ -235,6 +235,29 @@
   padding-bottom: 2px;
   transition: opacity 0.2s ease;
   margin-top: 1rem;
+  min-height: 44px; /* Ensure minimum touch target height */
+  padding: 0.5rem 0; /* Add vertical padding to increase touch area */
+  display: flex; /* Change to flex to center content vertically */
+  align-items: center; /* Center content vertically */
+  box-sizing: border-box; /* Include padding in height calculation */
+}
+
+/* Mobile touch target optimization */
+@media (max-width: 768px) {
+  .btn-text,
+  .email-link {
+    min-height: 48px; /* Comfortable touch target height */
+    padding: 0.75rem 0; /* Increased padding for better touch area */
+    /* Enhanced touch feedback */
+    transition: opacity 120ms ease, transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .btn-text:active,
+  .email-link:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
 }
 
 .btn-text:hover,

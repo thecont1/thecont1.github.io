@@ -16,6 +16,13 @@ class PixelDust {
       glowOpacity: 0.22,
       storageKey: "pixel_dust_enabled",
       fps: 30,
+      // Responsive breakpoints
+      mobileBreakpoint: 768,
+      tabletBreakpoint: 1024,
+      // Particle count ratios for different viewports
+      mobileParticleRatio: 0.5,
+      tabletParticleRatio: 0.75,
+      desktopParticleRatio: 1.0,
       ...options,
     };
     this.canvas = null;
@@ -56,16 +63,27 @@ class PixelDust {
       return;
     }
 
+    // Load saved state BEFORE any other initialization that might override it
     try {
       const saved = sessionStorage.getItem(this.options.storageKey);
-      if (saved !== null) this.enabled = saved === "true";
-    } catch (e) {}
+      if (saved !== null) {
+        this.enabled = saved === "true";
+        console.log('PixelDust: Loaded saved state:', this.enabled);
+      }
+    } catch (e) {
+      console.warn('PixelDust: Failed to load saved state:', e);
+    }
 
     this.setupStyles();
     this.bindEvents();
     this.createParticles();
     this.resize();
     this.applyState();
+    
+    // Attach instance to canvas for test access
+    if (this.canvas) {
+      this.canvas.pixelDustInstance = this;
+    }
   }
 
   setupStyles() {
@@ -82,13 +100,16 @@ class PixelDust {
   }
 
   bindEvents() {
+    // Simple resize handling
     const onResize = () => {
       clearTimeout(this.resizeTimeout);
-      this.resizeTimeout = setTimeout(() => this.resize(), 150);
+      this.resizeTimeout = setTimeout(() => {
+        this.resize();
+      }, 150);
     };
 
     window.addEventListener("resize", onResize, { passive: true });
-    onResize();
+    
     this.startNavAlphaPolling();
     this.draw();
 
@@ -115,10 +136,20 @@ class PixelDust {
       if (this.canvas && this.ctx) {
         this.resize();
         this.draw();
+        // Ensure state is preserved after page navigation
+        this.applyState();
       } else {
+        // Preserve enabled state when reinitializing
+        const currentEnabled = this.enabled;
         this.init();
+        // Restore the enabled state after init
+        this.enabled = currentEnabled;
+        this.applyState();
       }
     });
+
+    // Store cleanup function for destroy method
+    this.resizeCleanup = resizeCleanup;
   }
 
   readNavAlpha() {
@@ -203,6 +234,22 @@ class PixelDust {
     return { r: 255, g: 255, b: 255, a: opacity };
   }
 
+  getParticleCount() {
+    const { maxParticles, mobileBreakpoint, mobileParticleRatio, desktopParticleRatio } = this.options;
+    
+    // Simple viewport width detection
+    const width = window.innerWidth || 1920;
+    
+    // Apply particle count ratios based on requirements:
+    // ≤768px: 50% fewer particles (mobile)
+    // >768px: full particle count (desktop)
+    if (width <= mobileBreakpoint) {
+      return Math.floor(maxParticles * mobileParticleRatio);
+    }
+    // All viewports > 768px get full desktop particle count
+    return Math.floor(maxParticles * desktopParticleRatio);
+  }
+
   getShape() {
     return this.options.shape;
   }
@@ -239,21 +286,58 @@ class PixelDust {
 
   createParticles() {
     this.updateColorMode();
-    const { maxParticles } = this.options;
+    const particleCount = this.getParticleCount();
     const w = window.innerWidth || 1;
     const h = window.innerHeight || 1;
 
-    this.particles = Array.from({ length: maxParticles }, () =>
+    this.particles = Array.from({ length: particleCount }, () =>
       this.spawnParticle(w, h, true)
     );
   }
 
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = Math.floor(window.innerWidth * dpr);
-    this.canvas.height = Math.floor(window.innerHeight * dpr);
+    const width = window.innerWidth || 1920;
+    const height = window.innerHeight || 1080;
+    
+    this.canvas.width = Math.floor(width * dpr);
+    this.canvas.height = Math.floor(height * dpr);
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    this.createParticles();
+    
+    // Store previous particle count to detect breakpoint changes
+    const previousParticleCount = this.particles ? this.particles.length : 0;
+    const newParticleCount = this.getParticleCount();
+    
+    // Only recreate particles if the count changed (crossed breakpoint)
+    if (previousParticleCount !== newParticleCount) {
+      this.createParticles();
+    }
+  }
+
+  getViewportHeightFallback() {
+    try {
+      // Try multiple methods to get viewport height
+      if (typeof window.innerHeight === 'number' && window.innerHeight > 0) {
+        return window.innerHeight;
+      }
+      if (document.documentElement && document.documentElement.clientHeight > 0) {
+        return document.documentElement.clientHeight;
+      }
+      if (document.body && document.body.clientHeight > 0) {
+        return document.body.clientHeight;
+      }
+      if (screen && screen.height > 0) {
+        return screen.height;
+      }
+      
+      // Ultimate fallback - assume desktop
+      console.warn('PixelDust: All viewport height detection methods failed, assuming desktop (1080px)');
+      return 1080;
+      
+    } catch (error) {
+      console.error('PixelDust: Critical error in viewport height detection:', error);
+      return 1080; // Desktop fallback
+    }
   }
 
   update(fadeOut = false) {
@@ -391,6 +475,7 @@ class PixelDust {
 
   toggle() {
     this.enabled = !this.enabled;
+    console.log('PixelDust: Toggled to enabled:', this.enabled);
     this.saveState();
     this.applyState();
   }
@@ -398,7 +483,10 @@ class PixelDust {
   saveState() {
     try {
       sessionStorage.setItem(this.options.storageKey, String(this.enabled));
-    } catch (e) {}
+      console.log('PixelDust: Saved state to sessionStorage:', this.enabled);
+    } catch (e) {
+      console.warn('PixelDust: Failed to save state:', e);
+    }
   }
 
   applyState() {
@@ -418,6 +506,9 @@ class PixelDust {
       if (this.canvas) this.canvas.style.display = "block";
       this.draw();
     }
+    
+    // Log state for debugging
+    console.log('PixelDust: Applied state - enabled:', this.enabled, 'button pressed:', this.toggleBtn?.getAttribute('aria-pressed'));
   }
 
   pause() {
@@ -449,16 +540,25 @@ class PixelDust {
   destroy() {
     this.pause();
     clearTimeout(this.resizeTimeout);
+    
+    // Clean up viewport detector resize handler if it exists
+    if (this.resizeCleanup && typeof this.resizeCleanup === 'function') {
+      try {
+        this.resizeCleanup();
+      } catch (error) {
+        console.warn('PixelDust: Error during resize cleanup:', error);
+      }
+    }
   }
 }
 
 // Initialize with working defaults
-new PixelDust({
-  maxParticles: 250,
+const pixelDustInstance = new PixelDust({
+  maxParticles: 350,
   maxSize: 10,
   maxSpeed: 0.9,
   minSpeed: 0.1,
-  shape: "circle",
+  shape: "square",
   colors: "auto",
   minOpacity: 0.5,
   maxOpacity: 0.9,
@@ -466,3 +566,13 @@ new PixelDust({
   glowSize: 1.6,
   glowOpacity: 0.24
 });
+
+// Expose instance globally for testing
+if (typeof window !== 'undefined') {
+  window.pixelDustInstance = pixelDustInstance;
+  
+  // Also attach to canvas element for test access
+  if (pixelDustInstance.canvas) {
+    pixelDustInstance.canvas.pixelDustInstance = pixelDustInstance;
+  }
+}

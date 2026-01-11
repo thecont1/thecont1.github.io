@@ -119,6 +119,7 @@
   cursor: pointer;
   width: auto;
   height: auto;
+  min-height: 44px; /* Ensure minimum touch target height */
   transform: none;
   outline: none;
   box-shadow:
@@ -127,6 +128,22 @@
     0 0 48px rgba(208, 75, 54, 0),
     0 2px 8px rgba(0, 0, 0, 0.1);
   transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+/* Mobile touch target optimization for info panel button */
+@media (max-width: 768px) {
+  .info-panel-cr-button {
+    min-height: 48px; /* Comfortable touch target height */
+    padding: 0.75rem 1rem; /* Increased padding for better touch area */
+    /* Enhanced touch feedback */
+    transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+  }
+  
+  /* Touch feedback - active state for mobile taps */
+  .info-panel-cr-button:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 1);
+  }
 }
 
 .info-panel-cr-button:hover {
