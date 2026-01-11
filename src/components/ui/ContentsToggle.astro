@@ -64,6 +64,10 @@ const { title, label = "Contents" } = Astro.props;
     transform: translateX(-100%);
   }
 
+  body.lightbox-open .toc-toggle-btn {
+    display: none !important;
+  }
+
   /* Shared Toggle Button Styles (ensuring availability) */
   .toggle-btn {
     position: fixed;

@@ -11,12 +11,42 @@ html {
   min-height: 100vh;
   position: relative;
   display: block;
+  box-sizing: border-box;
+}
+
+/* Prevent any horizontal panning on Essay pages */
+html,
+body {
+  overflow-x: hidden;
+}
+
+.editorial-post {
+  overflow-x: hidden;
 }
 
 @media (max-width: 768px) {
   .editorial-post {
     padding-left: 1.25rem;
     padding-right: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .editorial-post .post-layout-container,
+  .editorial-post .post-body {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .editorial-post .post-body,
+  .editorial-post .post-body * {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .editorial-post .post-body {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 }
 
@@ -207,6 +237,12 @@ html {
   }
 }
 
+@media (max-width: 480px) {
+  .editorial-post .post-body .dropcap::before {
+    left: -2rem;
+  }
+}
+
 /* Image styling */
 .post-body img {
   display: block;
@@ -217,6 +253,13 @@ html {
   border: 10px solid white;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .post-body img {
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 .post-body img.is-vertical {

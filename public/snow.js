@@ -65,10 +65,20 @@ class PixelDust {
 
     // Load saved state BEFORE any other initialization that might override it
     try {
-      const saved = sessionStorage.getItem(this.options.storageKey);
+      const legacy = sessionStorage.getItem(this.options.storageKey);
+      if (legacy !== null) {
+        // Migrate legacy per-session state to persistent storage
+        localStorage.setItem(this.options.storageKey, legacy);
+        sessionStorage.removeItem(this.options.storageKey);
+      }
+
+      const saved = localStorage.getItem(this.options.storageKey);
       if (saved !== null) {
         this.enabled = saved === "true";
         console.log('PixelDust: Loaded saved state:', this.enabled);
+      } else {
+        // First ever load: persist the default so we reliably start enabled.
+        localStorage.setItem(this.options.storageKey, "true");
       }
     } catch (e) {
       console.warn('PixelDust: Failed to load saved state:', e);
@@ -109,6 +119,9 @@ class PixelDust {
     };
 
     window.addEventListener("resize", onResize, { passive: true });
+    const resizeCleanup = () => {
+      window.removeEventListener("resize", onResize);
+    };
     
     this.startNavAlphaPolling();
     this.draw();
