@@ -38,7 +38,7 @@ const { title, label = "Contents" } = Astro.props;
     min-width: 250px;
     background: #1a1f2c;
     color: white;
-    z-index: 500; /* Reduced to sit below the site-footer (z-index 2000) */
+    z-index: 1000; /* High z-index to ensure visibility above content */
     transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
     box-shadow: none;
     padding: 6rem 2rem 10rem 4rem; /* Bottom padding for content safety */
@@ -91,7 +91,7 @@ const { title, label = "Contents" } = Astro.props;
     border-radius: 0 16px 16px 0;
     pointer-events: auto;
     box-shadow: none;
-    z-index: 1100;
+    z-index: 1100; /* High z-index to ensure visibility */
   }
 
   .toggle-btn:hover,

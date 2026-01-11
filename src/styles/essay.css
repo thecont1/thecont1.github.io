@@ -129,7 +129,7 @@ html {
   box-sizing: border-box;
   display: block;
   position: relative;
-  z-index: 1;
+  /* Remove z-index to prevent stacking context issues with sidebar */
 }
 
 .post-body p {
@@ -146,7 +146,7 @@ html {
   line-height: 1.2;
   scroll-margin-top: 6rem;
   position: relative;
-  z-index: 1;
+  /* Remove z-index to prevent stacking context issues */
 }
 
 @media (max-width: 768px) {
@@ -158,7 +158,7 @@ html {
 /* Over-the-top Dropcaps - Refined for "Inside" effect */
 .editorial-post .post-body .dropcap {
   position: relative;
-  z-index: 1;
+  /* Remove z-index to prevent stacking context issues */
   margin-top: 2rem;
   margin-bottom: 3rem;
   padding-left: 0 !important;
