@@ -71,6 +71,40 @@
     top: 78% !important;
   }
 
+  /* Mobile: Position Screen tab hanging from left side of menubar, next to Contents */
+  @media (max-width: 768px) {
+    .screen-toggle-btn {
+      position: fixed !important;
+      top: var(--site-header-height, 64px) !important; /* Hang from bottom of header */
+      left: calc(2rem + 90px) !important; /* Position next to Contents tab (2rem + Contents width + small gap) */
+      right: auto !important;
+      transform: none !important;
+      width: auto !important; /* Auto width for horizontal layout */
+      height: 2.5rem !important; /* Horizontal height */
+      background: #1a1f2c !important;
+      border-radius: 0 0 8px 8px !important; /* Rounded bottom corners only */
+      z-index: 15 !important;
+      flex-direction: row !important; /* Horizontal layout */
+      gap: 0.5rem !important;
+      padding: 0.5rem 1rem !important; /* Horizontal padding */
+      min-width: 70px !important; /* Minimum width */
+    }
+
+    .screen-toggle-btn .label {
+      writing-mode: initial !important; /* Horizontal text */
+      text-orientation: initial !important;
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.1em !important;
+    }
+
+    .screen-toggle-btn .dot {
+      width: 4px !important;
+      height: 4px !important;
+    }
+  }
+
   .screen-toggle-btn .dot {
     opacity: 0.5;
   }
@@ -188,7 +222,27 @@
   }
 
   body.screen-mode figure {
-    transform: scale(1.15);
+    transform: scale(1.05); /* Reduced scaling to prevent bleeding */
+    max-width: 95vw; /* Prevent horizontal overflow */
+    overflow: hidden;
+    margin: 0 auto; /* Center the figure */
+  }
+
+  body.screen-mode figure img {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto; /* Center the image within figure */
+  }
+
+  /* Handle standalone images (not in figures) */
+  body.screen-mode img:not(figure img) {
+    transform: scale(1.05);
+    max-width: 95vw;
+    margin: 0 auto;
+    display: block;
   }
 
   /* Keep Screen toggle ALWAYS on top to prevent vanishing during transitions */

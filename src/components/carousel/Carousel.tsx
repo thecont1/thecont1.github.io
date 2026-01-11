@@ -144,12 +144,15 @@ export default function Carousel({ images }: { images: Image[] }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Autoplay effect
+  // Autoplay effect with smooth infinite loop
   useEffect(() => {
     if (userTookControl || images.length < 2) return;
 
     const timer = window.setTimeout(() => {
-      setIndex((i) => (i + 1) % images.length);
+      setIndex((i) => {
+        const nextIndex = (i + 1) % images.length;
+        return nextIndex;
+      });
     }, 5000);
 
     return () => window.clearTimeout(timer);
@@ -237,13 +240,15 @@ export default function Carousel({ images }: { images: Image[] }) {
   const onPrev = () => {
     setUserTookControl(true);
     programmaticNavUntilRef.current = Date.now() + 900;
-    setIndex((i) => (i - 1 + images.length) % images.length);
+    const newIndex = (index - 1 + images.length) % images.length;
+    setIndex(newIndex);
   };
 
   const onNext = () => {
     setUserTookControl(true);
     programmaticNavUntilRef.current = Date.now() + 900;
-    setIndex((i) => (i + 1) % images.length);
+    const newIndex = (index + 1) % images.length;
+    setIndex(newIndex);
   };
 
   const onToggleInfo = () => {

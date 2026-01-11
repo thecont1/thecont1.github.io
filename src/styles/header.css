@@ -84,7 +84,8 @@
   gap: 1.6rem;
   margin-left: 3rem;
   pointer-events: auto;
-  justify-content: flex-end; /* Right-align the toggle set */
+  justify-content: flex-end; /* Ensure right alignment */
+  align-items: center; /* Center items vertically */
 }
 
 /* Mobile adjustments to prevent overflow */
@@ -200,8 +201,10 @@ body.text-only .eye-slash {
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 20;
+  z-index: 30000000; /* Higher than C2PA overlay (20000000) and lightbox (10000001) */
   pointer-events: none;
+  /* Force isolation from backdrop filters */
+  isolation: isolate;
 }
 
 .mobile-nav[aria-hidden="false"] {
@@ -218,6 +221,8 @@ body.text-only .eye-slash {
   background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   transition: opacity 0.3s ease;
+  /* Ensure overlay is isolated */
+  isolation: isolate;
 }
 
 .mobile-nav[aria-hidden="false"] .mobile-nav-overlay {
@@ -231,67 +236,97 @@ body.text-only .eye-slash {
   width: 280px;
   max-width: 80vw;
   height: 100%;
-  background: rgba(255, 255, 255, 0.95); /* Semi-transparent background */
-  backdrop-filter: blur(10px); /* Blur effect for modern browsers */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
-  transform: translateX(100%);
+  background: #1a1f2c !important; /* Force solid background */
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  transform: translateX(100%) translateZ(0);
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
-  padding: 2rem;
-  gap: 1rem; /* Reduced gap between menu items */
+  padding: 0; /* Remove padding to control spacing better */
+  gap: 0; /* Remove gap to control spacing better */
+  z-index: 30000001; /* Higher than parent container */
+  /* Force isolation to prevent transparency inheritance */
+  isolation: isolate;
+  /* Ensure no backdrop filters interfere */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  /* Force stacking context without interfering with translateX */
+  will-change: transform;
+  /* Additional isolation properties */
+  contain: layout style paint;
+  /* Force opaque rendering */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Ensure content is visible */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .mobile-nav[aria-hidden="false"] .mobile-nav-content {
-  transform: translateX(0);
+  transform: translateX(0) translateZ(0);
 }
 
 .mobile-nav-close {
-  align-self: flex-end;
+  position: absolute;
+  top: 0;
+  right: 0.5rem; /* Match the hamburger button's right padding */
   background: none;
   border: none;
   cursor: pointer;
-  width: 48px; /* Minimum 44px touch target, using 48px for comfort */
-  height: 48px;
+  width: 48px; /* Match hamburger button size */
+  height: 48px; /* Match hamburger button size */
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--ink);
+  color: white; /* White color for dark background */
   /* Enhanced touch feedback */
   transition: background 120ms ease, transform 120ms ease;
+  z-index: 30000002; /* Above everything else */
+  /* Align with site header height */
+  margin-top: calc(var(--site-header-height, 64px) - 48px); /* Center vertically in header area */
 }
 
 /* Touch feedback - active state for mobile taps */
 .mobile-nav-close:active {
   transform: scale(0.95);
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.1); /* Light background on dark panel */
 }
 
 .mobile-nav-close svg {
   width: 1.5rem;
   height: 1.5rem;
-  stroke: var(--ink);
+  stroke: white; /* White stroke for dark background */
   stroke-width: 2;
 }
 
 .mobile-nav a {
-  color: var(--ink);
+  color: white; /* White text for dark background */
   text-decoration: none;
-  font-size: 1.4rem; /* Increased font size for better visibility */
-  font-weight: 500; /* Slightly bolder text */
-  padding: 0.75rem 0; /* Reduced vertical padding for tighter spacing */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* More subtle border */
+  font-family: "Fraunces", serif; /* Use Fraunces font to match content layouts */
+  font-size: 1.6rem; /* Larger, more elegant size */
+  font-weight: 400; /* Regular weight for Fraunces */
+  padding: 1rem 2rem; /* Horizontal padding for touch targets */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15); /* Subtle light border */
   transition: color 0.2s ease, background 0.2s ease;
   /* Ensure adequate touch target height */
   min-height: 48px; /* Minimum 44px touch target, using 48px for comfort */
   display: flex;
   align-items: center;
-  border-radius: 4px; /* Subtle rounded corners */
+  border-radius: 0; /* Remove border radius for full-width touch targets */
+  line-height: 1.3; /* Better line height for Fraunces */
+  /* Ensure visibility */
+  position: relative;
+  z-index: 1;
+}
+
+/* Add top margin to first navigation link to account for close button */
+.mobile-nav a:first-of-type {
+  margin-top: calc(var(--site-header-height, 64px) + 1rem);
 }
 
 .mobile-nav a:hover {
-  color: var(--accent);
-  background: rgba(0, 0, 0, 0.05); /* Subtle background on hover */
+  color: var(--accent, #d04b36); /* Accent color on hover */
+  background: rgba(255, 255, 255, 0.05); /* Very subtle background on hover */
 }
 
 .mobile-nav a:last-child {
@@ -308,7 +343,12 @@ body.text-only .eye-slash {
     display: flex;
   }
   
-  .mobile-nav {
+  /* Mobile nav should still respect aria-hidden state */
+  .mobile-nav[aria-hidden="true"] {
+    display: none;
+  }
+  
+  .mobile-nav[aria-hidden="false"] {
     display: block;
   }
   
@@ -329,5 +369,37 @@ body.text-only .eye-slash {
   
   .mobile-nav {
     display: none;
+  }
+}
+
+/* Override any backdrop filters that might affect mobile navigation */
+.mobile-nav,
+.mobile-nav-overlay,
+.mobile-nav-content {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Ensure mobile navigation is always above any backdrop-filtered elements */
+@media (max-width: 768px) {
+  .mobile-nav {
+    z-index: 30000000 !important; /* Higher than all other elements */
+    /* Create new stacking context to isolate from backdrop filters */
+    position: fixed !important;
+    isolation: isolate !important;
+  }
+  
+  .mobile-nav-content {
+    z-index: 30000001 !important;
+    background: #1a1f2c !important;
+    /* Ensure completely opaque background */
+    opacity: 1 !important;
+    /* Don't override transform here - let the main rules handle the slide animation */
+  }
+  
+  /* Ensure mobile navigation is not affected by any parent backdrop filters */
+  .site-header[style*="backdrop-filter"] ~ * .mobile-nav,
+  .site-header[style*="-webkit-backdrop-filter"] ~ * .mobile-nav {
+    z-index: 30000003 !important;
   }
 }

@@ -559,7 +559,7 @@ const pixelDustInstance = new PixelDust({
   maxSpeed: 0.9,
   minSpeed: 0.1,
   shape: "square",
-  colors: "auto",
+  colors: "hard", // Force colored snowflakes instead of "auto"
   minOpacity: 0.5,
   maxOpacity: 0.9,
   glow: true,

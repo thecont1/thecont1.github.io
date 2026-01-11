@@ -132,17 +132,6 @@ html {
   z-index: 1;
 }
 
-/* Reserve a stable left gutter so opening/closing the TOC does not shift the text column */
-.editorial-post {
-  padding-left: calc(clamp(1.25rem, 5vw, 5rem) - 1.8rem);
-}
-
-@media (max-width: 768px) {
-  .editorial-post {
-    padding-left: clamp(1.25rem, 5vw, 5rem);
-  }
-}
-
 .post-body p {
   margin-bottom: 1.6rem;
 }
@@ -209,8 +198,11 @@ html {
   display: block;
   margin: 0rem auto;
   max-width: 100%;
+  width: 100%;
+  height: auto;
   border: 10px solid white;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
 .post-body img.is-vertical {

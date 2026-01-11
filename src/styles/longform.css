@@ -140,9 +140,9 @@
   line-height: 1.8;
   color: var(--ink);
   max-width: 720px;
-  width: calc(100% - 4rem);
+  width: 100%;
   margin: 0 auto; /* Horizontal centering */
-  padding: 0;
+  padding: 0 2rem;
   box-sizing: border-box;
   display: block;
   position: relative;
@@ -305,8 +305,11 @@
   display: block;
   margin: 3rem auto;
   max-width: 100%;
+  width: 100%;
+  height: auto;
   border: 10px solid white;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-sizing: border-box;
 }
 
 .post-body figcaption,
