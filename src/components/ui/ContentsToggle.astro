@@ -56,6 +56,7 @@ const { title, label = "Contents" } = Astro.props;
       padding: 6rem 2rem;
       top: var(--site-header-height, 64px); /* Start below the header */
       height: calc(100vh - var(--site-header-height, 64px)); /* Adjust height */
+      z-index: 30000002; /* Higher than mobile nav to ensure visibility */
     }
   }
 
@@ -134,7 +135,7 @@ const { title, label = "Contents" } = Astro.props;
       height: 2.5rem !important; /* Horizontal height */
       background: #1a1f2c !important;
       border-radius: 0 0 8px 8px !important; /* Rounded bottom corners only */
-      z-index: 15 !important;
+      z-index: 30000003 !important; /* Higher than mobile nav and sidebar */
       flex-direction: row !important; /* Horizontal layout */
       gap: 0.5rem !important;
       padding: 0.5rem 1rem !important; /* Horizontal padding */
@@ -153,6 +154,11 @@ const { title, label = "Contents" } = Astro.props;
     .toc-toggle-btn .dot {
       width: 4px !important;
       height: 4px !important;
+    }
+    
+    /* Ensure Contents tab is always visible above mobile nav overlay */
+    .toc-toggle-btn {
+      pointer-events: auto !important;
     }
   }
 

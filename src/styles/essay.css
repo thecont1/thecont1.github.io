@@ -142,7 +142,7 @@ html {
   font-family: "Fraunces", serif;
   font-size: 2.1rem;
   font-weight: 400;
-  margin: 4.5rem 0 1.25rem -1.75rem;
+  margin: 4.5rem 0 1.25rem 0; /* Removed negative left margin */
   line-height: 1.2;
   scroll-margin-top: 6rem;
   position: relative;

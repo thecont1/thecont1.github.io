@@ -402,4 +402,9 @@ body.text-only .eye-slash {
   .site-header[style*="-webkit-backdrop-filter"] ~ * .mobile-nav {
     z-index: 30000003 !important;
   }
+  
+  /* When Contents panel is open, ensure mobile nav overlay doesn't interfere */
+  body.toc-open .mobile-nav-overlay {
+    pointer-events: none !important;
+  }
 }
