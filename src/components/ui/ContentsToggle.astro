@@ -125,10 +125,16 @@ const { title, label = "Contents" } = Astro.props;
 
   /* Mobile: Position Contents tab hanging from left side of menubar */
   @media (max-width: 768px) {
+    :root {
+      --mobile-left-tabs-inset: 0px;
+      --mobile-contents-tab-width: 113px;
+      --mobile-tabs-gap: 8px;
+    }
+
     .toc-toggle-btn {
       position: fixed !important;
-      top: var(--site-header-height, 64px) !important; /* Hang from bottom of header */
-      left: 2rem !important; /* Start from left, aligned with site title */
+      top: calc(var(--site-header-height, 64px) + 0.5rem) !important; /* Keep visible below header */
+      left: var(--mobile-left-tabs-inset) !important; /* Flush to left edge */
       right: auto !important;
       transform: none !important;
       width: auto !important; /* Auto width for horizontal layout */
@@ -139,7 +145,7 @@ const { title, label = "Contents" } = Astro.props;
       flex-direction: row !important; /* Horizontal layout */
       gap: 0.5rem !important;
       padding: 0.5rem 1rem !important; /* Horizontal padding */
-      min-width: 80px !important; /* Minimum width */
+      min-width: var(--mobile-contents-tab-width) !important; /* Stable width for aligning Screen tab */
     }
 
     .toc-toggle-btn .label {
@@ -294,6 +300,18 @@ const { title, label = "Contents" } = Astro.props;
         document.body.classList.toggle('toc-open', isOpen);
       });
       toggle.dataset.hasTocListener = 'true';
+    }
+
+    if (sidebar && toggle && !document.body.dataset.hasTocEscapeListener) {
+      document.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape') return;
+        if (sidebar.classList.contains('is-open')) {
+          sidebar.classList.remove('is-open');
+          toggle.classList.remove('active');
+          document.body.classList.remove('toc-open');
+        }
+      });
+      document.body.dataset.hasTocEscapeListener = 'true';
     }
 
     if (tocTitleLink && !tocTitleLink.dataset.hasTitleListener) {

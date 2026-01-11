@@ -13,6 +13,13 @@ html {
   display: block;
 }
 
+@media (max-width: 768px) {
+  .editorial-post {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
 /* Header Design */
 .post-header {
   width: 100%;
@@ -130,6 +137,13 @@ html {
   display: block;
   position: relative;
   /* Remove z-index to prevent stacking context issues with sidebar */
+}
+
+@media (max-width: 768px) {
+  .post-body {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 .post-body p {

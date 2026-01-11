@@ -73,10 +73,16 @@
 
   /* Mobile: Position Screen tab hanging from left side of menubar, next to Contents */
   @media (max-width: 768px) {
+    :root {
+      --mobile-left-tabs-inset: 0px;
+      --mobile-screen-tab-width: 113px;
+      --mobile-tabs-gap: 8px;
+    }
+
     .screen-toggle-btn {
       position: fixed !important;
-      top: var(--site-header-height, 64px) !important; /* Hang from bottom of header */
-      left: calc(2rem + 90px) !important; /* Position next to Contents tab (2rem + Contents width + small gap) */
+      top: calc(var(--site-header-height, 64px) + 0.5rem) !important; /* Keep aligned with Contents tab */
+      left: calc(var(--mobile-left-tabs-inset, 0px) + var(--mobile-screen-tab-width, 113px) + var(--mobile-tabs-gap, 8px)) !important; /* Immediately right of Contents */
       right: auto !important;
       transform: none !important;
       width: auto !important; /* Auto width for horizontal layout */
@@ -87,7 +93,7 @@
       flex-direction: row !important; /* Horizontal layout */
       gap: 0.5rem !important;
       padding: 0.5rem 1rem !important; /* Horizontal padding */
-      min-width: 70px !important; /* Minimum width */
+      min-width: var(--mobile-screen-tab-width) !important; /* Minimum width */
     }
 
     .screen-toggle-btn .label {

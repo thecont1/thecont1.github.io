@@ -10,6 +10,15 @@
   let mobileNavClose = null;
   let mobileNavOverlay = null;
 
+  function ensureMobileNavInBody() {
+    if (!mobileNav) return;
+    // If the nav is inside some transformed/filtered container, it can get trapped
+    // behind content due to stacking contexts. Portaling it to <body> avoids this.
+    if (mobileNav.parentElement !== document.body) {
+      document.body.appendChild(mobileNav);
+    }
+  }
+
   function initMobileNav() {
     // Get DOM elements
     mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
@@ -20,6 +29,8 @@
     if (!mobileMenuToggle || !mobileNav) {
       return; // Elements not found, exit gracefully
     }
+
+    ensureMobileNavInBody();
 
     // Add event listeners
     mobileMenuToggle.addEventListener('click', toggleMobileMenu);
