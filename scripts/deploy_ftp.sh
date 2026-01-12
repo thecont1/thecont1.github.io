@@ -23,7 +23,7 @@ REMOTE_SERVER="server"
 
 # By default, run in dry-run mode (preview changes without uploading/deleting).
 # Set DRY_RUN=0 to perform the actual deployment.
-DRY_RUN="${DRY_RUN:-1}"
+DRY_RUN="${DRY_RUN:-0}"
 MIRROR_DRYRUN_FLAG=""
 MODE_LABEL="LIVE"
 if [ "${DRY_RUN}" != "0" ]; then
