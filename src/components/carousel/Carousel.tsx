@@ -40,6 +40,7 @@ export default function Carousel({ images }: { images: Image[] }) {
   const programmaticNavUntilRef = useRef(0);
   const ioRef = useRef<IntersectionObserver | null>(null);
   const ioTickRef = useRef<number | null>(null);
+  const preloadTokenRef = useRef(0);
 
   // Publish a global lookup so the Lightbox (plain JS) can display the same metadata.
   useEffect(() => {
@@ -158,6 +159,58 @@ export default function Carousel({ images }: { images: Image[] }) {
     return () => window.clearTimeout(timer);
   }, [userTookControl, images.length, index]);
 
+  // Ensure images begin loading in order of appearance.
+  // Rationale: in a horizontal carousel, native `loading="lazy"` can still trigger many
+  // concurrent fetches (depending on heuristics), which makes early slides compete with
+  // later ones. We instead:
+  // - Keep slide 0 as the only eager/high-priority image.
+  // - Sequentially preload images starting from the current index.
+  useEffect(() => {
+    if (!images.length) return;
+
+    const startToken = ++preloadTokenRef.current;
+    const queue = images.map((img) => img?.src).filter(Boolean) as string[];
+
+    const clamp = (i: number) => {
+      if (!queue.length) return 0;
+      const m = i % queue.length;
+      return m < 0 ? m + queue.length : m;
+    };
+
+    const run = async () => {
+      // Preload a small window ahead; if the user swipes, this effect restarts.
+      const maxAhead = Math.min(4, Math.max(0, queue.length - 1));
+      const targets: string[] = [];
+      targets.push(queue[clamp(index)]);
+      for (let k = 1; k <= maxAhead; k++) targets.push(queue[clamp(index + k)]);
+
+      for (const src of targets) {
+        if (preloadTokenRef.current !== startToken) return;
+        await new Promise<void>((resolve) => {
+          const img = new Image();
+          img.decoding = "async";
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          img.src = src;
+        });
+      }
+    };
+
+    // Don't block initial paint; start preloading after the browser is idle.
+    const w = window as any;
+    const idleId = typeof w.requestIdleCallback === "function"
+      ? w.requestIdleCallback(run, { timeout: 1200 })
+      : window.setTimeout(run, 0);
+
+    return () => {
+      if (typeof w.cancelIdleCallback === "function" && typeof idleId === "number") {
+        w.cancelIdleCallback(idleId);
+      } else {
+        window.clearTimeout(idleId as number);
+      }
+    };
+  }, [images, index]);
+
   // Scroll to current slide
   useEffect(() => {
     // Skip if this index change came from user drag (they're already at the right position)
@@ -270,7 +323,9 @@ export default function Carousel({ images }: { images: Image[] }) {
                 src={img.src}
                 alt=""
                 className="carousel-image"
-                loading={i === 0 ? "eager" : "lazy"}
+                loading={i === 0 ? "eager" : "eager"}
+                fetchPriority={i === 0 ? "high" : "low"}
+                decoding="async"
               />
             </div>
             {i < images.length - 1 && <div className="carousel-gap" aria-hidden="true" />}
