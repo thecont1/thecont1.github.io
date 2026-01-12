@@ -63,13 +63,15 @@ const lightboxEnabled = post.data.lightbox?.gallery !== false;
 
   <div class="post-layout-container">
     {post.data.toc && toc.length > 0 && (
-      <ContentsToggle title={post.data.title}>
-        <ul>
-          {toc.map((h) => (
-            <li><a href={`#${h.slug}`}>{h.text}</a></li>
-          ))}
-        </ul>
-      </ContentsToggle>
+      <div class="essay-toc-desktop-only">
+        <ContentsToggle title={post.data.title}>
+          <ul>
+            {toc.map((h) => (
+              <li><a href={`#${h.slug}`}>{h.text}</a></li>
+            ))}
+          </ul>
+        </ContentsToggle>
+      </div>
     )}
 
     <div class="post-body">
@@ -92,6 +94,14 @@ const lightboxEnabled = post.data.lightbox?.gallery !== false;
   <ScreenToggle />
   <C2PAOverlay />
 </article>
+
+<style is:global>
+  @media (max-width: 768px) {
+    .essay-toc-desktop-only {
+      display: none !important;
+    }
+  }
+</style>
 
 <script>
   function tagImageOrientation() {

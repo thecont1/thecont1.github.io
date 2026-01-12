@@ -22,6 +22,8 @@ const { title, label = "Contents" } = Astro.props;
   </nav>
 </aside>
 
+<div id="toc-overlay" class="toc-overlay" aria-hidden="true"></div>
+
 <button id="toc-toggle" class="toc-toggle-btn toggle-btn" aria-label={`Toggle ${label}`}>
   <span class="dot"></span>
   <span class="label">{label}</span>
@@ -51,17 +53,45 @@ const { title, label = "Contents" } = Astro.props;
 
   @media (max-width: 768px) {
     .post-sidebar {
-      width: 85vw;
+      left: 0;
+      top: auto;
+      bottom: 0;
+      width: 100vw;
       min-width: auto;
-      padding: 6rem 2rem;
-      top: var(--site-header-height, 64px); /* Start below the header */
-      height: calc(100vh - var(--site-header-height, 64px)); /* Adjust height */
-      z-index: 30000002; /* Higher than mobile nav to ensure visibility */
+      height: min(70vh, 560px);
+      padding: 1.25rem 1.25rem 2rem;
+      z-index: 30000004; /* Above overlay and mobile nav */
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
     }
   }
 
   .post-sidebar:not(.is-open) {
     transform: translateX(-100%);
+  }
+
+  @media (max-width: 768px) {
+    .post-sidebar:not(.is-open) {
+      transform: translateY(110%);
+    }
+  }
+
+  .toc-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 30000003;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  @media (max-width: 768px) {
+    body.toc-open .toc-overlay {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
   body.lightbox-open .toc-toggle-btn {
@@ -137,19 +167,20 @@ const { title, label = "Contents" } = Astro.props;
 
     .toc-toggle-btn {
       position: fixed !important;
-      top: calc(var(--site-header-height, 64px) + 0.5rem) !important; /* Keep visible below header */
-      left: var(--mobile-left-tabs-inset) !important; /* Flush to left edge */
+      left: 50% !important;
       right: auto !important;
-      transform: none !important;
+      bottom: 0 !important;
+      top: auto !important;
+      transform: translateX(-50%) !important;
       width: auto !important; /* Auto width for horizontal layout */
       height: 2.5rem !important; /* Horizontal height */
       background: #1a1f2c !important;
-      border-radius: 0 0 8px 8px !important; /* Rounded bottom corners only */
-      z-index: 30000003 !important; /* Higher than mobile nav and sidebar */
+      border-radius: 10px 10px 0 0 !important;
+      z-index: 30000005 !important; /* Above sheet */
       flex-direction: row !important; /* Horizontal layout */
       gap: 0.5rem !important;
       padding: 0.5rem 1rem !important; /* Horizontal padding */
-      min-width: var(--mobile-contents-tab-width) !important; /* Stable width for aligning Screen tab */
+      min-width: var(--mobile-contents-tab-width) !important;
     }
 
     .toc-toggle-btn .label {
@@ -294,6 +325,7 @@ const { title, label = "Contents" } = Astro.props;
     const sidebar = document.getElementById('toc-sidebar');
     const toggle = document.getElementById('toc-toggle');
     const tocTitleLink = document.querySelector('.toc-title-link') as HTMLElement;
+    const overlay = document.getElementById('toc-overlay');
 
     document.body.classList.remove('toc-open');
 
@@ -304,6 +336,15 @@ const { title, label = "Contents" } = Astro.props;
         document.body.classList.toggle('toc-open', isOpen);
       });
       toggle.dataset.hasTocListener = 'true';
+    }
+
+    if (sidebar && toggle && overlay && !overlay.dataset.hasTocOverlayListener) {
+      overlay.addEventListener('click', () => {
+        sidebar.classList.remove('is-open');
+        toggle.classList.remove('active');
+        document.body.classList.remove('toc-open');
+      });
+      overlay.dataset.hasTocOverlayListener = 'true';
     }
 
     if (sidebar && toggle && !document.body.dataset.hasTocEscapeListener) {
@@ -330,6 +371,7 @@ const { title, label = "Contents" } = Astro.props;
         if (sidebar) {
           sidebar.classList.remove('is-open');
           if (toggle) toggle.classList.remove('active');
+          document.body.classList.remove('toc-open');
         }
       });
       tocTitleLink.dataset.hasTitleListener = 'true';
