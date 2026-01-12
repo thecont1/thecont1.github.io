@@ -129,7 +129,7 @@ else
 fi
 
 # ==============================================================================
-# STEP 3: Delete dist/client/library (CDN files not needed on server)
+# STEP 3: Clean Build Output
 # ==============================================================================
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 echo -e "${BLUE}STEP 3: Clean Build Output${NC}"
@@ -141,6 +141,22 @@ if [ -d "dist/client/library" ]; then
     echo -e "${GREEN}✓ Deleted dist/client/library${NC}"
 else
     echo -e "${GREEN}✓ dist/client/library not found (already clean)${NC}"
+fi
+echo ""
+
+# ==============================================================================
+# STEP 3.5: Inject Remote-Only Files
+# ==============================================================================
+echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
+echo -e "${BLUE}STEP 3.5: Inject Remote-Only Files${NC}"
+echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
+
+if [ -d "remote-only" ]; then
+    echo -e "${YELLOW}Copying files from remote-only/ to dist/client/...${NC}"
+    cp -r remote-only/. dist/client/
+    echo -e "${GREEN}✓ Remote-only files copied${NC}"
+else
+    echo -e "${YELLOW}⚠ No remote-only directory found (skipping)${NC}"
 fi
 echo ""
 

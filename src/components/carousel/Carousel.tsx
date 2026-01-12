@@ -181,7 +181,6 @@ export default function Carousel({ images }: { images: Image[] }) {
       // Preload a small window ahead; if the user swipes, this effect restarts.
       const maxAhead = Math.min(4, Math.max(0, queue.length - 1));
       const targets: string[] = [];
-      targets.push(queue[clamp(index)]);
       for (let k = 1; k <= maxAhead; k++) targets.push(queue[clamp(index + k)]);
 
       for (const src of targets) {
@@ -323,8 +322,8 @@ export default function Carousel({ images }: { images: Image[] }) {
                 src={img.src}
                 alt=""
                 className="carousel-image"
-                loading={i === 0 ? "eager" : "eager"}
-                fetchPriority={i === 0 ? "high" : "low"}
+                loading={i < 3 ? "eager" : "lazy"}
+                fetchPriority={i < 3 ? "high" : "low"}
                 decoding="async"
               />
             </div>

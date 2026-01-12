@@ -69,6 +69,11 @@ async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
 {layoutType === "carousel" ? (
   <!-- CAROUSEL LAYOUT - Full page with curtain, then footer -->
   <Layout title={post.data.title}>
+    <Fragment slot="head">
+      {images.slice(0, 3).map((img) => (
+        <link rel="preload" as="image" href={img.src} />
+      ))}
+    </Fragment>
     <section class="photogallery-carousel-hero">
       <!-- Fixed carousel layer -->
       <div class="carousel-hero-fixed">

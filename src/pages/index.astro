@@ -5,6 +5,7 @@ import HomeHero from "../components/home/Hero.astro";
 import HomeProjects from "../components/home/Projects.astro";
 import HomeAbout from "../components/home/About.astro";
 import C2PAOverlay from "../components/ui/C2PAOverlay.astro";
+import { CAROUSEL_IMAGES } from "../data/carousel";
 import "../styles/home.css";
 ---
 
@@ -22,6 +23,10 @@ import "../styles/home.css";
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&family=Lexend:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    {CAROUSEL_IMAGES.slice(0, 3).map((img) => (
+      <link rel="preload" as="image" href={img.src} />
+    ))}
   </head>
 
   <body>

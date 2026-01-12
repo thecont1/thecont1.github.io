@@ -44,3 +44,6 @@ Thumbs.db
 # misc
 dirstruct.txt
 .cursorrules
+remote-only/
+
+playwright-report/
