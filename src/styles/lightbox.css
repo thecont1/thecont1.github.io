@@ -42,9 +42,9 @@
 .lightbox-main {
   position: relative;
   z-index: 2;
-  width: 80vw;
+  flex: 1 1 auto;
   height: 100vh;
-  flex: 0 0 80vw;
+  min-width: 0;
   overflow: hidden;
   display: block;
   background: transparent;
@@ -92,24 +92,27 @@
 .lightbox-sidebar {
   position: relative;
   z-index: 10;
-  width: 20vw;
-  min-width: 250px;
+  width: 22vw;
+  min-width: 320px;
+  max-width: 400px;
   height: 100vh;
-  flex: 0 0 20vw;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  padding: 2rem 1.5rem;
+  padding: 1.5rem 1.25rem;
   background: white;
   box-sizing: border-box;
   transition: opacity 0.3s ease, background 0.3s ease;
+  overflow: hidden;
   /* Clean look: no borders */
 }
 
 .sidebar-content {
-  flex-grow: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 0.5rem;
@@ -168,6 +171,16 @@
   max-width: 100%;
   max-height: none;
   animation: none;
+  padding: 1rem 1.25rem 1.25rem;
+  border-radius: 12px;
+  box-sizing: border-box;
+}
+
+/* Ensure values don't overflow in lightbox */
+.lightbox .info-panel-value {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .exif-row {

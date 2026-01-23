@@ -1,28 +1,52 @@
-/* ============================================================================
+/* =============================================================================
    INFO PANEL (Metadata Display)
-   ============================================================================ */
+   A clean, scannable metadata panel for Lightbox and Carousel
+   ============================================================================= */
 
 .carousel-info-panel {
   position: fixed;
   top: calc(var(--site-header-height) + 12px);
   right: 2rem;
   transform: none;
-  width: 320px;
+  width: 340px;
   max-width: calc(100vw - 4rem);
   max-height: calc(100vh - var(--site-header-height) - 24px);
   overflow-y: auto;
+  overflow-x: hidden;
 
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: rgba(12, 12, 14, 0.88);
+  backdrop-filter: blur(24px) saturate(1.2);
+  -webkit-backdrop-filter: blur(24px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem 1.5rem;
 
   color: #fff;
-  font-family: "Inter", sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   z-index: 10;
 
-  animation: info-panel-slide-in 0.3s ease-out;
+  /* Custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+
+  animation: info-panel-slide-in 0.25s ease-out;
+}
+
+.carousel-info-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.carousel-info-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.carousel-info-panel::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.carousel-info-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Post hover panel is positioned dynamically via JS; avoid initial fixed top/right + slide-in */
@@ -37,7 +61,7 @@
 @keyframes info-panel-slide-in {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(16px);
   }
   to {
     opacity: 1;
@@ -45,148 +69,258 @@
   }
 }
 
+/* -----------------------------------------------------------------------------
+   Header
+   ----------------------------------------------------------------------------- */
 .info-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .info-panel-title {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.65rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.5);
 }
 
+/* -----------------------------------------------------------------------------
+   Description / Caption
+   ----------------------------------------------------------------------------- */
 .info-panel-description {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.92);
   margin: 0 0 1.25rem 0;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.info-panel-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+/* -----------------------------------------------------------------------------
+   Sections
+   ----------------------------------------------------------------------------- */
+.info-panel-section {
   margin-bottom: 1rem;
 }
 
-.info-panel-row {
+.info-panel-section:last-of-type {
+  margin-bottom: 0.5rem;
+}
+
+.info-panel-section-title {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 0.6rem;
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-panel-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.1), transparent);
+}
+
+/* -----------------------------------------------------------------------------
+   Details Grid
+   ----------------------------------------------------------------------------- */
+.info-panel-details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0;
+}
+
+.info-panel-row {
+  display: contents;
 }
 
 .info-panel-label {
   font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: rgba(255, 255, 255, 0.5);
-  flex-shrink: 0;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
 }
 
 .info-panel-value {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.88);
   text-align: right;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
 }
 
+/* Highlight important values */
+.info-panel-value--highlight {
+  color: rgba(255, 255, 255, 1);
+  font-weight: 600;
+}
+
+/* -----------------------------------------------------------------------------
+   Copyright / Footer text
+   ----------------------------------------------------------------------------- */
 .info-panel-copyright {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* -----------------------------------------------------------------------------
+   C2PA Content Credentials Button
+   Styled to match the official C2PA branding
+   ----------------------------------------------------------------------------- */
 .info-panel-cr-button {
   position: relative;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
+  width: 100%;
   opacity: 1;
   visibility: visible;
   color: #d04b36;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.5rem 0.9rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(208, 75, 54, 0.2);
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
   font-weight: 600;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.55rem;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  width: auto;
-  height: auto;
-  min-height: 44px; /* Ensure minimum touch target height */
+  min-height: 42px;
   transform: none;
   outline: none;
-  box-shadow:
-    0 0 0 3px rgba(208, 75, 54, 0),
-    0 0 18px rgba(208, 75, 54, 0),
-    0 0 48px rgba(208, 75, 54, 0),
-    0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
-}
-
-/* Mobile touch target optimization for info panel button */
-@media (max-width: 768px) {
-  .info-panel-cr-button {
-    min-height: 48px; /* Comfortable touch target height */
-    padding: 0.75rem 1rem; /* Increased padding for better touch area */
-    /* Enhanced touch feedback */
-    transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
-  }
-  
-  /* Touch feedback - active state for mobile taps */
-  .info-panel-cr-button:active {
-    transform: scale(0.98);
-    background: rgba(255, 255, 255, 1);
-  }
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: 
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 300ms ease,
+    transform 150ms ease;
 }
 
 .info-panel-cr-button:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 1);
   border-color: rgba(208, 75, 54, 0.4);
+  transform: translateY(-1px);
   box-shadow:
-    0 0 0 3px rgba(208, 75, 54, 0.14),
-    0 0 18px rgba(208, 75, 54, 0.45),
-    0 0 48px rgba(208, 75, 54, 0.25),
+    0 0 0 3px rgba(208, 75, 54, 0.1),
+    0 0 16px rgba(208, 75, 54, 0.35),
+    0 0 32px rgba(208, 75, 54, 0.15),
     0 4px 12px rgba(208, 75, 54, 0.2);
 }
 
-.info-panel-cr-button svg {
-  width: 18px;
-  height: 18px;
-  color: currentColor;
+.info-panel-cr-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 0 0 2px rgba(208, 75, 54, 0.12),
+    0 0 8px rgba(208, 75, 54, 0.25),
+    0 2px 6px rgba(208, 75, 54, 0.1);
 }
 
+/* CR Logo styling */
+.info-panel-cr-button svg,
+.info-panel-cr-button .cr-logo,
+.info-panel-cr-button > span:first-child svg {
+  width: 20px;
+  height: 20px;
+  color: #d04b36;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Wrapper span for SVG in React */
+.info-panel-cr-button > span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Content Credentials label - matches C2PA official styling */
 .info-panel-cr-button .c2pa-indicator-label {
   display: inline-block;
-  max-width: 220px;
   opacity: 1;
   overflow: visible;
-  color: #000;
-  font-family: "Inter", sans-serif;
-  font-size: inherit;
-  font-weight: inherit;
-  text-transform: lowercase;
+  color: #1a1a1a;
+  font-family: "IBM Plex Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
-/* Responsive */
+/* =============================================================================
+   Responsive Styles
+   ============================================================================= */
+
+/* Tablet */
 @media (max-width: 768px) {
   .carousel-info-panel {
     right: 1rem;
-    width: 280px;
-    padding: 1.25rem;
+    width: 300px;
+    padding: 1rem 1.25rem 1.25rem;
+    border-radius: 14px;
+  }
+
+  .info-panel-description {
+    font-size: 0.825rem;
+  }
+
+  .info-panel-cr-button {
+    min-height: 48px;
+    padding: 0.75rem 1rem;
   }
 }
 
+/* Mobile */
 @media (max-width: 480px) {
   .carousel-info-panel {
-    right: 0.5rem;
-    left: 0.5rem;
+    right: 0.75rem;
+    left: 0.75rem;
     width: auto;
+    max-width: none;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .info-panel-header {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .info-panel-description {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .info-panel-section {
+    margin-bottom: 0.75rem;
+  }
+
+  .info-panel-details {
+    gap: 0.3rem 0.5rem;
+  }
+
+  .info-panel-label {
+    font-size: 0.65rem;
+  }
+
+  .info-panel-value {
+    font-size: 0.7rem;
   }
 }

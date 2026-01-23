@@ -7,6 +7,8 @@ import Carousel from "../carousel/Carousel.tsx";
 import "../../styles/photogallery.css";
 import "../../styles/carousel.css";
 import "../../styles/info-panel.css";
+import fs from "node:fs";
+import path from "node:path";
 
 interface Props {
   post: CollectionEntry<"photogallery">;
@@ -35,34 +37,35 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
   day: 'numeric'
 }).format(post.data.date) : null;
 
-function getOriginalsDirFromSrc(imgSrc: string): string | null {
+// Extract directory name from image src path
+function getDirectoryFromSrc(imgSrc: string): string | null {
   const parts = imgSrc.split('/').filter(Boolean);
   const originalsIndex = parts.indexOf('originals');
-  if (originalsIndex === -1) return null;
-  if (originalsIndex >= parts.length - 2) return null;
-  return parts.slice(0, parts.length - 1).join('/');
+  if (originalsIndex === -1 || originalsIndex >= parts.length - 1) return null;
+  return parts[originalsIndex + 1];
 }
+
+// Cache for metadata loaded from filesystem
 const dirMetadataCache = new Map<string, any>();
 
-async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
-  // Expecting a web-root-like path that includes /originals/<DIR>
-  const parts = dirPathFromWebRoot.split('/').filter(Boolean);
-  const originalsIndex = parts.indexOf('originals');
-  if (originalsIndex === -1 || originalsIndex >= parts.length) return null;
-  const directory = parts[originalsIndex + 1];
-  if (!directory) return null;
-
+// Load metadata from filesystem at build time
+function loadMetadataForDirectory(directory: string): any {
   if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
+  
   try {
-    const metadataUrl = `/library/originals/${directory}/metadata.json`;
-    const resp = await fetch(metadataUrl);
-    const data = resp.ok ? await resp.json() : null;
-    dirMetadataCache.set(directory, data);
-    return data;
-  } catch {
-    dirMetadataCache.set(directory, null);
-    return null;
+    const metadataPath = path.join(process.cwd(), 'public', 'library', 'originals', directory, 'metadata.json');
+    if (fs.existsSync(metadataPath)) {
+      const content = fs.readFileSync(metadataPath, 'utf-8');
+      const data = JSON.parse(content);
+      dirMetadataCache.set(directory, data);
+      return data;
+    }
+  } catch (err) {
+    console.warn(`Failed to load metadata for ${directory}:`, err);
   }
+  
+  dirMetadataCache.set(directory, null);
+  return null;
 }
 ---
 
@@ -78,20 +81,20 @@ async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
       <!-- Fixed carousel layer -->
       <div class="carousel-hero-fixed">
         <Carousel 
-          images={await Promise.all(images.map(async (img) => {
+          images={images.map((img) => {
             const filename = img.src.split('/').pop() || '';
-            const dir = getOriginalsDirFromSrc(img.src);
+            const directory = getDirectoryFromSrc(img.src);
             let meta: any = {};
-            if (dir) {
-              const dirMeta = await loadMetadataForDir(dir);
-              meta = dirMeta?.[filename]?.photography || {};
+            if (directory) {
+              const dirMeta = loadMetadataForDirectory(directory);
+              meta = dirMeta?.[filename] || {};
             }
             return {
               src: img.src,
               caption: img.caption,
               metadata: meta
             };
-          }))}
+          })}
           client:load
         />
       </div>

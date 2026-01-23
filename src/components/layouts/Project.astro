@@ -4,6 +4,8 @@ import Carousel from "../carousel/Carousel.tsx";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/home.css";
+import fs from "node:fs";
+import path from "node:path";
 
 interface Props {
   post: CollectionEntry<"project">;
@@ -21,10 +23,6 @@ const code = await Promise.all((post.data.code || []).map((ref: any) => ref()));
 
 const projectContent = [...photogalleries, ...essays, ...longforms, ...posts, ...datastories, ...code]
   .filter((p) => p?.data?.status === "published");
-
-// Sort by date or some other metric if needed?
-// For now, maybe we just list them or let the user define an order in frontmatter?
-// Or we can group them by layout type.
 
 // 2. Derive carousel images from referenced photogalleries (frontmatter-defined)
 const dirMetadataCache = new Map<string, any>();
@@ -44,36 +42,40 @@ function parseOriginalsDirAndFilename(imgSrc: string): { directory: string; file
   }
 }
 
-async function loadMetadataForDirectory(directory: string): Promise<any> {
+// Load metadata from filesystem at build time
+function loadMetadataForDirectory(directory: string): any {
   if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
+  
   try {
-    const metadataUrl = `/library/originals/${directory}/metadata.json`;
-    const resp = await fetch(metadataUrl);
-    const data = resp.ok ? await resp.json() : null;
-    dirMetadataCache.set(directory, data);
-    return data;
-  } catch {
-    dirMetadataCache.set(directory, null);
-    return null;
+    const metadataPath = path.join(process.cwd(), 'public', 'library', 'originals', directory, 'metadata.json');
+    if (fs.existsSync(metadataPath)) {
+      const content = fs.readFileSync(metadataPath, 'utf-8');
+      const data = JSON.parse(content);
+      dirMetadataCache.set(directory, data);
+      return data;
+    }
+  } catch (err) {
+    console.warn(`Failed to load metadata for ${directory}:`, err);
   }
+  
+  dirMetadataCache.set(directory, null);
+  return null;
 }
 
-const carouselImages = (
-  await Promise.all(
-    photogalleries.flatMap((g: any) => (g?.data?.images || []).map(async (img: any) => {
-      const parsed = parseOriginalsDirAndFilename(img.src);
-      let meta: any = {};
-      if (parsed) {
-        const dirMeta = await loadMetadataForDirectory(parsed.directory);
-        meta = dirMeta?.[parsed.filename]?.photography || {};
-      }
-      return {
-        src: img.src,
-        caption: img.caption || img.alt || parsed?.filename?.replace(/\.[^/.]+$/, '') || '',
-        metadata: meta
-      };
-    }))
-  )
+const carouselImages = photogalleries.flatMap((g: any) => 
+  (g?.data?.images || []).map((img: any) => {
+    const parsed = parseOriginalsDirAndFilename(img.src);
+    let meta: any = {};
+    if (parsed) {
+      const dirMeta = loadMetadataForDirectory(parsed.directory);
+      meta = dirMeta?.[parsed.filename] || {};
+    }
+    return {
+      src: img.src,
+      caption: img.caption || img.alt || parsed?.filename?.replace(/\.[^/.]+$/, '') || '',
+      metadata: meta
+    };
+  })
 ).filter(Boolean);
 
 const backgroundColor = post.data.backgroundColor || "var(--paper)";

@@ -12,18 +12,27 @@ declare global {
 }
 
 type ImageMetadata = {
-  camera_make?: string;
-  camera_model?: string;
-  lens_model?: string;
-  aperture?: string;
-  shutter_speed?: string;
-  iso?: number;
-  focal_length?: string;
-  date_original?: string;
-  artist?: string;
-  copyright?: string;
-  description?: string;
-  title?: string;
+  filename?: string;
+  format?: string;
+  size?: [number, number];
+  width?: number;
+  height?: number;
+  exif?: Record<string, any>;
+  photography?: {
+    camera_make?: string;
+    camera_model?: string;
+    lens_model?: string;
+    aperture?: string;
+    shutter_speed?: string;
+    iso?: number;
+    focal_length?: string;
+    date_original?: string;
+    date_taken?: string;
+    artist?: string;
+    copyright?: string;
+    description?: string;
+    title?: string;
+  };
 };
 
 type Image = {
@@ -381,6 +390,7 @@ export default function Carousel({ images }: { images: Image[] }) {
       </div>
 
       {showInfo && metadata && <InfoPanel metadata={metadata} imageSrc={currentImage.src} />}
+      {!metadata && <div className="debug-no-meta">No metadata available</div>}
     </div>
   );
 }
