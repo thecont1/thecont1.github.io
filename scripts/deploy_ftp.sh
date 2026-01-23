@@ -73,7 +73,7 @@ set net:max-retries 3
 set net:reconnect-interval-base 5
 set ftp:passive-mode on
 open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
-mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --ignore-time --parallel=3 --no-perms ${LOCAL_CLIENT} ${REMOTE_CLIENT}
+mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --ignore-time --parallel=3 --no-perms ${LOCAL_CLIENT} ${REMOTE_CLIENT}
 bye
 "
 echo -e "${GREEN}✓ Client directory mirrored${NC}"
@@ -88,7 +88,7 @@ set net:max-retries 3
 set net:reconnect-interval-base 5
 set ftp:passive-mode on
 open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
-mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --ignore-time --parallel=3 --no-perms ${LOCAL_SERVER} ${REMOTE_SERVER}
+mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --ignore-time --parallel=3 --no-perms ${LOCAL_SERVER} ${REMOTE_SERVER}
 bye
 "
 echo -e "${GREEN}✓ Server directory mirrored${NC}"
