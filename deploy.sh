@@ -28,7 +28,7 @@ fi
 echo ""
 
 # Check required commands
-REQUIRED_COMMANDS=("uv" "npm" "lftp" "rclone")
+REQUIRED_COMMANDS=("uv" "bun" "lftp" "rclone")
 for cmd in "${REQUIRED_COMMANDS[@]}"; do
     if ! command -v "$cmd" &> /dev/null; then
         echo -e "${RED}✗ Required command not found: $cmd${NC}"
@@ -131,7 +131,7 @@ else
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
     
     echo -e "${YELLOW}Building site with Astro...${NC}"
-    npm run build
+    bun run build
     
     echo -e "${GREEN}✓ Build complete${NC}"
     echo ""
