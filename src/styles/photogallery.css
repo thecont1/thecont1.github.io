@@ -20,6 +20,23 @@ body {
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
+/* Prevent any horizontal panning on Photogallery pages */
+html,
+body {
+  overflow-x: hidden;
+}
+
+.photogallery-layout {
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .photogallery-layout {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+}
+
 /* Header Design - Borrowed from essay.css */
 .photogallery-header {
   width: 100%;
@@ -30,52 +47,125 @@ body {
   box-sizing: border-box;
 }
 
-.photogallery-meta-top {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  font-family: "Inter", sans-serif;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-size: 0.75rem;
-  color: var(--muted);
-  margin-bottom: 2rem;
+@media (max-width: 768px) {
+  .photogallery-header {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
-.photogallery-meta-top .category {
+/* Kicker row (Photogallery + category) */
+.photogallery-kicker {
+  font-family: "Inter", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--accent, #d04b36);
-  font-weight: 700;
+  margin: 0 auto 2.25rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.photogallery-kicker .collection-type {
+  color: var(--accent, #d04b36);
+}
+
+.photogallery-kicker .category {
+  color: var(--muted, #555);
+}
+
+.photogallery-kicker .category::before {
+  content: "·";
+  margin-right: 0.75rem;
+  color: var(--muted, #555);
 }
 
 .photogallery-title {
   font-family: "Fraunces", serif;
-  font-size: clamp(3rem, 8vw, 5rem);
-  line-height: 1;
+  font-size: clamp(3.2rem, 7.5vw, 5.2rem);
+  line-height: 0.98;
   font-weight: 300;
-  margin-bottom: 2.5rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.015em;
+  margin: 0 auto 1.75rem;
 }
 
 .photogallery-subtitle {
   font-family: "Fraunces", serif;
-  font-size: 1.6rem;
-  line-height: 1.4;
+  font-size: 1.55rem;
+  line-height: 1.45;
   font-style: italic;
-  color: var(--muted);
-  max-width: 780px;
-  margin: 0 auto 3rem;
+  color: rgba(0, 0, 0, 0.7);
+  max-width: 52ch;
+  margin: 0.25rem auto 2.25rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .photogallery-subtitle {
+    font-size: 1.15rem;
+    line-height: 1.5;
+    max-width: 100%;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    hyphens: auto;
+  }
 }
 
 .photogallery-author-line {
-  font-family: "DM Sans", sans-serif;
-  font-size: 1rem;
+  font-family: "Inter", sans-serif;
+  font-size: 1.05rem;
   color: var(--ink);
+  font-weight: 700;
+}
+
+.photogallery-author-line .author-name {
+  font-weight: 700;
 }
 
 .photogallery-author-line .by {
-  font-style: italic;
-  color: var(--muted);
-  margin-right: 0.4rem;
+  font-style: normal;
+  letter-spacing: 0.02em;
+  margin-right: 0.35rem;
+}
+
+/* Body/content below the gallery should follow the Essay centered container */
+.photogallery-content {
+  max-width: 62ch;
+  width: 100%;
+  margin: 6rem auto 0;
+  padding: 0 2rem;
+  box-sizing: border-box;
+  display: block;
+  font-family: "Fraunces", serif;
+  font-size: 1.3rem;
+  line-height: 1.9;
+  font-weight: 300;
+  color: var(--ink);
+}
+
+@media (max-width: 768px) {
+  .photogallery-content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.photogallery-date-line {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  color: rgba(0, 0, 0, 0.55);
+  margin-top: 0.5rem;
 }
 
 /* GRID LAYOUT (tile) - Row-wise grid respecting frontmatter order */
@@ -115,6 +205,47 @@ body {
   display: none;
 }
 
+@media (max-width: 768px) {
+  .photogallery-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0rem;
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  .photogallery-grid .gallery-item {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .photogallery-grid .gallery-item img {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    border: 5px solid white;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+  }
+
+  .photogallery-grid .gallery-item figcaption {
+    display: block;
+    font-family: "Inter", sans-serif;
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 0.45rem;
+    line-height: 1.4;
+  }
+}
+
 /* ONE-UP LAYOUT - Single column, one image after another */
 .photogallery-oneup {
   max-width: 800px;
@@ -133,7 +264,7 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  border: 10px solid white;
+  border: 5px solid white;
   box-shadow: 0 20px 60px rgba(0,0,0,0.1);
   cursor: zoom-in;
   /* Removed hover scale transform */
@@ -222,17 +353,8 @@ body {
 }
 
 @media (max-width: 600px) {
-  .photogallery-grid {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    max-width: 95%;
-  }
-  
-  .photogallery-title {
-    font-size: 2rem;
-  }
-  
   .photogallery-layout {
-    padding: 8rem 1rem 4rem;
+    padding: 8rem 1.25rem 4rem;
   }
   
   .photogallery-oneup {

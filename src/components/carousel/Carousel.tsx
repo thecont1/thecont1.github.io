@@ -2,6 +2,9 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
 import InfoPanel from "./InfoPanel";
 
+const PLACEHOLDER_IMAGE_SRC =
+  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
 declare global {
   interface Window {
     __imageMetadataBySrc?: Map<string, any>;
@@ -33,6 +36,7 @@ export default function Carousel({ images }: { images: Image[] }) {
   const [index, setIndex] = useState(0);
   const [showInfo, setShowInfo] = useState(false);
   const [userTookControl, setUserTookControl] = useState(false);
+  const [revealed, setRevealed] = useState<boolean[]>(() => images.map((_, i) => i === 0));
   const trackRef = useRef<HTMLDivElement | null>(null);
   const slideRefs = useRef<Array<HTMLDivElement | null>>([]);
   const isAutoScrollingRef = useRef(false);
@@ -59,6 +63,21 @@ export default function Carousel({ images }: { images: Image[] }) {
 
   useEffect(() => {
     if (index >= images.length) setIndex(0);
+  }, [images.length, index]);
+
+  useEffect(() => {
+    setRevealed(images.map((_, i) => i === 0));
+  }, [images]);
+
+  useEffect(() => {
+    setRevealed((prev) => {
+      if (index < 0 || index >= images.length) return prev;
+      if (prev[index]) return prev;
+      const next = prev.slice(0, images.length);
+      while (next.length < images.length) next.push(false);
+      next[index] = true;
+      return next;
+    });
   }, [images.length, index]);
 
   useEffect(() => {
@@ -180,17 +199,30 @@ export default function Carousel({ images }: { images: Image[] }) {
     const run = async () => {
       // Preload a small window ahead; if the user swipes, this effect restarts.
       const maxAhead = Math.min(4, Math.max(0, queue.length - 1));
-      const targets: string[] = [];
-      for (let k = 1; k <= maxAhead; k++) targets.push(queue[clamp(index + k)]);
+      const targets: Array<{ idx: number; src: string }> = [];
+      for (let k = 1; k <= maxAhead; k++) {
+        const idx = clamp(index + k);
+        targets.push({ idx, src: queue[idx] });
+      }
 
-      for (const src of targets) {
+      for (const t of targets) {
         if (preloadTokenRef.current !== startToken) return;
         await new Promise<void>((resolve) => {
           const img = new Image();
           img.decoding = "async";
           img.onload = () => resolve();
           img.onerror = () => resolve();
-          img.src = src;
+          img.src = t.src;
+        });
+
+        if (preloadTokenRef.current !== startToken) return;
+        setRevealed((prev) => {
+          if (t.idx < 0 || t.idx >= images.length) return prev;
+          if (prev[t.idx]) return prev;
+          const next = prev.slice(0, images.length);
+          while (next.length < images.length) next.push(false);
+          next[t.idx] = true;
+          return next;
         });
       }
     };
@@ -319,11 +351,11 @@ export default function Carousel({ images }: { images: Image[] }) {
               }}
             >
               <img
-                src={img.src}
+                src={revealed[i] ? img.src : PLACEHOLDER_IMAGE_SRC}
                 alt=""
                 className="carousel-image"
-                loading={i < 3 ? "eager" : "lazy"}
-                fetchPriority={i < 3 ? "high" : "low"}
+                loading={i === index ? "eager" : "lazy"}
+                fetchPriority={i === index ? "high" : "low"}
                 decoding="async"
               />
             </div>

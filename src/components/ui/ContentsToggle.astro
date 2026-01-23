@@ -169,7 +169,7 @@ const { title, label = "Contents" } = Astro.props;
       position: fixed !important;
       left: 50% !important;
       right: auto !important;
-      bottom: 0 !important;
+      bottom: max(0px, env(safe-area-inset-bottom, 0px)) !important;
       top: auto !important;
       transform: translateX(-50%) !important;
       width: auto !important; /* Auto width for horizontal layout */

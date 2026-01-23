@@ -70,7 +70,7 @@ async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
   <!-- CAROUSEL LAYOUT - Full page with curtain, then footer -->
   <Layout title={post.data.title}>
     <Fragment slot="head">
-      {images.slice(0, 3).map((img) => (
+      {images.slice(0, 1).map((img) => (
         <link rel="preload" as="image" href={img.src} />
       ))}
     </Fragment>
@@ -124,19 +124,24 @@ async function loadMetadataForDir(dirPathFromWebRoot: string): Promise<any> {
       
       <!-- Header Section -->
       <header class="photogallery-header">
-        <div class="photogallery-meta-top">
+        <div class="photogallery-kicker">
+          <span class="collection-type">{collectionName}</span>
           {post.data.category && <span class="category">{post.data.category}</span>}
-          {formattedDate && <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>}
-        </div>
-        
-        <h1 class="photogallery-title">{post.data.title}</h1>
-        
-        <div class="photogallery-author-line">
-          <span class="by">by</span>
-          <span class="author-name">{post.data.author}</span>
         </div>
 
+        <h1 class="photogallery-title">{post.data.title}</h1>
+
         {post.data.subtitle && <p class="photogallery-subtitle">{post.data.subtitle}</p>}
+
+        <div class="photogallery-author-line">
+          <span class="by">By</span><span class="author-name">{post.data.author}</span>
+        </div>
+
+        {formattedDate && (
+          <div class="photogallery-date-line">
+            <time datetime={post.data.date?.toISOString()}>{formattedDate}</time>
+          </div>
+        )}
       </header>
 
       <!-- Gallery Content -->
