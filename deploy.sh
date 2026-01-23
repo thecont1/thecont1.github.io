@@ -98,15 +98,24 @@ else
     echo -e "${BLUE}STEP 1: R2 Sync (EXIF + Upload)${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
     
-    if [ -n "$R2_DIR" ]; then
-        echo -e "${YELLOW}Syncing only: originals/$R2_DIR${NC}"
-        bash scripts/upload_to_r2.sh "$R2_DIR"
-    else
-        echo -e "${YELLOW}Syncing all originals${NC}"
-        bash scripts/upload_to_r2.sh
-    fi
+    # Prompt user before checking R2 bucket
+    echo -e -n "${YELLOW}Sync local with Cloudflare R2? (y/n): ${NC}"
+    read -n 1 -r
+    echo ""
     
-    echo -e "${GREEN}✓ R2 sync complete${NC}"
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        if [ -n "$R2_DIR" ]; then
+            echo -e "${YELLOW}Syncing only: originals/$R2_DIR${NC}"
+            bash scripts/upload_to_r2.sh "$R2_DIR"
+        else
+            echo -e "${YELLOW}Syncing all originals${NC}"
+            bash scripts/upload_to_r2.sh
+        fi
+        
+        echo -e "${GREEN}✓ R2 sync complete${NC}"
+    else
+        echo -e "${GREEN}⏭  Skipping R2 sync (user declined)${NC}"
+    fi
     echo ""
 fi
 
@@ -129,10 +138,10 @@ else
 fi
 
 # ==============================================================================
-# STEP 3: Clean Build Output
+# STEP 3: Prepare Build Output
 # ==============================================================================
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}STEP 3: Clean Build Output${NC}"
+echo -e "${BLUE}STEP 3: Prepare Build Output${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
 if [ -d "dist/client/library" ]; then
@@ -142,14 +151,6 @@ if [ -d "dist/client/library" ]; then
 else
     echo -e "${GREEN}✓ dist/client/library not found (already clean)${NC}"
 fi
-echo ""
-
-# ==============================================================================
-# STEP 3.5: Inject Remote-Only Files
-# ==============================================================================
-echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}STEP 3.5: Inject Remote-Only Files${NC}"
-echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
 if [ -d "remote-only" ]; then
     echo -e "${YELLOW}Copying files from remote-only/ to dist/client/...${NC}"
@@ -182,7 +183,7 @@ fi
 # ==============================================================================
 echo -e "${GREEN}"
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║        🎉 DEPLOYMENT COMPLETE 🎉                          ║"
+echo "║          🎉 DEPLOYMENT COMPLET  E 🎉                      ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
