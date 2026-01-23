@@ -202,19 +202,19 @@ body {
 /* Over-the-top Dropcaps - Refined for "Inside" effect */
 .editorial-post .post-body .dropcap {
   position: relative;
-  /* Remove z-index to prevent stacking context issues */
-  margin-top: 2rem;
-  margin-bottom: 3rem;
+  z-index: 1;
+  margin-top: 4rem;
+  margin-bottom: 4rem;
   padding-left: 0 !important;
 }
 
 .editorial-post .post-body .dropcap::before {
   content: attr(data-letter);
   position: absolute;
-  top: -7rem;
+  top: -8rem;
   left: -8rem;
   font-family: "Fraunces", serif;
-  font-size: 48rem;
+  font-size: 52rem;
   line-height: 1;
   font-weight: 100;
   color: var(--accent);
@@ -348,6 +348,28 @@ body {
   margin-left: -0.35rem;
   padding: 0.8rem 1.0rem 0rem 0rem;
   color: var(--accent);
+}
+
+@media (min-width: 769px) {
+  .post-body p.dropcap {
+    position: relative;
+  }
+
+  .post-body p.dropcap::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: -7rem;
+    left: -8rem;
+    font-family: "Fraunces", serif;
+    font-size: 48rem;
+    line-height: 1;
+    font-weight: 100;
+    color: var(--ink);
+    opacity: 0.06;
+    z-index: -1;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
 }
 
 /* Fallback for browsers not supporting initial-letter */

@@ -232,27 +232,20 @@
   }
 
   body.screen-mode figure {
-    transform: scale(1.05); /* Reduced scaling to prevent bleeding */
-    max-width: 95vw; /* Prevent horizontal overflow */
-    overflow: hidden;
-    margin: 0 auto; /* Center the figure */
+    transform: scale(1.05);
+    transform-origin: center center;
+    will-change: transform;
   }
 
   body.screen-mode figure img {
-    max-width: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto; /* Center the image within figure */
+    will-change: transform;
   }
 
   /* Handle standalone images (not in figures) */
   body.screen-mode img:not(figure img) {
     transform: scale(1.05);
-    max-width: 95vw;
-    margin: 0 auto;
-    display: block;
+    transform-origin: center center;
+    will-change: transform;
   }
 
   /* Keep Screen toggle ALWAYS on top to prevent vanishing during transitions */

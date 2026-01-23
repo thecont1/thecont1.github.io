@@ -346,6 +346,28 @@
   color: var(--accent);
 }
 
+@media (min-width: 769px) {
+  .post-body p.dropcap {
+    position: relative;
+  }
+
+  .post-body p.dropcap::before {
+    content: attr(data-letter);
+    position: absolute;
+    top: -10rem;
+    left: -2rem;
+    font-family: "Fraunces", serif;
+    font-size: 60rem;
+    line-height: 1;
+    font-weight: 100;
+    color: var(--ink);
+    opacity: 0.06;
+    z-index: -1;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+}
+
 /* Editorial Elements */
 
 /* Blurb Style: use <p class="blurb"> in markdown */
