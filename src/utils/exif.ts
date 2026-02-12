@@ -1,7 +1,8 @@
 /**
  * EXIF Metadata Utilities
- * Access pre-extracted EXIF data from co-located metadata files
+ * Fetch EXIF data from the hosted C2PA/EXIF API
  */
+import { C2PA_API_BASE, resolveImageUri } from './api';
 
 export interface ExifMetadata {
   filename: string;
@@ -28,34 +29,23 @@ export interface ExifMetadata {
 }
 
 /**
- * Get EXIF metadata for an image by its path
- * @param imagePath - Path to image (e.g., "https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/TheAfricanPortraits/image.jpg")
+ * Get EXIF metadata for an image by its path.
+ * Calls the hosted EXIF API at apps.thecontrarian.in.
+ * @param imagePath - Path to image (root-relative or full URL)
  * @returns EXIF metadata or null if not found
  */
 export async function getImageMetadata(imagePath: string): Promise<ExifMetadata | null> {
   try {
-    // Parse the directory structure from the path
-    const pathParts = imagePath.split('/');
-    const filename = pathParts[pathParts.length - 1];
-    
-    // Find the directory (should be the part after 'originals')
-    const originalsIndex = pathParts.indexOf('originals');
-    if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) {
-      return null;
-    }
-    
-    const directory = pathParts[originalsIndex + 1];
-    
-    // Fetch the co-located metadata via canonical site path (hosting redirects /library/* to asset CDN)
-    const metadataUrl = `/library/originals/${directory}/metadata.json`;
-    const response = await fetch(metadataUrl);
-    
-    if (!response.ok) {
-      return null;
-    }
-    
-    const directoryMetadata = await response.json();
-    return directoryMetadata[filename] || null;
+    const uri = resolveImageUri(imagePath);
+    const apiUrl = `${C2PA_API_BASE}/api/exif_metadata?uri=${encodeURIComponent(uri)}`;
+    const response = await fetch(apiUrl);
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    // The API returns { "filename": { ...metadata } } — extract the first (only) value
+    const keys = Object.keys(data);
+    if (keys.length === 0) return null;
+    return data[keys[0]] as ExifMetadata;
   } catch (error) {
     return null;
   }
@@ -122,27 +112,12 @@ export function getImageCaption(metadata: ExifMetadata): string {
 }
 
 /**
- * Get all available directories with metadata by scanning the originals directory
- * @returns Promise that resolves to array of directory names that have metadata
- */
-export async function getAvailableDirectories(): Promise<string[]> {
-  try {
-    // This would require a server-side API to list directories
-    // For now, return empty array - directories are discovered dynamically when needed
-    return [];
-  } catch (error) {
-    return [];
-  }
-}
-
-/**
  * Get debug info about the metadata system
- * @returns Debug information (limited without index file)
  */
 export function getDebugInfo() {
   return {
-    note: 'Metadata files are co-located with images on R2 CDN',
-    architecture: 'Co-located metadata files on Cloudflare R2',
-    discovery: 'Dynamic discovery based on image paths'
+    note: 'EXIF and C2PA metadata served by hosted API',
+    api: C2PA_API_BASE,
+    architecture: 'Static site + external API for metadata extraction'
   };
 }

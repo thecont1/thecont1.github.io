@@ -7,23 +7,17 @@
  */
 import { getEntry } from "astro:content";
 import { FEATURED_ITEMS, FEATURED_SECTIONS, type FeaturedItem } from "../../data/featured";
-import { existsSync } from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 // Helper to normalize public paths
 const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") : p);
 
-const publicDir = fileURLToPath(new URL("../../../public/", import.meta.url));
+// Check if a path points to a valid image (CDN URLs, /library/ paths, or any absolute path)
 const hasPublicFile = (p?: string) => {
   if (!p) return false;
-  // Remote/CDN assets won't exist in local public/
   if (/^https?:\/\//i.test(p)) return true;
-  let rel = p.replace(/^\/+/, "");
-  if (rel.startsWith("public/")) {
-    rel = rel.replace(/^public\//, "");
-  }
-  return existsSync(path.join(publicDir, rel));
+  if (p.startsWith('/library/')) return true;
+  // Any other root-relative path is assumed valid
+  return p.startsWith('/');
 };
 
 // URL mapping for each collection type
