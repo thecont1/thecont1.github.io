@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
+import SchemaMarkup from "../seo/SchemaMarkup.astro";
 import Lightbox from "../ui/Lightbox.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import Carousel from "../carousel/Carousel.tsx";
@@ -71,11 +72,19 @@ function loadMetadataForDirectory(directory: string): any {
 
 {layoutType === "carousel" ? (
   <!-- CAROUSEL LAYOUT - Full page with curtain, then footer -->
-  <Layout title={post.data.title}>
+  <Layout title={post.data.title} description={post.data.subtitle} image={post.data.heroImage || images[0]?.src} type="article" publishedDate={post.data.date?.toISOString()}>
     <Fragment slot="head">
       {images.slice(0, 1).map((img) => (
         <link rel="preload" as="image" href={img.src} />
       ))}
+      <SchemaMarkup
+        title={post.data.title}
+        description={post.data.subtitle}
+        image={post.data.heroImage || images[0]?.src}
+        datePublished={post.data.date?.toISOString()}
+        type="gallery"
+        url={Astro.url.href}
+      />
     </Fragment>
     <section class="photogallery-carousel-hero">
       <!-- Fixed carousel layer -->
@@ -122,7 +131,17 @@ function loadMetadataForDirectory(directory: string): any {
   </Layout>
 ) : (
   <!-- REGULAR PHOTOGALLERY LAYOUTS (tile/one-up) -->
-  <Layout title={post.data.title}>
+  <Layout title={post.data.title} description={post.data.subtitle} image={post.data.heroImage || images[0]?.src} type="article" publishedDate={post.data.date?.toISOString()}>
+    <Fragment slot="head">
+      <SchemaMarkup
+        title={post.data.title}
+        description={post.data.subtitle}
+        image={post.data.heroImage || images[0]?.src}
+        datePublished={post.data.date?.toISOString()}
+        type="gallery"
+        url={Astro.url.href}
+      />
+    </Fragment>
     <div class="photogallery-layout" style={`--page-bg: ${backgroundColor};`}>
       
       <!-- Header Section -->

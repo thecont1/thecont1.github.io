@@ -3,19 +3,55 @@ import { getCollection } from "astro:content";
 import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import C2PAOverlay from "../../components/ui/C2PAOverlay.astro";
+import { AUTHOR } from "../../data/author";
 import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
 
 const codeProjects = await getCollection("code", ({ data }) => data.status === "published");
+
+const title = "Code Projects | Mahesh Shantaram";
+const description = "Open source projects and creative coding experiments by Mahesh Shantaram.";
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(AUTHOR.image, Astro.site).href;
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: AUTHOR.name,
+  url: AUTHOR.url,
+  jobTitle: AUTHOR.jobTitle,
+  sameAs: AUTHOR.sameAs,
+};
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Code Projects | Mahesh Shantaram</title>
+    <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL.href} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Mahesh Shantaram" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@thecontrarian" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

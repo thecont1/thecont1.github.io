@@ -24,6 +24,9 @@ const baseSchema = z.object({
   author: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
+
+  // SEO
+  metaDescription: z.string().max(160).optional(),
   
   // Taxonomy
   geography: z.array(geographyEnum).max(2).optional().default([]),

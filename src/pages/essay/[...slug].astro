@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Essay from "../../components/layouts/Essay.astro";
+import SchemaMarkup from "../../components/seo/SchemaMarkup.astro";
 
 export const prerender = true;
 
@@ -16,8 +17,25 @@ export async function getStaticPaths() {
 }
 
 const { essay } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
-<Layout title={essay.data.title}>
+<Layout
+  title={essay.data.title}
+  description={essay.data.metaDescription || essay.data.subtitle}
+  image={essay.data.heroImage}
+  type="article"
+  publishedDate={essay.data.date?.toISOString()}
+>
+  <Fragment slot="head">
+    <SchemaMarkup
+      title={essay.data.title}
+      description={essay.data.metaDescription || essay.data.subtitle}
+      image={essay.data.heroImage}
+      datePublished={essay.data.date?.toISOString()}
+      type="article"
+      url={canonicalURL}
+    />
+  </Fragment>
   <Essay post={essay} />
 </Layout>

@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Longform from "../../components/layouts/Longform.astro";
+import SchemaMarkup from "../../components/seo/SchemaMarkup.astro";
 
 export const prerender = true;
 
@@ -16,8 +17,25 @@ export async function getStaticPaths() {
 }
 
 const { longform } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
-<Layout title={longform.data.title}>
+<Layout
+  title={longform.data.title}
+  description={longform.data.metaDescription || longform.data.subtitle}
+  image={longform.data.heroImage}
+  type="article"
+  publishedDate={longform.data.date?.toISOString()}
+>
+  <Fragment slot="head">
+    <SchemaMarkup
+      title={longform.data.title}
+      description={longform.data.metaDescription || longform.data.subtitle}
+      image={longform.data.heroImage}
+      datePublished={longform.data.date?.toISOString()}
+      type="article"
+      url={canonicalURL}
+    />
+  </Fragment>
   <Longform post={longform} />
 </Layout>
