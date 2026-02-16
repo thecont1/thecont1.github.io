@@ -57,6 +57,8 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
 </div>
 
 <script>
+  import { openC2PAOverlay } from "../../utils/c2pa.js";
+  
   function initLightbox() {
     const lightbox = document.getElementById("lightbox");
     if (!lightbox) return;
@@ -215,7 +217,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
         if (crBtn) {
           crBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc } }));
+            openC2PAOverlay(imgSrc);
           });
         }
       };
@@ -509,7 +511,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       c2paBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const currentImgEl = lightboxImages[activeImgIndex] as HTMLImageElement;
-        if (currentImgEl?.src) window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc: currentImgEl.src } }));
+        if (currentImgEl?.src) openC2PAOverlay(currentImgEl.src);
       });
     }
 

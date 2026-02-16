@@ -10,14 +10,24 @@ export const C2PA_API_BASE = 'https://apps.thecontrarian.in/c2pa';
  * that the hosted API can fetch from.
  */
 export function resolveImageUri(imgPath: string): string {
-  // If already a full URL, return as-is
+  let pathname: string;
+  
+  // Extract pathname from full URLs or use as-is for relative paths
   if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) {
-    return imgPath;
+    try {
+      pathname = new URL(imgPath).pathname;
+    } catch {
+      pathname = imgPath;
+    }
+  } else {
+    pathname = imgPath;
   }
+  
   // Convert root-relative /library/... paths to the CDN origin
-  if (imgPath.startsWith('/library/')) {
-    return `https://library.thecontrarian.in${imgPath.replace('/library', '')}`;
+  if (pathname.startsWith('/library/')) {
+    return `https://library.thecontrarian.in${pathname.replace('/library', '')}`;
   }
+  
   // Fallback: assume it's a CDN-relative path
-  return `https://library.thecontrarian.in/${imgPath.replace(/^\//, '')}`;
+  return `https://library.thecontrarian.in/${pathname.replace(/^\//, '')}`;
 }

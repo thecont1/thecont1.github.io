@@ -34,6 +34,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 <script>
   import "../../styles/c2pa.css";
   import { CR_LOGO_SVG, SHIELD_CHECK_SVG, SHIELD_X_SVG } from "../icons/cr-logo-svg";
+  import { fetchC2PAMini, fetchC2PAData } from "../../utils/c2pa.js";
 
   class C2PAManager {
     overlay: HTMLElement | null;
@@ -56,11 +57,11 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
       this.closeBtn?.addEventListener('click', () => this.close());
       this.backdrop?.addEventListener('click', () => this.close());
-      
-      // Listen for custom event to open
-      window.addEventListener('open-c2pa', (e: any) => {
-        this.open(e.detail.imgSrc);
-      });
+
+      // Expose manager on overlay element for direct access
+      if (this.overlay) {
+        (this.overlay as any)._manager = this;
+      }
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && this.overlay?.classList.contains('is-active')) {
@@ -71,15 +72,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
     // Cache for c2pa_mini results per image URI
     miniCache = new Map<string, any>();
-    C2PA_API = 'https://apps.thecontrarian.in/c2pa';
-
-    resolveImageUri(imgPath: string): string {
-      if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) return imgPath;
-      if (imgPath.startsWith('/library/')) {
-        return `https://library.thecontrarian.in${imgPath.replace('/library', '')}`;
-      }
-      return imgPath;
-    }
 
     async fetchMini(imgSrc: string): Promise<any> {
       const pathname = (() => {
@@ -88,10 +80,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       if (this.miniCache.has(pathname)) return this.miniCache.get(pathname);
 
       try {
-        const uri = this.resolveImageUri(pathname);
-        const resp = await fetch(`${this.C2PA_API}/api/c2pa_mini?uri=${encodeURIComponent(uri)}`);
-        if (!resp.ok) { this.miniCache.set(pathname, null); return null; }
-        const data = await resp.json();
+        const data = await fetchC2PAMini(pathname);
         this.miniCache.set(pathname, data);
         return data;
       } catch {
@@ -289,35 +278,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       }
 
       try {
-        // Resolve image path to a full CDN URL for the hosted API
-        let cleanSrc = imgSrc;
-        try {
-          const u = new URL(imgSrc, window.location.origin);
-          cleanSrc = u.pathname;
-        } catch (e) {}
-
-        // Convert root-relative /library/ path to full CDN URL
-        let imageUri = cleanSrc;
-        if (cleanSrc.startsWith('/library/')) {
-          imageUri = `https://library.thecontrarian.in${cleanSrc.replace('/library', '')}`;
-        }
-
-        const C2PA_API = 'https://apps.thecontrarian.in/c2pa';
-        const fetchUrl = `${C2PA_API}/api/c2pa_metadata?uri=${encodeURIComponent(imageUri)}`;
-        
-        const response = await fetch(fetchUrl, {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
-        
-        let data;
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-          data = await response.json();
-        } else {
-          const text = await response.text();
-          throw new Error(`Server returned non-JSON response: ${text.slice(0, 100)}`);
-        }
+        const data = await fetchC2PAData(imgSrc);
 
         // Ensure minimum 1.0s loading delay
         const elapsed = Date.now() - startTime;
@@ -325,13 +286,11 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
         }
 
-        if (!response.ok) {
-          const errorMsg = data.details || data.message || data.error || 'Credentials generation failed';
-          throw new Error(errorMsg);
-        }
-
-        // Handle case where API returns 200 but no credentials found
-        if (data.error === 'No Credentials Found' || data.error === 'no_c2pa') {
+        this.render(data, imgSrc);
+      } catch (err: any) {
+        // Handle case where API returns no credentials found
+        const msg = String(err?.message || '');
+        if (msg.includes('No Credentials Found') || msg.includes('no_c2pa')) {
           if (this.content) {
             this.content.innerHTML = `
               <div class="c2pa-no-results">
@@ -355,48 +314,9 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           }
           return;
         }
-        
-        this.render(data, cleanSrc);
-      } catch (err: any) {
+
+        // Handle other errors
         if (this.content) {
-          const msg = String(err?.message || '');
-          const looksLikeNoCredentials =
-            msg.includes('No Credentials Found') ||
-            msg.includes('Content Credentials only available') ||
-            msg.includes('404') ||
-            msg.includes('not found');
-
-          if (looksLikeNoCredentials) {
-            this.content.innerHTML = `
-              <div class="c2pa-no-results">
-                <div class="c2pa-no-results-watermark">
-                  ${CR_LOGO_SVG}
-                </div>
-
-                <div class="c2pa-status c2pa-status-missing">
-                  ${SHIELD_X_SVG}
-                  Unverified
-                </div>
-
-                <p class="c2pa-message">Content Credentials unavailable for this image.</p>
-
-                <div class="c2pa-info-box">
-                  <p><strong>What does this mean?</strong></p>
-                  <p>Content Credentials are still a new feature, and not all images include them yet. They can also be removed when an image is re-saved, resized, re-compressed, converted between formats, or processed by some platforms and editors.</p>
-                </div>
-
-                <details class="c2pa-debug-info" style="margin-top: 1.25rem; opacity: 0.85;">
-                  <summary style="cursor: pointer;">Technical details</summary>
-                  <div style="margin-top: 0.75rem;">
-                    <strong>Requested Path:</strong> ${imgSrc}<br/>
-                    <strong>Error:</strong> ${msg}
-                  </div>
-                </details>
-              </div>
-            `;
-            return;
-          }
-
           this.content.innerHTML = `
             <div class="c2pa-error">
               <h3 class="c2pa-error-title">Live Extraction Failed</h3>
