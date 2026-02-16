@@ -144,17 +144,17 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${BLUE}STEP 3: Prepare Build Output${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
-if [ -d "dist/client/library" ]; then
-    echo -e "${YELLOW}Deleting dist/client/library (served from R2 CDN)...${NC}"
-    rm -rf dist/client/library
-    echo -e "${GREEN}✓ Deleted dist/client/library${NC}"
+if [ -d "dist/library" ]; then
+    echo -e "${YELLOW}Deleting dist/library (served from R2 CDN)...${NC}"
+    rm -rf dist/library
+    echo -e "${GREEN}✓ Deleted dist/library${NC}"
 else
-    echo -e "${GREEN}✓ dist/client/library not found (already clean)${NC}"
+    echo -e "${GREEN}✓ dist/library not found (already clean)${NC}"
 fi
 
 if [ -d "remote-only" ]; then
-    echo -e "${YELLOW}Copying files from remote-only/ to dist/client/...${NC}"
-    cp -r remote-only/. dist/client/
+    echo -e "${YELLOW}Copying files from remote-only/ to dist/...${NC}"
+    cp -r remote-only/. dist/
     echo -e "${GREEN}✓ Remote-only files copied${NC}"
 else
     echo -e "${YELLOW}⚠ No remote-only directory found (skipping)${NC}"
@@ -196,10 +196,9 @@ fi
 if [ "$SKIP_BUILD" = false ]; then
     echo -e "${GREEN}  ✓${NC} Astro site built"
 fi
-echo -e "${GREEN}  ✓${NC} dist/client/library removed"
+echo -e "${GREEN}  ✓${NC} dist/library removed"
 if [ "$SKIP_FTP" = false ]; then
-    echo -e "${GREEN}  ✓${NC} dist/client deployed to remote public_html"
-    echo -e "${GREEN}  ✓${NC} dist/server deployed to remote server"
+    echo -e "${GREEN}  ✓${NC} Static site deployed to remote public_html"
 fi
 
 echo ""

@@ -29,11 +29,10 @@ The master script executes these steps in order:
    - Runs `npm run build` to generate static site
 
 3. **Clean Build Output**
-   - Deletes `dist/client/library` (served from R2 CDN, not needed on server)
+   - Deletes `dist/library` (served from R2 CDN, not needed on server)
 
 4. **FTP Deployment**
-   - Deploys `dist/client/` to remote `public_html/`
-   - Deploys `dist/server/` to remote `server/`
+   - Deploys `dist/` to remote `public_html/`
    - Uses `scripts/deploy_ftp.sh`
 
 ## Command Options

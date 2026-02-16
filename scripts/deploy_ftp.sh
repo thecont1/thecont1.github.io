@@ -16,10 +16,8 @@ fi
 FTP_HOST="ftp.thecontrarian.in"
 FTP_USER="thecont1@thecontrarian.in"
 FTP_PASS="${THECONT1_FTP_PASSWORD}"
-LOCAL_CLIENT="dist/client"
-LOCAL_SERVER="dist/server"
-REMOTE_CLIENT="public_html"
-REMOTE_SERVER="server"
+LOCAL_DIR="dist"
+REMOTE_DIR="public_html"
 
 # By default, run in dry-run mode (preview changes without uploading/deleting).
 # Set DRY_RUN=0 to perform the actual deployment.
@@ -54,18 +52,18 @@ bye
 echo -e "${GREEN}✓ FTP connection successful${NC}"
 echo ""
 
-# Step 1: Delete local /dist/client/library (CDN files, not needed on server)
-echo "Step 1: Deleting local ${LOCAL_CLIENT}/library..."
-if [ -d "${LOCAL_CLIENT}/library" ]; then
-  rm -rf "${LOCAL_CLIENT}/library"
+# Step 1: Delete local /dist/library (CDN files, not needed on server)
+echo "Step 1: Deleting local ${LOCAL_DIR}/library..."
+if [ -d "${LOCAL_DIR}/library" ]; then
+  rm -rf "${LOCAL_DIR}/library"
   echo -e "${GREEN}✓ Local library directory deleted${NC}"
 else
   echo -e "${GREEN}✓ Local library directory not found (already clean)${NC}"
 fi
 echo ""
 
-# Step 2: Mirror client directory
-echo "Step 2: Mirroring ${LOCAL_CLIENT} to remote ${REMOTE_CLIENT}..."
+# Step 2: Mirror static site directory
+echo "Step 2: Mirroring ${LOCAL_DIR} to remote ${REMOTE_DIR}..."
 lftp -c "
 set ssl:verify-certificate no
 set net:timeout 30
@@ -73,25 +71,10 @@ set net:max-retries 3
 set net:reconnect-interval-base 5
 set ftp:passive-mode on
 open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
-mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --ignore-time --parallel=3 --no-perms ${LOCAL_CLIENT} ${REMOTE_CLIENT}
+mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --ignore-time --parallel=3 --no-perms ${LOCAL_DIR} ${REMOTE_DIR}
 bye
 "
-echo -e "${GREEN}✓ Client directory mirrored${NC}"
-echo ""
-
-# Step 3: Mirror server directory
-echo "Step 3: Mirroring ${LOCAL_SERVER} to remote ${REMOTE_SERVER}..."
-lftp -c "
-set ssl:verify-certificate no
-set net:timeout 30
-set net:max-retries 3
-set net:reconnect-interval-base 5
-set ftp:passive-mode on
-open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
-mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --ignore-time --parallel=3 --no-perms ${LOCAL_SERVER} ${REMOTE_SERVER}
-bye
-"
-echo -e "${GREEN}✓ Server directory mirrored${NC}"
+echo -e "${GREEN}✓ Static site mirrored${NC}"
 echo ""
 
 echo "=== FTP Deployment Complete (${MODE_LABEL}) ==="
