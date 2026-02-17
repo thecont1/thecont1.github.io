@@ -50,12 +50,12 @@ export async function fetchC2PAMini(imgSrc: string): Promise<C2PAMiniData> {
     const data = await response.json();
     
     // Handle API response format
-    if (data.error === 'No Credentials Found') {
+    if (data.error === 'No Credentials Found' || data.status === 'unverified' || data.status === 'Unverified') {
       return { status: 'unverified', error: 'No credentials found' };
     }
     
     return {
-      status: 'verified',
+      status: data.status || 'verified',
       creator: data.creator,
       issued_by: data.issued_by,
       issued_on: data.issued_on,
@@ -84,7 +84,7 @@ export async function fetchC2PAData(imgSrc: string): Promise<C2PAData> {
     
     const data = await response.json();
     
-    if (data.error === 'No Credentials Found') {
+    if (data.error === 'No Credentials Found' || data.error === 'no_c2pa' || !data.provenance) {
       throw new Error('No Credentials Found');
     }
     

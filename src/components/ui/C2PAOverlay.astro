@@ -26,7 +26,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
     </div>
 
     <footer class="c2pa-footer">
-      <p>This image contains Content Credentials, which provide information about its origin and history. <a href="https://contentauthenticity.org" target="_blank" rel="noopener">Learn more</a></p>
+      <p>Content Credentials provide verifiable information about an image's origin and history. <a href="https://contentauthenticity.org" target="_blank" rel="noopener">Learn more</a></p>
     </footer>
   </div>
 </div>
@@ -91,12 +91,12 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
     // Build the mini popup HTML from c2pa_mini response
     buildMiniPopup(data: any, imgSrc: string): string {
-      if (!data || data.error) {
+      if (!data || data.error || data.status === 'unverified') {
         return `
           <div class="c2pa-mini-popup">
             <div class="c2pa-mini-status c2pa-mini-unverified">
               ${SHIELD_X_SVG}
-              <span>No credentials</span>
+              <span>Unavailable</span>
             </div>
           </div>
         `;
@@ -290,7 +290,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       } catch (err: any) {
         // Handle case where API returns no credentials found
         const msg = String(err?.message || '');
-        if (msg.includes('No Credentials Found') || msg.includes('no_c2pa')) {
+        if (msg.includes('No Credentials Found') || msg.includes('no_c2pa') || msg.includes('No credentials found')) {
           if (this.content) {
             this.content.innerHTML = `
               <div class="c2pa-no-results">
@@ -300,14 +300,14 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
                 
                 <div class="c2pa-status c2pa-status-missing">
                   ${SHIELD_X_SVG}
-                  Unverified
+                  Unavailable
                 </div>
 
-                <p class="c2pa-message">This image does not contain embedded Content Credentials.</p>
+                <p class="c2pa-message">Content Credentials are not available for this image.</p>
                 
                 <div class="c2pa-info-box">
-                  <p><strong>Why might they be missing?</strong></p>
-                  <p>Many images simply don’t include Content Credentials yet. Credentials can also be lost if an image is re-saved, re-compressed, resized, converted between formats, or passed through some platforms and editors that strip metadata.</p>
+                  <p><strong>What are Content Credentials?</strong></p>
+                  <p>Content Credentials are cryptographically signed metadata that verify an image's creator and history. Many images don't include them yet, or they may have been removed during editing, compression, or format conversion.</p>
                 </div>
               </div>
             `;
@@ -340,6 +340,31 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
     render(data: any, currentImgSrc: string) {
       if (!this.content) return;
+
+      // Check if this is actually valid credential data
+      if (!data || !data.c2pa_data || !data.c2pa_data.provenance) {
+        this.content.innerHTML = `
+          <div class="c2pa-no-results">
+            <div class="c2pa-no-results-watermark">
+              ${CR_LOGO_SVG}
+            </div>
+            
+            <div class="c2pa-status c2pa-status-missing">
+              ${SHIELD_X_SVG}
+              Unavailable
+            </div>
+
+            <p class="c2pa-message">Content Credentials are not available for this image.</p>
+            
+            <div class="c2pa-info-box">
+              <p><strong>What does this mean?</strong></p>
+              <p>This image does not contain Content Credentials, which are cryptographically signed metadata that verify an image's creator and history. Without these credentials, you cannot independently verify who created this image or whether it has been altered since creation.</p>
+              <p>Many images don't include Content Credentials yet, or they may have been removed during editing, compression, or format conversion.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
 
       const c2pa = data.c2pa_data || {};
       const thumbnails = data.thumbnails || {};
@@ -397,7 +422,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
               ${SHIELD_CHECK_SVG}
               Verified
             </div>
-            <p class="c2pa-trust-message">This image has cryptographically signed credentials that verify its creator and history.</p>
+            <p class="c2pa-trust-message">This image has verifiable Content Credentials that confirm its creator and history.</p>
           </div>
 
           <div class="c2pa-info-grid">
@@ -416,7 +441,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             <div class="c2pa-section">
               <h3 class="c2pa-section-title">Signed By</h3>
               <div class="c2pa-info-item">
-                <p>${signature.issuer || 'Content Authenticity'}</p>
+                <p>${signature.issuer || '—'}</p>
                 ${dateStr ? `<span class="c2pa-date-badge">${dateStr}</span>` : ''}
               </div>
             </div>
@@ -459,7 +484,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             <h3 class="c2pa-section-title">Process & History</h3>
             <div class="c2pa-actions-list">
               ${uniqueActions.map(action => `<span class="c2pa-action-pill">${action}</span>`).join('')}
-              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded in manifest.</p>' : ''}
+              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded.</p>' : ''}
             </div>
           </div>
         </div>
