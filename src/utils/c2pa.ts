@@ -7,9 +7,10 @@ import { C2PA_API_BASE, resolveImageUri } from './api.js';
 export interface C2PAMiniData {
   status: 'verified' | 'unverified';
   creator?: string;
-  signed_by?: string;
-  date?: string;
-  source?: string;
+  issued_by?: string;
+  issued_on?: string;
+  digital_source_type?: string;
+  more?: string;
   error?: string;
 }
 
@@ -56,9 +57,10 @@ export async function fetchC2PAMini(imgSrc: string): Promise<C2PAMiniData> {
     return {
       status: 'verified',
       creator: data.creator,
-      signed_by: data.signed_by,
-      date: data.date,
-      source: data.source
+      issued_by: data.issued_by,
+      issued_on: data.issued_on,
+      digital_source_type: data.digital_source_type,
+      more: data.more
     };
   } catch (error) {
     return { 
