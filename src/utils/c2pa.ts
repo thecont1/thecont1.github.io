@@ -84,7 +84,12 @@ export async function fetchC2PAData(imgSrc: string): Promise<C2PAData> {
     
     const data = await response.json();
     
-    if (data.error === 'No Credentials Found' || data.error === 'no_c2pa' || !data.provenance) {
+    if (data.error === 'No Credentials Found' || data.error === 'no_c2pa') {
+      throw new Error('No Credentials Found');
+    }
+    
+    // Check if we have valid credential data (provenance is at top level)
+    if (!data.provenance) {
       throw new Error('No Credentials Found');
     }
     

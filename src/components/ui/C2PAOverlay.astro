@@ -123,8 +123,18 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
     // Automatically find /library/ images and add CR indicators with mini popup.
     // Deferred to run after layout scripts (Post/Essay) finish wrapping images in figures.
     injectIndicators() {
+      // Prevent multiple injections
+      if ((window as any).__c2paInjecting) {
+        return;
+      }
+      
+      (window as any).__c2paInjecting = true;
+      
       // Use a small delay so Post/Essay layout scripts finish their figure-wrapping first
-      setTimeout(() => this._doInject(), 120);
+      setTimeout(() => {
+        this._doInject();
+        (window as any).__c2paInjecting = false;
+      }, 120);
     }
 
     private _doInject() {
@@ -153,10 +163,14 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
         const attach = () => {
           const src = imgEl.getAttribute('src');
-          if (!src || !src.includes('/library/')) return;
+          if (!src || !src.includes('/library/')) {
+            return;
+          }
 
           // Skip inside lightbox (it has its own CR button)
-          if (imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure')) return;
+          if (imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure')) {
+            return;
+          }
 
           // Find the positioning container — prefer figure, then album/gallery item
           let container: HTMLElement | null =
@@ -172,10 +186,14 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           if (!container) return;
 
           // Already has an indicator? Skip.
-          if (container.querySelector('.c2pa-indicator.c2pa-injected')) return;
+          if (container.querySelector('.c2pa-indicator.c2pa-injected')) {
+            return;
+          }
 
           // Check if image is already wrapped
-          if (imgEl.closest('.c2pa-image-wrapper')) return;
+          if (imgEl.closest('.c2pa-image-wrapper')) {
+            return;
+          }
 
           // Create a wrapper that exactly matches the image dimensions
           const wrapper = document.createElement('div');
@@ -187,6 +205,8 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           if (imgEl.parentNode) {
             imgEl.parentNode.insertBefore(wrapper, imgEl);
             wrapper.appendChild(imgEl);
+          } else {
+            return;
           }
 
           // Create the CR logo button
@@ -264,19 +284,23 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           popup.addEventListener('mouseleave', scheduleHide);
 
           // Click CR logo → open full overlay directly
+          const imageSrc = src; // Capture src in closure
           btn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             popup.style.display = 'none';
-            this.open(src);
+            this.open(imageSrc);
           });
 
           wrapper.appendChild(btn);
           wrapper.appendChild(popup);
         };
 
-        if (imgEl.complete) attach();
-        else imgEl.addEventListener('load', attach, { once: true });
+        if (imgEl.complete) {
+          attach();
+        } else {
+          imgEl.addEventListener('load', attach, { once: true });
+        }
       });
     }
 
@@ -354,7 +378,8 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       if (!this.content) return;
 
       // Check if this is actually valid credential data
-      if (!data || !data.c2pa_data || !data.c2pa_data.provenance) {
+      const c2pa = data.c2pa_data || data;
+      if (!data || !data.provenance) {
         this.content.innerHTML = `
           <div class="c2pa-no-results">
             <div class="c2pa-no-results-watermark">
@@ -378,7 +403,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         return;
       }
 
-      const c2pa = data.c2pa_data || {};
       const thumbnails = data.thumbnails || {};
 
       // Extract authors from author_info (hosted API shape)
