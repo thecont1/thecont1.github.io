@@ -174,8 +174,20 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           // Already has an indicator? Skip.
           if (container.querySelector('.c2pa-indicator.c2pa-injected')) return;
 
-          container.style.position = 'relative';
-          container.setAttribute('data-c2pa-container', 'true');
+          // Check if image is already wrapped
+          if (imgEl.closest('.c2pa-image-wrapper')) return;
+
+          // Create a wrapper that exactly matches the image dimensions
+          const wrapper = document.createElement('div');
+          wrapper.className = 'c2pa-image-wrapper';
+          wrapper.style.position = 'relative';
+          wrapper.style.display = 'inline-block'; // Match image display
+
+          // Wrap the image
+          if (imgEl.parentNode) {
+            imgEl.parentNode.insertBefore(wrapper, imgEl);
+            wrapper.appendChild(imgEl);
+          }
 
           // Create the CR logo button
           const btn = document.createElement('button');
@@ -259,8 +271,8 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             this.open(src);
           });
 
-          container.appendChild(btn);
-          container.appendChild(popup);
+          wrapper.appendChild(btn);
+          wrapper.appendChild(popup);
         };
 
         if (imgEl.complete) attach();

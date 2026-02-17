@@ -442,6 +442,20 @@
 }
 
 /* ============================================================
+   C2PA Image Wrapper (ensures CR logo is positioned relative to actual image)
+   ============================================================ */
+.c2pa-image-wrapper {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+.c2pa-image-wrapper img {
+  display: block !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* ============================================================
    In-Image CR Indicator (always visible, soft → hard on hover)
    ============================================================ */
 .c2pa-indicator {
@@ -469,6 +483,7 @@
 .c2pa-indicator.c2pa-injected {
   top: 12px;
   right: 12px;
+  position: absolute;
 }
 
 .c2pa-indicator.c2pa-injected svg {
