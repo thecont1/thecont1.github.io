@@ -455,6 +455,13 @@
   height: auto !important;
 }
 
+/* Ensure hover events pass through wrapper to image */
+.c2pa-image-wrapper:hover > .c2pa-indicator.c2pa-injected,
+.c2pa-image-wrapper img:hover ~ .c2pa-indicator.c2pa-injected {
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 1px 6px rgba(0,0,0,0.55));
+}
+
 /* ============================================================
    In-Image CR Indicator (always visible, soft → hard on hover)
    ============================================================ */
@@ -599,13 +606,19 @@ figure > .c2pa-media-wrap {
   color: #e8e8e8;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 0.85rem 1rem;
-  min-width: 220px;
-  max-width: 280px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  min-width: 260px;
+  max-width: 300px;
+  padding: 0.65rem 0.75rem;
   font-family: "Inter", sans-serif;
+  line-height: 1.35;
   font-size: 0.8rem;
   box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04);
   animation: c2pa-mini-in 0.15s ease-out;
+}
+
+.c2pa-mini-popup * {
+  line-height: inherit;
 }
 
 @keyframes c2pa-mini-in {

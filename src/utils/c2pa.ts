@@ -89,7 +89,7 @@ export async function fetchC2PAData(imgSrc: string): Promise<C2PAData> {
     }
     
     // Check if we have valid credential data (provenance is at top level)
-    if (!data.provenance) {
+    if (!data.provenance || data.provenance.length === 0) {
       throw new Error('No Credentials Found');
     }
     

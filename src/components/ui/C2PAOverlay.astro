@@ -270,7 +270,9 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
           const scheduleHide = () => {
             if (hideTimer) clearTimeout(hideTimer);
-            hideTimer = setTimeout(() => { popup.style.display = 'none'; }, 200);
+            hideTimer = setTimeout(() => { 
+              popup.style.display = 'none'; 
+            }, 500); // Increased from 200ms to 500ms
           };
 
           const cancelHide = () => {
@@ -379,7 +381,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
       // Check if this is actually valid credential data
       const c2pa = data.c2pa_data || data;
-      if (!data || !data.provenance) {
+      if (!data || !data.provenance || data.provenance.length === 0) {
         this.content.innerHTML = `
           <div class="c2pa-no-results">
             <div class="c2pa-no-results-watermark">
