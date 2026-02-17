@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Essay from "../../components/layouts/Essay.astro";
+import StructuredData from "../../components/StructuredData.astro";
 
 export const prerender = true;
 
@@ -16,8 +17,34 @@ export async function getStaticPaths() {
 }
 
 const { essay } = Astro.props;
+const tags = [...(essay.data.theme || []), ...(essay.data.geography || [])];
 ---
 
-<Layout title={essay.data.title}>
+<Layout 
+  title={essay.data.title}
+  description={essay.data.subtitle}
+  image={essay.data.heroImage}
+  type="article"
+  publishedTime={essay.data.date}
+  author={essay.data.author}
+  tags={tags}
+>
+  <Fragment slot="head">
+    <StructuredData 
+      type="article"
+      title={essay.data.title}
+      description={essay.data.subtitle}
+      image={essay.data.heroImage}
+      publishedTime={essay.data.date}
+      author={essay.data.author}
+      section={essay.data.category || essay.data.series}
+      tags={tags}
+      breadcrumbs={[
+        { name: "Home", url: "/" },
+        { name: "Essays", url: "/essay/" },
+        { name: essay.data.title, url: `/essay/${essay.slug}/` }
+      ]}
+    />
+  </Fragment>
   <Essay post={essay} />
 </Layout>

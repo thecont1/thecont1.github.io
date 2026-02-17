@@ -2,6 +2,8 @@
 import type { CollectionEntry } from "astro:content";
 import SiteHeader from "../SiteHeader.astro";
 import SiteFooter from "../SiteFooter.astro";
+import SEO from "../SEO.astro";
+import StructuredData from "../StructuredData.astro";
 import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
@@ -59,15 +61,32 @@ const languageColor = post.data.language ? getLanguageColor(post.data.language) 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{post.data.title} | Code Project</title>
+  <SEO 
+    title={post.data.title}
+    description={post.data.description || post.data.subtitle}
+    type="article"
+    author={post.data.author}
+    tags={post.data.tags || []}
+  />
+  <StructuredData 
+    type="article"
+    title={post.data.title}
+    description={post.data.description || post.data.subtitle}
+    publishedTime={post.data.date}
+    modifiedTime={post.data.lastUpdated}
+    author={post.data.author}
+    tags={post.data.tags || []}
+    breadcrumbs={[
+      { name: "Home", url: "/" },
+      { name: "Code", url: "/code/" },
+      { name: post.data.title, url: `/code/${post.slug}/` }
+    ]}
+  />
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
-  
-  <!-- Emoji support -->
-  <meta charset="utf-8">
 </head>
 
 <body>

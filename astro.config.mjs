@@ -1,12 +1,22 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
 import scaffold from './scripts/scaffold-integration.ts';
 
 // https://astro.build/config
 export default defineConfig({
-  // site intentionally omitted for platform deployments (set when you have a stable domain)
-  integrations: [react(), scaffold()],
+  site: 'https://thecontrarian.in',
+  integrations: [
+    react(),
+    sitemap({
+      filter: (page) => !page.includes('/api/'),
+      changefreq: 'weekly',
+      priority: 0.7,
+      lastmod: new Date(),
+    }),
+    scaffold(),
+  ],
   output: 'static',
   vite: {
     build: {

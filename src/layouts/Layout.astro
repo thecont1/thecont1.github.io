@@ -2,21 +2,47 @@
 import { ClientRouter } from "astro:transitions";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import SEO from "../components/SEO.astro";
 import "../styles/home.css";
 
 interface Props {
   title: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article' | 'profile';
+  publishedTime?: Date;
+  author?: string;
+  tags?: string[];
+  noindex?: boolean;
 }
 
-const { title } = Astro.props;
+const { 
+  title, 
+  description,
+  image,
+  type = 'website',
+  publishedTime,
+  author,
+  tags,
+  noindex,
+} = Astro.props;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{title} | Mahesh Shantaram</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO 
+      title={title}
+      description={description}
+      image={image}
+      type={type}
+      publishedTime={publishedTime}
+      author={author}
+      tags={tags}
+      noindex={noindex}
+    />
     <ClientRouter />
 
     <!-- Google Fonts -->

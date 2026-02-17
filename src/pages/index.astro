@@ -5,16 +5,32 @@ import HomeHero from "../components/home/Hero.astro";
 import HomeProjects from "../components/home/Projects.astro";
 import HomeAbout from "../components/home/About.astro";
 import C2PAOverlay from "../components/ui/C2PAOverlay.astro";
+import SEO from "../components/SEO.astro";
+import StructuredData from "../components/StructuredData.astro";
 import { CAROUSEL_IMAGES } from "../data/carousel";
 import "../styles/home.css";
+
+const seoDescription = "Mahesh Shantaram is a documentary photographer, data scientist, and visual artist based in Bangalore, India. Exploring society, culture, and identity through photography and data storytelling.";
+const heroImage = CAROUSEL_IMAGES[0]?.src;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Mahesh Shantaram | visual artist, data scientist</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SEO 
+      title="Mahesh Shantaram | visual artist, data scientist"
+      description={seoDescription}
+      image={heroImage}
+      type="website"
+    />
+    <StructuredData 
+      type="home"
+      title="Mahesh Shantaram | visual artist, data scientist"
+      description={seoDescription}
+      image={heroImage}
+    />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

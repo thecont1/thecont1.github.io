@@ -1,0 +1,247 @@
+---
+/**
+ * Structured Data Component (JSON-LD)
+ * 
+ * Generates Schema.org structured data for:
+ * - Person (Mahesh Shantaram)
+ * - WebSite (thecontrarian.in)
+ * - Article (for posts, essays)
+ * - ImageGallery (for photogalleries)
+ * - BreadcrumbList
+ */
+
+export interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
+interface Props {
+  type: 'home' | 'article' | 'gallery' | 'profile';
+  title?: string;
+  description?: string;
+  image?: string;
+  publishedTime?: Date;
+  modifiedTime?: Date;
+  author?: string;
+  section?: string;
+  tags?: string[];
+  breadcrumbs?: BreadcrumbItem[];
+  images?: string[];
+}
+
+const {
+  type,
+  title,
+  description,
+  image,
+  publishedTime,
+  modifiedTime,
+  author = "Mahesh Shantaram",
+  section,
+  tags = [],
+  breadcrumbs = [],
+  images = [],
+} = Astro.props;
+
+// Site configuration
+const SITE_URL = "https://thecontrarian.in";
+const SITE_NAME = "thecontrarian.in";
+
+// Person schema (Mahesh Shantaram)
+const personSchema = {
+  "@type": "Person",
+  "@id": `${SITE_URL}/#person`,
+  "name": "Mahesh Shantaram",
+  "alternateName": "thecontrarian",
+  "url": SITE_URL,
+  "image": `${SITE_URL}/library/about/mahesh-shantaram.jpg`,
+  "description": "Documentary photographer, data scientist, and visual artist based in Bangalore, India.",
+  "jobTitle": ["Documentary Photographer", "Data Scientist", "Visual Artist"],
+  "knowsAbout": ["Documentary Photography", "Data Science", "Visual Storytelling", "Wedding Photography"],
+  "sameAs": [
+    "https://x.com/thecontrarian",
+    "https://www.linkedin.com/in/mahesh-shantaram",
+    "https://www.instagram.com/thesquarerootofindia/",
+    "https://github.com/thecont1",
+    "https://gravatar.com/thecont1"
+  ]
+};
+
+// Organization schema
+const organizationSchema = {
+  "@type": "Organization",
+  "@id": `${SITE_URL}/#organization`,
+  "name": SITE_NAME,
+  "url": SITE_URL,
+  "logo": {
+    "@type": "ImageObject",
+    "url": `${SITE_URL}/favicon.svg`
+  },
+  "founder": {
+    "@id": `${SITE_URL}/#person`
+  },
+  "sameAs": [
+    "https://x.com/thecontrarian",
+    "https://www.instagram.com/thesquarerootofindia/"
+  ]
+};
+
+// WebSite schema
+const webSiteSchema = {
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  "url": SITE_URL,
+  "name": SITE_NAME,
+  "description": "Personal website of Mahesh Shantaram — documentary photographer, data scientist, and visual artist. A long-term archive, public thinking space, and data-driven storytelling platform.",
+  "publisher": {
+    "@id": `${SITE_URL}/#person`
+  },
+  "inLanguage": "en-US"
+};
+
+// Build schemas based on type
+const schemas: any[] = [];
+
+if (type === 'home') {
+  // Homepage: Person + Organization + WebSite
+  schemas.push({
+    "@context": "https://schema.org",
+    "@graph": [
+      personSchema,
+      organizationSchema,
+      webSiteSchema,
+      {
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/`,
+        "url": `${SITE_URL}/`,
+        "name": title || "Mahesh Shantaram | visual artist, data scientist",
+        "description": description || personSchema.description,
+        "isPartOf": { "@id": `${SITE_URL}/#website` },
+        "about": { "@id": `${SITE_URL}/#person` },
+        "primaryImageOfPage": {
+          "@type": "ImageObject",
+          "url": image || `${SITE_URL}/library/originals/TheNeighbourhood/MS200706-TheHood491.jpg`
+        }
+      }
+    ]
+  });
+} else if (type === 'article') {
+  // Article: Article schema with author reference
+  const articleSchema: any = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": title,
+    "description": description,
+    "author": {
+      "@type": "Person",
+      "name": author,
+      "url": SITE_URL
+    },
+    "publisher": {
+      "@id": `${SITE_URL}/#person`
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": Astro.url.href
+    },
+    "isPartOf": { "@id": `${SITE_URL}/#website` },
+    "inLanguage": "en-US"
+  };
+
+  if (image) {
+    articleSchema.image = {
+      "@type": "ImageObject",
+      "url": image.startsWith('http') ? image : `${SITE_URL}${image}`
+    };
+  }
+
+  if (publishedTime) {
+    articleSchema.datePublished = publishedTime.toISOString();
+  }
+
+  if (modifiedTime) {
+    articleSchema.dateModified = modifiedTime.toISOString();
+  } else if (publishedTime) {
+    articleSchema.dateModified = publishedTime.toISOString();
+  }
+
+  if (section) {
+    articleSchema.articleSection = section;
+  }
+
+  if (tags.length > 0) {
+    articleSchema.keywords = tags.join(", ");
+  }
+
+  schemas.push(articleSchema);
+} else if (type === 'gallery') {
+  // ImageGallery schema
+  const gallerySchema: any = {
+    "@context": "https://schema.org",
+    "@type": "ImageGallery",
+    "name": title,
+    "description": description,
+    "author": {
+      "@type": "Person",
+      "name": author,
+      "url": SITE_URL
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": Astro.url.href
+    },
+    "isPartOf": { "@id": `${SITE_URL}/#website` },
+    "inLanguage": "en-US"
+  };
+
+  if (images.length > 0) {
+    gallerySchema.image = images.slice(0, 10).map(img => ({
+      "@type": "ImageObject",
+      "url": img.startsWith('http') ? img : `${SITE_URL}${img}`,
+      "author": {
+        "@type": "Person",
+        "name": author
+      }
+    }));
+  } else if (image) {
+    gallerySchema.image = {
+      "@type": "ImageObject",
+      "url": image.startsWith('http') ? image : `${SITE_URL}${image}`
+    };
+  }
+
+  if (publishedTime) {
+    gallerySchema.datePublished = publishedTime.toISOString();
+  }
+
+  schemas.push(gallerySchema);
+} else if (type === 'profile') {
+  // Profile page
+  schemas.push({
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "mainEntity": personSchema,
+    "name": title || "About Mahesh Shantaram",
+    "description": description || personSchema.description
+  });
+}
+
+// Add breadcrumbs if provided
+if (breadcrumbs.length > 0) {
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": item.name,
+      "item": item.url.startsWith('http') ? item.url : `${SITE_URL}${item.url}`
+    }))
+  };
+  schemas.push(breadcrumbSchema);
+}
+---
+
+{schemas.map(schema => (
+  <script type="application/ld+json" set:html={JSON.stringify(schema, null, 0)} />
+))}
