@@ -26,7 +26,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
     </div>
 
     <footer class="c2pa-footer">
-      <p>This image contains Content Credentials, which provide information about its origin and history. <a href="https://contentauthenticity.org" target="_blank" rel="noopener">Learn more</a></p>
+      <p>Content Credentials provide verifiable information about an image's origin and history. <a href="https://contentauthenticity.org" target="_blank" rel="noopener">Learn more</a></p>
     </footer>
   </div>
 </div>
@@ -34,6 +34,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 <script>
   import "../../styles/c2pa.css";
   import { CR_LOGO_SVG, SHIELD_CHECK_SVG, SHIELD_X_SVG } from "../icons/cr-logo-svg";
+  import { fetchC2PAMini, fetchC2PAData } from "../../utils/c2pa.js";
 
   class C2PAManager {
     overlay: HTMLElement | null;
@@ -56,11 +57,11 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
       this.closeBtn?.addEventListener('click', () => this.close());
       this.backdrop?.addEventListener('click', () => this.close());
-      
-      // Listen for custom event to open
-      window.addEventListener('open-c2pa', (e: any) => {
-        this.open(e.detail.imgSrc);
-      });
+
+      // Expose manager on overlay element for direct access
+      if (this.overlay) {
+        (this.overlay as any)._manager = this;
+      }
 
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && this.overlay?.classList.contains('is-active')) {
@@ -69,15 +70,78 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       });
     }
 
-    // Automatically find images in content and add indicators
+    // Cache for c2pa_mini results per image URI
+    miniCache = new Map<string, any>();
+
+    async fetchMini(imgSrc: string): Promise<any> {
+      const pathname = (() => {
+        try { return new URL(imgSrc, window.location.origin).pathname; } catch { return imgSrc; }
+      })();
+      if (this.miniCache.has(pathname)) return this.miniCache.get(pathname);
+
+      try {
+        const data = await fetchC2PAMini(pathname);
+        this.miniCache.set(pathname, data);
+        return data;
+      } catch {
+        this.miniCache.set(pathname, null);
+        return null;
+      }
+    }
+
+    // Build the mini popup HTML from c2pa_mini response
+    buildMiniPopup(data: any, imgSrc: string): string {
+      if (!data || data.error || data.status === 'unverified' || data.status === 'Unverified') {
+        return `
+          <div class="c2pa-mini-popup">
+            <div class="c2pa-mini-status c2pa-mini-unverified">
+              ${SHIELD_X_SVG}
+              <span>Unavailable</span>
+            </div>
+          </div>
+        `;
+      }
+      const rows = [
+        data.creator ? `<div class="c2pa-mini-row"><span class="c2pa-mini-label">Creator</span><span class="c2pa-mini-value">${data.creator}</span></div>` : '',
+        data.issued_by ? `<div class="c2pa-mini-row"><span class="c2pa-mini-label">Signed by</span><span class="c2pa-mini-value">${data.issued_by}</span></div>` : '',
+        data.issued_on ? `<div class="c2pa-mini-row"><span class="c2pa-mini-label">Date</span><span class="c2pa-mini-value">${data.issued_on}</span></div>` : '',
+        data.digital_source_type ? `<div class="c2pa-mini-row"><span class="c2pa-mini-label">Source</span><span class="c2pa-mini-value">${data.digital_source_type}</span></div>` : '',
+      ].filter(Boolean).join('');
+
+      return `
+        <div class="c2pa-mini-popup">
+          <div class="c2pa-mini-status c2pa-mini-verified">
+            ${SHIELD_CHECK_SVG}
+            <span>${data.status || 'Verified'}</span>
+          </div>
+          <div class="c2pa-mini-details">${rows}</div>
+          <a class="c2pa-mini-more" data-c2pa-detail="true" href="#">View full credentials</a>
+        </div>
+      `;
+    }
+
+    // Automatically find /library/ images and add CR indicators with mini popup.
+    // Deferred to run after layout scripts (Post/Essay) finish wrapping images in figures.
     injectIndicators() {
-      // "Major photographs" and other relevant images
+      // Prevent multiple injections
+      if ((window as any).__c2paInjecting) {
+        return;
+      }
+      
+      (window as any).__c2paInjecting = true;
+      
+      // Use a small delay so Post/Essay layout scripts finish their figure-wrapping first
+      setTimeout(() => {
+        this._doInject();
+        (window as any).__c2paInjecting = false;
+      }, 120);
+    }
+
+    private _doInject() {
       const selectors = [
         '.post-body img',
-        '.post-body figure img',
         '.post-hero img',
         '.album-item img',
-        '.lightbox-figure img',
         '.notebook-wrapper img',
         '.project-layout img',
         '.datastory-layout img',
@@ -87,185 +151,158 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
         '.photogallery-oneup .gallery-item img',
         '.photogallery-grid .gallery-item img'
       ];
-      
+
       const contentImages = document.querySelectorAll(selectors.join(', '));
-      
+      // Deduplicate (same img can match multiple selectors)
+      const seen = new Set<HTMLImageElement>();
+
       contentImages.forEach(img => {
         const imgEl = img as HTMLImageElement;
-        
-        const updateIndicator = () => {
+        if (seen.has(imgEl)) return;
+        seen.add(imgEl);
+
+        const attach = () => {
           const src = imgEl.getAttribute('src');
-          if (!src || !(src.includes('/library/') || src.includes('/library/originals/') || src.includes('r2.dev/originals/'))) return;
-
-          // Skip injection inside the lightbox itself (it has its own CR button)
-          const inLightbox = !!(imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure'));
-          if (inLightbox) return;
-
-          // Post pages may have a hover InfoPanel CR button.
-          // If that hover info is wired for this image, avoid injecting another in-image CR button.
-          const inPost = !!imgEl.closest('.simple-post');
-          const hasHoverInfo = imgEl.dataset.hasHoverInfo === 'true';
-          if (inPost && hasHoverInfo) return;
-
-          // Find a suitable container for the indicator
-          let container = imgEl.closest('figure') || 
-                            imgEl.closest('.album-item') || 
-                            imgEl.closest('.lightbox-figure') || 
-                            imgEl.closest('.gallery-item');
-          
-          // If no standard container, and image is in .post-body, use parent
-          if (!container && imgEl.closest('.post-body')) {
-            container = imgEl.parentElement;
-          }
-
-          // Post layout relies on figure/img sizing rules. Wrapping the media in a shrink-wrapped
-          // container can collapse figure width. For Posts, anchor the indicator to the container
-          // without creating a wrapper, but position it relative to the actual image bounds so
-          // the CR logo sits inside the image frame (for both horizontal and vertical images).
-          if (inPost && container) {
-            const containerEl = container as HTMLElement;
-            containerEl.style.position = 'relative';
-            containerEl.setAttribute('data-c2pa-container', 'true');
-
-            const injected = containerEl.querySelectorAll('.c2pa-indicator.c2pa-injected');
-            if (injected.length > 0) return;
-
-            const btn = document.createElement('button');
-            btn.className = 'c2pa-indicator c2pa-injected';
-            btn.setAttribute('aria-label', 'View Content Credentials');
-            btn.innerHTML = `
-              ${CR_LOGO_SVG}
-              <span class="c2pa-indicator-label">content credentials</span>
-            `;
-
-            btn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const currentSrc = imgEl.getAttribute('src');
-              if (currentSrc) this.open(currentSrc);
-            });
-
-            const positionButton = () => {
-              const imgRect = imgEl.getBoundingClientRect();
-              const containerRect = containerEl.getBoundingClientRect();
-              if (!imgRect.width || !containerRect.width) return;
-
-              // How much extra space exists between the container's right edge and the image's right edge?
-              const deltaRight = containerRect.right - imgRect.right;
-              // Keep at least a small inset from the image edge.
-              const inset = 5 + Math.max(0, Math.round(deltaRight));
-              btn.style.right = `${inset}px`;
-            };
-
-            if (imgEl.complete) {
-              requestAnimationFrame(positionButton);
-            } else {
-              imgEl.addEventListener('load', () => requestAnimationFrame(positionButton), { once: true });
-            }
-
-            if (typeof ResizeObserver !== 'undefined') {
-              const ro = new ResizeObserver(() => positionButton());
-              ro.observe(imgEl);
-              ro.observe(containerEl);
-            } else {
-              window.addEventListener('resize', positionButton);
-            }
-
-            containerEl.appendChild(btn);
+          if (!src || !src.includes('/library/')) {
             return;
           }
 
-          const pictureEl = imgEl.closest('picture');
-          const mediaNode = (pictureEl && pictureEl.contains(imgEl)) ? pictureEl : imgEl;
-          const existingWrap = (mediaNode as HTMLElement).closest('.c2pa-media-wrap');
-
-          let indicatorHost: HTMLElement | null = existingWrap as HTMLElement | null;
-          if (!indicatorHost) {
-            const parent = (mediaNode as HTMLElement).parentElement;
-            if (parent) {
-              const wrapEl = document.createElement('div');
-              wrapEl.className = 'c2pa-media-wrap';
-              parent.insertBefore(wrapEl, mediaNode as any);
-              wrapEl.appendChild(mediaNode as any);
-              indicatorHost = wrapEl;
-            } else {
-              indicatorHost = container as HTMLElement | null;
-            }
+          // Skip inside lightbox (it has its own CR button)
+          if (imgEl.closest('#lightbox') || imgEl.closest('.lightbox-figure')) {
+            return;
           }
 
-          if (indicatorHost && indicatorHost.dataset.c2paSized !== 'true') {
-            indicatorHost.dataset.c2paSized = 'true';
-            const applySize = () => {
-              const rect = imgEl.getBoundingClientRect();
-              if (!rect || rect.width <= 0 || rect.height <= 0) return;
-              indicatorHost!.style.width = `${Math.round(rect.width)}px`;
-              indicatorHost!.style.height = `${Math.round(rect.height)}px`;
-            };
-            if (imgEl.complete) requestAnimationFrame(applySize);
-            else imgEl.addEventListener('load', () => requestAnimationFrame(applySize), { once: true });
-            if (typeof ResizeObserver !== 'undefined') {
-              const ro = new ResizeObserver(() => applySize());
-              ro.observe(imgEl);
-            }
+          // Find the positioning container — prefer figure, then album/gallery item
+          let container: HTMLElement | null =
+            imgEl.closest('figure') as HTMLElement ||
+            imgEl.closest('.album-item') as HTMLElement ||
+            imgEl.closest('.gallery-item') as HTMLElement;
+
+          // Fallback: use the image's direct parent
+          if (!container) {
+            container = imgEl.parentElement;
           }
 
-          // Only avoid duplicating indicators that were injected by this script.
-          // Other UI (e.g., info panels) may use the base .c2pa-indicator class too.
-          if (indicatorHost) {
-            // If multiple injected indicators exist (e.g. after view transitions), keep only the first.
-            const injected = indicatorHost.querySelectorAll('.c2pa-indicator.c2pa-injected');
-            if (injected.length > 0) {
-              // Already has an indicator, don't add another
-              return;
-            }
+          if (!container) return;
+
+          // Already has an indicator? Skip.
+          if (container.querySelector('.c2pa-indicator.c2pa-injected')) {
+            return;
           }
 
-          if (indicatorHost && !indicatorHost.querySelector('.c2pa-indicator.c2pa-injected')) {
-            const containerEl = indicatorHost;
-            
-            // Critical for indicator positioning
-            containerEl.style.position = 'relative';
-            containerEl.setAttribute('data-c2pa-container', 'true');
-            
-            const btn = document.createElement('button');
-            btn.className = 'c2pa-indicator c2pa-injected';
-            btn.setAttribute('aria-label', 'View Content Credentials');
-            // Official Content Credentials (CR) logo SVG
-            btn.innerHTML = `
-              ${CR_LOGO_SVG}
-              <span class="c2pa-indicator-label">content credentials</span>
-            `;
-            
-            btn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const currentSrc = imgEl.getAttribute('src');
-              if (currentSrc) this.open(currentSrc);
+          // Check if image is already wrapped
+          if (imgEl.closest('.c2pa-image-wrapper')) {
+            return;
+          }
+
+          // Create a wrapper that exactly matches the image dimensions
+          const wrapper = document.createElement('div');
+          wrapper.className = 'c2pa-image-wrapper';
+          wrapper.style.position = 'relative';
+          wrapper.style.display = 'inline-block'; // Match image display
+
+          // Wrap the image
+          if (imgEl.parentNode) {
+            imgEl.parentNode.insertBefore(wrapper, imgEl);
+            wrapper.appendChild(imgEl);
+          } else {
+            return;
+          }
+
+          // Create the CR logo button
+          const btn = document.createElement('button');
+          btn.className = 'c2pa-indicator c2pa-injected';
+          btn.setAttribute('aria-label', 'View Content Credentials');
+          btn.innerHTML = CR_LOGO_SVG;
+
+          // Create the mini popup container (hidden by default)
+          const popup = document.createElement('div');
+          popup.className = 'c2pa-mini-popup-wrap';
+          popup.style.display = 'none';
+
+          let hideTimer: ReturnType<typeof setTimeout> | null = null;
+          let fetched = false;
+
+          const positionPopup = () => {
+            // Default: right side of image via CSS transform
+            popup.style.right = '0';
+            popup.style.left = '';
+            popup.style.transform = 'translateX(calc(100% + 8px))';
+
+            // Check if it overflows the viewport
+            requestAnimationFrame(() => {
+              const rect = popup.getBoundingClientRect();
+              if (rect.right > window.innerWidth - 8) {
+                // Flip to left side of the container
+                popup.style.right = '';
+                popup.style.left = '0';
+                popup.style.transform = 'translateX(calc(-100% - 8px))';
+              }
             });
-            
-            containerEl.appendChild(btn);
-          }
+          };
+
+          const showPopup = async () => {
+            if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+            popup.style.display = 'block';
+
+            if (!fetched) {
+              popup.innerHTML = '<div class="c2pa-mini-popup"><div class="c2pa-mini-loading">Checking...</div></div>';
+              positionPopup();
+              const data = await this.fetchMini(src);
+              popup.innerHTML = this.buildMiniPopup(data, src);
+              fetched = true;
+              positionPopup();
+
+              // Wire the "View full credentials" link
+              const moreLink = popup.querySelector('[data-c2pa-detail]');
+              if (moreLink) {
+                moreLink.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  popup.style.display = 'none';
+                  this.open(src);
+                });
+              }
+            } else {
+              positionPopup();
+            }
+          };
+
+          const scheduleHide = () => {
+            if (hideTimer) clearTimeout(hideTimer);
+            hideTimer = setTimeout(() => { 
+              popup.style.display = 'none'; 
+            }, 500); // Increased from 200ms to 500ms
+          };
+
+          const cancelHide = () => {
+            if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+          };
+
+          // Hover on CR logo → show popup
+          btn.addEventListener('mouseenter', showPopup);
+          btn.addEventListener('mouseleave', scheduleHide);
+          popup.addEventListener('mouseenter', cancelHide);
+          popup.addEventListener('mouseleave', scheduleHide);
+
+          // Click CR logo → open full overlay directly
+          const imageSrc = src; // Capture src in closure
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            popup.style.display = 'none';
+            this.open(imageSrc);
+          });
+
+          wrapper.appendChild(btn);
+          wrapper.appendChild(popup);
         };
 
-        // If this image has been processed before, still re-check injection.
-        // Essay layout scripts may move images into figures after initial injection.
-        if (imgEl.dataset.c2paProcessed === 'true') {
-          updateIndicator();
-          return;
+        if (imgEl.complete) {
+          attach();
+        } else {
+          imgEl.addEventListener('load', attach, { once: true });
         }
-        imgEl.dataset.c2paProcessed = 'true';
-
-        updateIndicator();
-
-        const observer = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
-              updateIndicator();
-            }
-          });
-        });
-        
-        observer.observe(imgEl, { attributes: true });
       });
     }
 
@@ -279,46 +316,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       }
 
       try {
-        // ... (fetch logic remains the same)
-        let cleanSrc = imgSrc;
-        try {
-          const u = new URL(imgSrc, window.location.origin);
-          cleanSrc = u.pathname;
-        } catch (e) {}
-
-        const origin = window.location.origin;
-        const fetchUrl = new URL('/api/c2pa', origin);
-        fetchUrl.searchParams.set('img', cleanSrc);
-        
-        let response = await fetch(fetchUrl.toString(), {
-          method: 'GET',
-          headers: { 
-            'Accept': 'application/json',
-            'X-C2PA-Img': cleanSrc 
-          }
-        });
-
-        if (!response.ok && response.status !== 404 && response.status !== 403) {
-          const postUrl = new URL('/api/c2pa', origin);
-          response = await fetch(postUrl.toString(), {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'X-C2PA-Img': cleanSrc
-            },
-            body: JSON.stringify({ img: cleanSrc })
-          });
-        }
-        
-        let data;
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-          data = await response.json();
-        } else {
-          const text = await response.text();
-          throw new Error(`Server returned non-JSON response: ${text.slice(0, 100)}`);
-        }
+        const data = await fetchC2PAData(imgSrc);
 
         // Ensure minimum 1.0s loading delay
         const elapsed = Date.now() - startTime;
@@ -326,26 +324,11 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
           await new Promise(resolve => setTimeout(resolve, 1000 - elapsed));
         }
 
-        if (!response.ok) {
-          const errorMsg = data.details || data.message || data.error || 'Credentials generation failed';
-          // ... (rest of error handling)
-          const debugInfo = data.debug ? `
-            <div class="c2pa-debug-technical">
-              <div class="c2pa-debug-header">Technical Debug Info</div>
-              <strong>Endpoint:</strong> /api/c2pa<br/>
-              <strong>Method:</strong> ${data.method || response.statusText || 'Unknown'}<br/>
-              <strong>Status:</strong> ${response.status}<br/>
-              <strong>Source:</strong> ${data.debug.extractionSource || 'N/A'}<br/>
-              <strong>Raw Body:</strong> ${data.debug.rawBody || 'empty'}<br/>
-              <strong>Req URL:</strong> ${data.debug.reqUrl || 'N/A'}<br/>
-              <strong>Headers:</strong> <pre style="margin:0; font-size:0.7rem; white-space:pre-wrap;">${JSON.stringify(data.debug.headers, null, 2)}</pre>
-            </div>
-          ` : '';
-          throw new Error(`${errorMsg}${debugInfo}`);
-        }
-
-        // Handle case where API returns 200 but no credentials found
-        if (data.error === 'No Credentials Found') {
+        this.render(data, imgSrc);
+      } catch (err: any) {
+        // Handle case where API returns no credentials found
+        const msg = String(err?.message || '');
+        if (msg.includes('No Credentials Found') || msg.includes('no_c2pa') || msg.includes('No credentials found')) {
           if (this.content) {
             this.content.innerHTML = `
               <div class="c2pa-no-results">
@@ -355,62 +338,23 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
                 
                 <div class="c2pa-status c2pa-status-missing">
                   ${SHIELD_X_SVG}
-                  Unverified
+                  Unavailable
                 </div>
 
-                <p class="c2pa-message">This image does not contain embedded Content Credentials.</p>
+                <p class="c2pa-message">Content Credentials are not available for this image.</p>
                 
                 <div class="c2pa-info-box">
-                  <p><strong>Why might they be missing?</strong></p>
-                  <p>Many images simply don’t include Content Credentials yet. Credentials can also be lost if an image is re-saved, re-compressed, resized, converted between formats, or passed through some platforms and editors that strip metadata.</p>
+                  <p><strong>What are Content Credentials?</strong></p>
+                  <p>Content Credentials are cryptographically signed metadata that verify an image's creator and history. Many images don't include them yet, or they may have been removed during editing, compression, or format conversion.</p>
                 </div>
               </div>
             `;
           }
           return;
         }
-        
-        this.render(data, cleanSrc);
-      } catch (err: any) {
+
+        // Handle other errors
         if (this.content) {
-          const msg = String(err?.message || '');
-          const looksLikeNoCredentials =
-            msg.includes('No Credentials Found') ||
-            msg.includes('Content Credentials only available') ||
-            msg.includes('404') ||
-            msg.includes('not found');
-
-          if (looksLikeNoCredentials) {
-            this.content.innerHTML = `
-              <div class="c2pa-no-results">
-                <div class="c2pa-no-results-watermark">
-                  ${CR_LOGO_SVG}
-                </div>
-
-                <div class="c2pa-status c2pa-status-missing">
-                  ${SHIELD_X_SVG}
-                  Unverified
-                </div>
-
-                <p class="c2pa-message">Content Credentials unavailable for this image.</p>
-
-                <div class="c2pa-info-box">
-                  <p><strong>What does this mean?</strong></p>
-                  <p>Content Credentials are still a new feature, and not all images include them yet. They can also be removed when an image is re-saved, resized, re-compressed, converted between formats, or processed by some platforms and editors.</p>
-                </div>
-
-                <details class="c2pa-debug-info" style="margin-top: 1.25rem; opacity: 0.85;">
-                  <summary style="cursor: pointer;">Technical details</summary>
-                  <div style="margin-top: 0.75rem;">
-                    <strong>Requested Path:</strong> ${imgSrc}<br/>
-                    <strong>Error:</strong> ${msg}
-                  </div>
-                </details>
-              </div>
-            `;
-            return;
-          }
-
           this.content.innerHTML = `
             <div class="c2pa-error">
               <h3 class="c2pa-error-title">Live Extraction Failed</h3>
@@ -435,24 +379,47 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
     render(data: any, currentImgSrc: string) {
       if (!this.content) return;
 
-      // Extract authors
-      let authors: any[] = [];
-      const assertions = data.assertions || [];
-      const creativeWork = assertions.find((a: any) => a.label === "stds.schema-org.CreativeWork");
-      if (creativeWork) {
-        authors = creativeWork.data?.author || [];
+      // Check if this is actually valid credential data
+      const c2pa = data.c2pa_data || data;
+      if (!data || !data.provenance || data.provenance.length === 0) {
+        this.content.innerHTML = `
+          <div class="c2pa-no-results">
+            <div class="c2pa-no-results-watermark">
+              ${CR_LOGO_SVG}
+            </div>
+            
+            <div class="c2pa-status c2pa-status-missing">
+              ${SHIELD_X_SVG}
+              Unavailable
+            </div>
+
+            <p class="c2pa-message">Content Credentials are not available for this image.</p>
+            
+            <div class="c2pa-info-box">
+              <p><strong>What does this mean?</strong></p>
+              <p>This image does not contain Content Credentials, which are cryptographically signed metadata that verify an image's creator and history. Without these credentials, you cannot independently verify who created this image or whether it has been altered since creation.</p>
+              <p>Many images don't include Content Credentials yet, or they may have been removed during editing, compression, or format conversion.</p>
+            </div>
+          </div>
+        `;
+        return;
       }
 
-      // Extract actions
-      let actions: any[] = [];
-      const actionsAssertion = assertions.find((a: any) => a.label === "c2pa.actions.v2");
-      if (actionsAssertion) {
-        actions = actionsAssertion.data?.actions || [];
+      const thumbnails = data.thumbnails || {};
+
+      // Extract authors from author_info (hosted API shape)
+      let authors: any[] = [];
+      const authorInfo = c2pa.author_info || data.author_info || {};
+      if (authorInfo.author) {
+        authors = Array.isArray(authorInfo.author) ? authorInfo.author : [authorInfo.author];
       }
+
+      // Extract actions from c2pa_data.actions (hosted API shape)
+      const actions: any[] = c2pa.actions || [];
 
       // Format actions for display
       const formattedActions = actions.map((a: any) => {
-        const type = a.action;
+        const type = a.action || '';
         const params = a.parameters || {};
         if (type === "c2pa.color_adjustments") {
           return params["com.adobe.acr"] || "Color Adjustments";
@@ -467,13 +434,20 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
       const uniqueActions = Array.from(new Set(formattedActions));
 
       // Ingredient info
-      const ingredient = data.ingredients?.[0] || {};
+      const ingredients = c2pa.ingredients || [];
+      const ingredient = ingredients[0] || {};
       
       // Signature info
-      const signature = data.signature_info || {};
+      const signature = c2pa.signature_info || {};
       const dateStr = signature.time ? new Date(signature.time).toLocaleDateString(undefined, { 
         year: 'numeric', month: 'long', day: 'numeric' 
       }) : null;
+
+      // Basic info
+      const basicInfo = c2pa.basic_info || {};
+
+      // Digital source type
+      const sourceType = data.digital_source_type || c2pa.digital_source_type || {};
 
       this.content.innerHTML = `
         <div class="c2pa-verified-results">
@@ -486,29 +460,38 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
               ${SHIELD_CHECK_SVG}
               Verified
             </div>
-            <p class="c2pa-trust-message">This image has cryptographically signed credentials that verify its creator and history.</p>
+            <p class="c2pa-trust-message">This image has verifiable Content Credentials that confirm its creator and history.</p>
           </div>
 
           <div class="c2pa-info-grid">
             <div class="c2pa-section">
               <h3 class="c2pa-section-title">Creator</h3>
               <div class="c2pa-info-item">
-                <p>${authors[0]?.name || 'Mahesh Shantaram'}</p>
+                <p>${authors[0]?.name || 'Unknown'}</p>
               </div>
-              ${authors[1] ? `
+              ${authors.slice(1).filter((a: any) => a['@id']).map((a: any) => `
                 <div class="c2pa-info-item" style="margin-top: 0.5rem">
-                  <p><a href="${authors[1]['@id']}" target="_blank" class="c2pa-author-link">${authors[1].name}</a></p>
+                  <p><a href="${a['@id']}" target="_blank" class="c2pa-author-link">${a.name || a['@id']}</a></p>
                 </div>
-              ` : ''}
+              `).join('')}
             </div>
 
             <div class="c2pa-section">
               <h3 class="c2pa-section-title">Signed By</h3>
               <div class="c2pa-info-item">
-                <p>${signature.issuer || 'Content Authenticity'}</p>
+                <p>${signature.issuer || '—'}</p>
                 ${dateStr ? `<span class="c2pa-date-badge">${dateStr}</span>` : ''}
               </div>
             </div>
+
+            ${sourceType.label ? `
+            <div class="c2pa-section">
+              <h3 class="c2pa-section-title">Source</h3>
+              <div class="c2pa-info-item">
+                <p>${sourceType.label}</p>
+              </div>
+            </div>
+            ` : ''}
           </div>
 
           <div class="c2pa-section">
@@ -516,7 +499,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             <div class="c2pa-image-comparison">
               <div class="c2pa-image-card">
                 <div class="c2pa-thumb-wrapper">
-                  ${ingredient.thumbnail?.data ? `<img src="data:${ingredient.thumbnail.format};base64,${ingredient.thumbnail.data}" alt="Original image" />` : '<div class="c2pa-no-thumb">No original thumbnail available</div>'}
+                  ${thumbnails.ingredient_thumbnail ? `<img src="data:image/jpeg;base64,${thumbnails.ingredient_thumbnail}" alt="Original image" />` : '<div class="c2pa-no-thumb">No original thumbnail available</div>'}
                 </div>
                 <div class="c2pa-card-meta">
                   <span class="c2pa-card-badge">Original</span>
@@ -525,11 +508,11 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
               </div>
               <div class="c2pa-image-card">
                 <div class="c2pa-thumb-wrapper">
-                  ${data.thumbnail?.data ? `<img src="data:${data.thumbnail.format};base64,${data.thumbnail.data}" alt="Current image" />` : `<img src="${currentImgSrc}" alt="Current image" />`}
+                  ${thumbnails.claim_thumbnail ? `<img src="data:image/jpeg;base64,${thumbnails.claim_thumbnail}" alt="Current image" />` : `<img src="${currentImgSrc}" alt="Current image" />`}
                 </div>
                 <div class="c2pa-card-meta">
                   <span class="c2pa-card-badge c2pa-card-badge-current">This Image</span>
-                  <p class="c2pa-card-title">${data.title || 'Exported Version'}</p>
+                  <p class="c2pa-card-title">${basicInfo.title || 'Exported Version'}</p>
                 </div>
               </div>
             </div>
@@ -539,7 +522,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             <h3 class="c2pa-section-title">Process & History</h3>
             <div class="c2pa-actions-list">
               ${uniqueActions.map(action => `<span class="c2pa-action-pill">${action}</span>`).join('')}
-              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded in manifest.</p>' : ''}
+              ${uniqueActions.length === 0 ? '<p class="c2pa-no-edits">No editing history recorded.</p>' : ''}
             </div>
           </div>
         </div>

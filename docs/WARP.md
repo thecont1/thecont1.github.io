@@ -158,13 +158,13 @@ The site integrates computational notebooks for data storytelling:
 ### Production Deployment (thecontrarian.in)
 - **Platform**: cPanel hosting via FTP
 - **Script**: `npm run deploy` (wraps `deploy.sh`)
-- **Build output**: Static site to `./dist/client/` (client) and `./dist/server/` (server)
+- **Build output**: Pure static site to `./dist/`
 - **Site URL**: https://thecontrarian.in
 - **Deployment Steps**:
   1. R2 Sync: Extract EXIF metadata + upload to Cloudflare R2
-  2. Build: Astro static build with server-side rendering
-  3. Clean: Remove `dist/client/library` (served from R2 CDN)
-  4. FTP Upload: Deploy to remote `public_html/` and `server/` via lftp
+  2. Build: Astro static build (no SSR)
+  3. Clean: Remove `dist/library` (served from R2 CDN)
+  4. FTP Upload: Deploy to remote `public_html/` via lftp
 - **Scripts**:
   - `deploy.sh` - Master orchestration script
   - `scripts/deploy_ftp.sh` - FTP mirroring with lftp

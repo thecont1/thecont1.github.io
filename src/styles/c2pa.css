@@ -441,88 +441,276 @@
   background: #e05b46;
 }
 
-/* Shared Indicators (In-Image Logos) */
+/* ============================================================
+   C2PA Image Wrapper (ensures CR logo is positioned relative to actual image)
+   ============================================================ */
+.c2pa-image-wrapper {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+.c2pa-image-wrapper img {
+  display: block !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Ensure hover events pass through wrapper to image */
+.c2pa-image-wrapper:hover > .c2pa-indicator.c2pa-injected,
+.c2pa-image-wrapper img:hover ~ .c2pa-indicator.c2pa-injected {
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 1px 6px rgba(0,0,0,0.55));
+}
+
+/* ============================================================
+   In-Image CR Indicator (always visible, soft → hard on hover)
+   ============================================================ */
 .c2pa-indicator {
   position: absolute;
-  height: 32px;
-  width: 32px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(8px);
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.8);
+  height: 36px;
+  width: 36px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 100;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  transition: color 0.25s ease, filter 0.25s ease;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.45));
   overflow: visible;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
   padding: 0;
   box-sizing: border-box;
   line-height: 1;
+  opacity: 1;
+  visibility: visible;
 }
 
-/* Mobile touch target optimization for C2PA indicators */
+.c2pa-indicator.c2pa-injected {
+  top: 12px;
+  right: 12px;
+  position: absolute;
+}
+
+.c2pa-indicator.c2pa-injected svg {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  margin: 0;
+  display: block;
+}
+
+/* Hard state: image container hovered */
+[data-c2pa-container]:hover > .c2pa-indicator.c2pa-injected,
+.album-item:hover > .c2pa-indicator.c2pa-injected,
+figure:hover > .c2pa-indicator.c2pa-injected {
+  color: rgba(255, 255, 255, 0.85);
+  filter: drop-shadow(0 1px 6px rgba(0,0,0,0.55));
+}
+
+/* CR logo itself hovered — strongest state */
+.c2pa-indicator.c2pa-injected:hover {
+  color: #ffffff !important;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.3)) drop-shadow(0 1px 6px rgba(0,0,0,0.5)) !important;
+}
+
+/* Hide CR indicator when Screen mode is ON */
+body.screen-mode .c2pa-indicator.c2pa-injected {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Disable hover CR indicator in lightbox */
+.lightbox-figure .c2pa-indicator.c2pa-injected {
+  display: none !important;
+}
+
+/* Mobile touch target */
 @media (max-width: 768px) {
   .c2pa-indicator {
-    height: 48px; /* Minimum 44px touch target, using 48px for comfort */
-    width: 48px;
-    border-radius: 24px; /* Adjust border radius to match new size */
-    /* Enhanced touch feedback */
-    transition: all 120ms cubic-bezier(0.4, 0, 0.2, 1), transform 120ms ease;
+    height: 44px;
+    width: 44px;
   }
-  
-  /* Touch feedback - active state for mobile taps */
-  .c2pa-indicator:active {
-    transform: scale(0.95);
-    background: rgba(255, 255, 255, 0.2);
-  }
-  
   .c2pa-indicator.c2pa-injected svg {
-    width: 20px; /* Slightly larger icon for better visibility on larger button */
-    height: 20px;
+    width: 44px;
+    height: 44px;
+  }
+  .c2pa-indicator:active {
+    transform: scale(0.92);
   }
 }
 
- .c2pa-media-wrap {
-   position: relative;
-   display: inline-block;
-   line-height: 0;
-   max-width: 100%;
- }
+/* Media wrap for images without a figure parent */
+.c2pa-media-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  max-width: 100%;
+}
 
- .c2pa-media-wrap > img,
- .c2pa-media-wrap > picture,
- .c2pa-media-wrap > picture > img {
-   display: block;
-   max-width: 100%;
-   height: auto;
- }
+.c2pa-media-wrap > img,
+.c2pa-media-wrap > picture,
+.c2pa-media-wrap > picture > img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
 
- figure > .c2pa-media-wrap {
-   margin-left: auto;
-   margin-right: auto;
- }
+figure > .c2pa-media-wrap {
+  margin-left: auto;
+  margin-right: auto;
+}
 
- /* Post layout: ensure the injected wrapper does not change text flow */
- .post-body .c2pa-media-wrap {
-   display: block;
-   width: 100%;
- }
+.post-body .c2pa-media-wrap {
+  display: block;
+  width: 100%;
+}
 
- .post-body .c2pa-media-wrap > img,
- .post-body .c2pa-media-wrap > picture,
- .post-body .c2pa-media-wrap > picture > img {
-   margin-left: auto;
-   margin-right: auto;
- }
+.post-body .c2pa-media-wrap > img,
+.post-body .c2pa-media-wrap > picture,
+.post-body .c2pa-media-wrap > picture > img {
+  margin-left: auto;
+  margin-right: auto;
+}
 
-/* Exclude info panel button from base indicator positioning and visibility */
+/* ============================================================
+   Mini C2PA Popup (tooltip on CR logo hover)
+   ============================================================ */
+.c2pa-mini-popup-wrap {
+  position: absolute;
+  top: 12px;
+  right: 0;
+  transform: translateX(calc(100% + 8px));
+  z-index: 200;
+  pointer-events: auto;
+}
+
+/* If popup overflows viewport right, flip to left side */
+@media (max-width: 768px) {
+  .c2pa-mini-popup-wrap {
+    top: auto;
+    bottom: 0;
+    right: 0;
+    transform: translateX(0) translateY(calc(100% + 8px));
+  }
+  .c2pa-mini-popup {
+    max-width: 100% !important;
+    border-radius: 10px !important;
+  }
+}
+
+.c2pa-mini-popup {
+  background: #1a1d28;
+  color: #e8e8e8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  min-width: 260px;
+  max-width: 300px;
+  padding: 0.65rem 0.75rem;
+  font-family: "Inter", sans-serif;
+  line-height: 1.35;
+  font-size: 0.8rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04);
+  animation: c2pa-mini-in 0.15s ease-out;
+}
+
+.c2pa-mini-popup * {
+  line-height: inherit;
+}
+
+@keyframes c2pa-mini-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.c2pa-mini-loading {
+  text-align: center;
+  padding: 0.5rem 0;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+  font-size: 0.75rem;
+}
+
+.c2pa-mini-status {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.c2pa-mini-status svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.c2pa-mini-verified {
+  color: #34d399;
+}
+
+.c2pa-mini-unverified {
+  color: #f87171;
+}
+
+.c2pa-mini-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.c2pa-mini-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.c2pa-mini-label {
+  color: rgba(255,255,255,0.35);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.c2pa-mini-value {
+  color: rgba(255,255,255,0.85);
+  font-size: 0.78rem;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.c2pa-mini-more {
+  display: block;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  color: #60a5fa;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.c2pa-mini-more:hover {
+  color: #93c5fd;
+}
+
+/* ============================================================
+   Info panel CR button (used in Post hover panel, Lightbox sidebar)
+   ============================================================ */
 .c2pa-indicator.info-panel-cr-button {
   position: relative !important;
   opacity: 1 !important;
@@ -540,54 +728,9 @@
   align-items: center !important;
   justify-content: center !important;
   gap: 0.55rem !important;
-  box-shadow:
-    0 0 0 3px rgba(208, 75, 54, 0),
-    0 0 18px rgba(208, 75, 54, 0),
-    0 0 48px rgba(208, 75, 54, 0) !important;
   transition: background 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.c2pa-indicator.c2pa-injected {
-  top: 15px;
-  right: 5px;
-}
-
-/* Show indicator in ochre when hovering the image container (exclude lightbox) */
-[data-c2pa-container]:hover .c2pa-indicator.c2pa-injected,
-.album-item:hover .c2pa-indicator.c2pa-injected,
-.post-body p:hover .c2pa-indicator.c2pa-injected,
-figure:hover .c2pa-indicator.c2pa-injected {
-  opacity: 1 !important;
-  visibility: visible !important;
-  right: 0px; /* Keep consistent positioning on hover */
-  color: #d04b36 !important;
-  background: rgba(255, 255, 255, 0.85) !important;
-}
-
-/* Hide CR indicator when Screen mode is ON */
-body.screen-mode .c2pa-indicator.c2pa-injected {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* Disable hover CR indicator in lightbox - use static button instead */
-.lightbox-figure .c2pa-indicator.c2pa-injected {
-  display: none !important;
-}
-
-.c2pa-indicator.c2pa-injected svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  margin: 0;
-  display: block;
-  position: relative;
-  left: 1px;
-  top: 1px;
-}
-
-/* Info panel button SVG - no fine-tuning needed */
 .c2pa-indicator.info-panel-cr-button svg {
   width: 18px;
   height: 18px;
@@ -595,8 +738,15 @@ body.screen-mode .c2pa-indicator.c2pa-injected {
   margin: 0;
   display: block;
   position: static;
-  left: auto;
-  top: auto;
+}
+
+.c2pa-indicator.info-panel-cr-button:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(208, 75, 54, 0.4) !important;
+  box-shadow:
+    0 0 0 3px rgba(208, 75, 54, 0.14),
+    0 0 18px rgba(208, 75, 54, 0.45),
+    0 0 48px rgba(208, 75, 54, 0.25) !important;
 }
 
 .c2pa-indicator-label {
@@ -605,43 +755,6 @@ body.screen-mode .c2pa-indicator.c2pa-injected {
   font-weight: 900;
   color: #000000 !important;
   text-transform: lowercase;
-  max-width: 0;
-  overflow: hidden;
-  opacity: 0;
-  margin-left: 0;
-  display: none; /* Hide immediately when not hovering */
-  transition: opacity 0.3s ease, max-width 0.3s ease;
-}
-
-/* Expand to show label when hovering the indicator itself - only for injected indicators */
-.c2pa-indicator.c2pa-injected:hover {
-  width: auto !important;
-  padding: 0 12px 0 6px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  gap: 4px !important;
-  border-radius: 20px;
-}
-
-.c2pa-indicator.c2pa-injected:hover .c2pa-indicator-label {
-  display: inline-block;
-  max-width: 150px;
-  opacity: 1;
-  margin-left: 0;
-}
-
-/* Info panel button: prevent hover expansion, keep static */
-.c2pa-indicator.info-panel-cr-button:hover {
-  width: auto !important;
-  padding: 0.5rem 0.9rem !important;
-  transform: none !important;
-  background: rgba(255, 255, 255, 0.95) !important;
-  border-color: rgba(208, 75, 54, 0.4) !important;
-  box-shadow:
-    0 0 0 3px rgba(208, 75, 54, 0.14),
-    0 0 18px rgba(208, 75, 54, 0.45),
-    0 0 48px rgba(208, 75, 54, 0.25) !important;
 }
 
 .c2pa-indicator.info-panel-cr-button:hover .c2pa-indicator-label {

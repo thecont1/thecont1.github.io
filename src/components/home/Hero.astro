@@ -5,136 +5,15 @@ import { CAROUSEL_IMAGES } from "../../data/carousel";
 import "../../styles/home.css";
 import "../../styles/carousel.css";
 import "../../styles/info-panel.css";
-import ExifReader from "exifreader";
-import fs from "node:fs";
-import path from "node:path";
-
-function getOriginalsDirAndFilenameFromSrc(imgSrc: string): { directory: string; filename: string } | null {
-  const parts = imgSrc.split('/').filter(Boolean);
-  const originalsIndex = parts.indexOf('originals');
-  if (originalsIndex === -1) return null;
-  if (originalsIndex >= parts.length - 2) return null;
-  const filename = parts[parts.length - 1];
-  const directory = parts[originalsIndex + 1];
-  return { directory, filename };
-}
-
-const dirMetadataCache = new Map<string, any>();
-
-async function loadMetadataForDirectory(directory: string): Promise<any> {
-  if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
-  try {
-    const metadataUrl = `/library/originals/${directory}/metadata.json`;
-    const resp = await fetch(metadataUrl);
-    const data = resp.ok ? await resp.json() : null;
-    dirMetadataCache.set(directory, data);
-    return data;
-  } catch {
-    dirMetadataCache.set(directory, null);
-    return null;
-  }
-}
-
-async function getSmartCaption(imgSrc: string) {
-  // Only process local images in public folder
-  if (imgSrc.startsWith("http")) return "";
-
-  const fullPath = path.join(process.cwd(), "public", imgSrc);
-  const filename = path.basename(imgSrc, path.extname(imgSrc));
-  let iptcCaption = "";
-  let dateStr = "";
-  let placeStr = "";
-
-  try {
-    if (fs.existsSync(fullPath)) {
-      const fileBuffer = fs.readFileSync(fullPath);
-      const tags = ExifReader.load(fileBuffer);
-      
-      // 1. Try IPTC/EXIF Caption or Description
-      iptcCaption = tags["Description"]?.description || 
-                    tags["ImageDescription"]?.description || 
-                    tags["Caption/Abstract"]?.description || 
-                    tags["Headline"]?.description || "";
-
-      // 2. Date of capture
-      const exifDate = tags["DateTimeOriginal"]?.description || 
-                       tags["DateTime"]?.description || 
-                       tags["DateCreated"]?.description;
-      
-      if (exifDate) {
-        // EXIF format is usually YYYY:MM:DD HH:MM:SS
-        const datePart = exifDate.split(" ")[0];
-        const parts = datePart.split(/[:\-]/);
-        if (parts.length >= 3) {
-          const [y, m, d] = parts;
-          dateStr = new Date(parseInt(y), parseInt(m) - 1, parseInt(d)).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric"
-          });
-        }
-      }
-
-      // 3. Place of capture
-      const city = tags["City"]?.description || "";
-      const state = tags["Province-State"]?.description || "";
-      const country = tags["Country/Primary Location Name"]?.description || "";
-      placeStr = [city, state, country].filter(Boolean).join(", ");
-    }
-  } catch (e) {
-  }
-
-  // If we found a full caption in IPTC, use it
-  if (iptcCaption) return iptcCaption;
-
-  // Otherwise construct: file name, date of capture, and place of capture
-  const components = [];
-  
-  // A. File name
-  components.push(filename);
-
-  // B. Date of capture (Fallback to filename parsing if metadata missing)
-  if (!dateStr) {
-    const dateMatch = filename.match(/^MS(\d{4})(\d{2})/);
-    if (dateMatch) {
-      const [, y, m] = dateMatch;
-      dateStr = new Date(parseInt(y), parseInt(m) - 1).toLocaleDateString("en-GB", {
-        month: "short",
-        year: "numeric"
-      });
-    }
-  }
-  if (dateStr) components.push(dateStr);
-
-  // C. Place of capture (Fallback to filename parsing if metadata missing)
-  if (!placeStr) {
-    // Look for everything after the date (MSYYYYMM-)
-    const placeMatch = filename.match(/^MS\d{6}-(.+?)(?=_?\d{4}$|$)/);
-    if (placeMatch) {
-      placeStr = placeMatch[1]
-        .replace(/[-_]/g, " ")
-        .replace(/([a-z])([A-Z])/g, '$1 $2')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-  }
-  if (placeStr) components.push(placeStr);
-
-  return components.join(", ");
-}
+import { getImageMetadata } from "../../utils/exif";
 
 const images = await Promise.all(
   CAROUSEL_IMAGES.map(async (img) => {
-    const parsed = getOriginalsDirAndFilenameFromSrc(img.src);
-    let meta: any = {};
-    if (parsed) {
-      const dirMeta = await loadMetadataForDirectory(parsed.directory);
-      meta = dirMeta?.[parsed.filename]?.photography || {};
-    }
+    const meta = await getImageMetadata(img.src);
     return {
       src: img.src,
-      caption: (img as any).caption || (await getSmartCaption(img.src)),
-      metadata: meta
+      caption: (img as any).caption || meta?.photography?.description || '',
+      metadata: meta || {}
     };
   })
 );

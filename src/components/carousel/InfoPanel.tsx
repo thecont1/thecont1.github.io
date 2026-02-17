@@ -1,4 +1,5 @@
 import { CR_LOGO_SVG } from "../icons/cr-logo-svg";
+import { openC2PAOverlay } from "../../utils/c2pa.js";
 
 type ImageMetadata = {
   filename?: string;
@@ -123,9 +124,7 @@ export default function InfoPanel({ metadata, imageSrc }: Props) {
   const timeOriginal = exif.DateTimeOriginal?.split(' ')[1] || '';
 
   const handleCRClick = () => {
-    window.dispatchEvent(new CustomEvent('open-c2pa', { 
-      detail: { imgSrc: imageSrc } 
-    }));
+    openC2PAOverlay(imageSrc);
   };
 
   // Build section data

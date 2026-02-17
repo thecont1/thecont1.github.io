@@ -24,6 +24,8 @@ const { imgSrc, className = "" } = Astro.props;
 </button>
 
 <script>
+  import { openC2PAOverlay } from "../../utils/c2pa.js";
+  
   function initC2PAToggles() {
     const toggles = document.querySelectorAll('.c2pa-indicator');
     
@@ -36,9 +38,7 @@ const { imgSrc, className = "" } = Astro.props;
         
         const imgSrc = (toggle as HTMLElement).dataset.imgSrc;
         if (imgSrc) {
-          window.dispatchEvent(new CustomEvent('open-c2pa', { 
-            detail: { imgSrc } 
-          }));
+          openC2PAOverlay(imgSrc);
         }
       });
       

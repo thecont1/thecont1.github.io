@@ -57,6 +57,8 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
 </div>
 
 <script>
+  import { openC2PAOverlay } from "../../utils/c2pa.js";
+  
   function initLightbox() {
     const lightbox = document.getElementById("lightbox");
     if (!lightbox) return;
@@ -95,10 +97,16 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
     const formatDate = (dateStr: string) => {
       if (!dateStr) return '';
       try {
-        const [datePart] = dateStr.split(' ');
-        const [year, month, day] = datePart.split(':');
-        const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        // Handle old EXIF format: "YYYY:MM:DD HH:MM:SS"
+        if (/^\d{4}:\d{2}:\d{2}/.test(dateStr)) {
+          const [datePart] = dateStr.split(' ');
+          const [year, month, day] = datePart.split(':');
+          const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        // Already human-readable from hosted API (e.g. "Oct 08, 2021 at 09:17 PM")
+        const atIndex = dateStr.indexOf(' at ');
+        return atIndex !== -1 ? dateStr.substring(0, atIndex) : dateStr;
       } catch {
         return dateStr;
       }
@@ -140,52 +148,14 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       `;
     };
 
-    const extractExifMetadata = async (imgUrl: string) => {
-      try {
-        const resp = await fetch(imgUrl);
-        if (!resp.ok) return null;
-        const arrayBuffer = await resp.arrayBuffer();
-        // @ts-ignore - ExifReader is loaded as UMD global
-        const tags = ExifReader.load(arrayBuffer);
+    const C2PA_API = 'https://apps.thecontrarian.in/c2pa';
 
-        const exif = {
-          ImageDescription:
-            tags["ImageDescription"]?.description ||
-            tags["Description"]?.description ||
-            tags["Caption/Abstract"]?.description ||
-            "",
-        };
-
-        const photography = {
-          camera_make: tags["Make"]?.description || "",
-          camera_model: tags["Model"]?.description || "",
-          lens_model: tags["LensModel"]?.description || "",
-          aperture: tags["FNumber"]?.description
-            ? `f/${tags["FNumber"].description}`
-            : undefined,
-          shutter_speed: (() => {
-            const exp = tags["ExposureTime"]?.value || tags["ExposureTime"]?.description;
-            if (!exp) return undefined;
-            const num = typeof exp === "number" ? exp : parseFloat(String(exp));
-            if (!num || Number.isNaN(num)) return undefined;
-            if (num >= 1) return `${num.toFixed(1)}s`;
-            const denom = Math.round(1 / num);
-            return `1/${denom}s`;
-          })(),
-          iso:
-            (Array.isArray(tags["ISOSpeedRatings"]?.value)
-              ? tags["ISOSpeedRatings"].value[0]
-              : tags["ISOSpeedRatings"]?.value) ||
-            tags["ISO"]?.value,
-          focal_length: tags["FocalLength"]?.description || undefined,
-          date_original: tags["DateTimeOriginal"]?.description || undefined,
-          copyright: tags["Copyright"]?.description || undefined,
-        };
-
-        return { photography, exif };
-      } catch {
-        return null;
+    const resolveImageUri = (imgPath: string): string => {
+      if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) return imgPath;
+      if (imgPath.startsWith('/library/')) {
+        return `https://library.thecontrarian.in${imgPath.replace('/library', '')}`;
       }
+      return imgPath;
     };
 
     const normalizeToPathname = (imgUrl: string) => {
@@ -206,25 +176,24 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
           if (direct) return direct;
         }
 
-        const url = new URL(imgUrl, window.location.origin);
-        const imagePath = url.pathname;
-        const pathParts = imagePath.split('/');
-        const filename = pathParts[pathParts.length - 1];
-        const originalsIndex = pathParts.indexOf('originals');
-        if (originalsIndex === -1 || originalsIndex >= pathParts.length - 2) return null;
+        // Check cache
+        const cacheKey = imgUrl;
+        if (metadataCache.has(cacheKey)) return metadataCache.get(cacheKey);
 
-        const directory = pathParts[originalsIndex + 1];
-        const cacheKey = `originals:${directory}`;
-        if (!metadataCache.has(cacheKey)) {
-          const metadataUrl = `/library/originals/${directory}/metadata.json`;
-          const resp = await fetch(metadataUrl);
-          metadataCache.set(cacheKey, resp.ok ? await resp.json() : null);
+        // Call hosted EXIF API
+        const uri = resolveImageUri(normalizeToPathname(imgUrl));
+        const apiUrl = `${C2PA_API}/api/exif_metadata?uri=${encodeURIComponent(uri)}`;
+        const resp = await fetch(apiUrl);
+        if (!resp.ok) {
+          metadataCache.set(cacheKey, null);
+          return null;
         }
-        const dirMeta = metadataCache.get(cacheKey);
-        if (dirMeta && dirMeta[filename]) return dirMeta[filename];
-
-        const exifMeta = await extractExifMetadata(imgUrl);
-        return exifMeta;
+        const data = await resp.json();
+        // API returns { "filename": { ...metadata } } — extract first value
+        const keys = Object.keys(data);
+        const meta = keys.length > 0 ? data[keys[0]] : null;
+        metadataCache.set(cacheKey, meta);
+        return meta;
       } catch {
         return null;
       }
@@ -248,7 +217,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
         if (crBtn) {
           crBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc } }));
+            openC2PAOverlay(imgSrc);
           });
         }
       };
@@ -542,7 +511,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
       c2paBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const currentImgEl = lightboxImages[activeImgIndex] as HTMLImageElement;
-        if (currentImgEl?.src) window.dispatchEvent(new CustomEvent('open-c2pa', { detail: { imgSrc: currentImgEl.src } }));
+        if (currentImgEl?.src) openC2PAOverlay(currentImgEl.src);
       });
     }
 

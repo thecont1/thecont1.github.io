@@ -4,8 +4,7 @@ import Carousel from "../carousel/Carousel.tsx";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
 import "../../styles/home.css";
-import fs from "node:fs";
-import path from "node:path";
+import { getImageMetadata } from "../../utils/exif";
 
 interface Props {
   post: CollectionEntry<"project">;
@@ -25,58 +24,19 @@ const projectContent = [...photogalleries, ...essays, ...longforms, ...posts, ..
   .filter((p) => p?.data?.status === "published");
 
 // 2. Derive carousel images from referenced photogalleries (frontmatter-defined)
-const dirMetadataCache = new Map<string, any>();
-
-function parseOriginalsDirAndFilename(imgSrc: string): { directory: string; filename: string } | null {
-  try {
-    const u = new URL(imgSrc, 'http://localhost');
-    const parts = u.pathname.split('/').filter(Boolean);
-    const originalsIndex = parts.indexOf('originals');
-    if (originalsIndex === -1 || originalsIndex >= parts.length - 2) return null;
-    const directory = parts[originalsIndex + 1];
-    const filename = parts[parts.length - 1];
-    if (!directory || !filename) return null;
-    return { directory, filename };
-  } catch {
-    return null;
-  }
-}
-
-// Load metadata from filesystem at build time
-function loadMetadataForDirectory(directory: string): any {
-  if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
-  
-  try {
-    const metadataPath = path.join(process.cwd(), 'public', 'library', 'originals', directory, 'metadata.json');
-    if (fs.existsSync(metadataPath)) {
-      const content = fs.readFileSync(metadataPath, 'utf-8');
-      const data = JSON.parse(content);
-      dirMetadataCache.set(directory, data);
-      return data;
-    }
-  } catch (err) {
-    console.warn(`Failed to load metadata for ${directory}:`, err);
-  }
-  
-  dirMetadataCache.set(directory, null);
-  return null;
-}
-
-const carouselImages = photogalleries.flatMap((g: any) => 
-  (g?.data?.images || []).map((img: any) => {
-    const parsed = parseOriginalsDirAndFilename(img.src);
-    let meta: any = {};
-    if (parsed) {
-      const dirMeta = loadMetadataForDirectory(parsed.directory);
-      meta = dirMeta?.[parsed.filename] || {};
-    }
-    return {
-      src: img.src,
-      caption: img.caption || img.alt || parsed?.filename?.replace(/\.[^/.]+$/, '') || '',
-      metadata: meta
-    };
-  })
-).filter(Boolean);
+const carouselImages = await Promise.all(
+  photogalleries.flatMap((g: any) => 
+    (g?.data?.images || []).map(async (img: any) => {
+      const meta = await getImageMetadata(img.src);
+      const filename = img.src.split('/').pop()?.replace(/\.[^/.]+$/, '') || '';
+      return {
+        src: img.src,
+        caption: img.caption || img.alt || filename,
+        metadata: meta || {}
+      };
+    })
+  )
+);
 
 const backgroundColor = post.data.backgroundColor || "var(--paper)";
 ---
