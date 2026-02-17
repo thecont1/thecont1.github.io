@@ -8,8 +8,7 @@ import Carousel from "../carousel/Carousel.tsx";
 import "../../styles/photogallery.css";
 import "../../styles/carousel.css";
 import "../../styles/info-panel.css";
-import fs from "node:fs";
-import path from "node:path";
+import { getImageMetadata } from "../../utils/exif";
 
 interface Props {
   post: CollectionEntry<"photogallery">;
@@ -38,35 +37,13 @@ const formattedDate = post.data.date ? new Intl.DateTimeFormat('en-US', {
   day: 'numeric'
 }).format(post.data.date) : null;
 
-// Extract directory name from image src path
-function getDirectoryFromSrc(imgSrc: string): string | null {
-  const parts = imgSrc.split('/').filter(Boolean);
-  const originalsIndex = parts.indexOf('originals');
-  if (originalsIndex === -1 || originalsIndex >= parts.length - 1) return null;
-  return parts[originalsIndex + 1];
-}
-
-// Cache for metadata loaded from filesystem
-const dirMetadataCache = new Map<string, any>();
-
-// Load metadata from filesystem at build time
-function loadMetadataForDirectory(directory: string): any {
-  if (dirMetadataCache.has(directory)) return dirMetadataCache.get(directory);
-  
-  try {
-    const metadataPath = path.join(process.cwd(), 'public', 'library', 'originals', directory, 'metadata.json');
-    if (fs.existsSync(metadataPath)) {
-      const content = fs.readFileSync(metadataPath, 'utf-8');
-      const data = JSON.parse(content);
-      dirMetadataCache.set(directory, data);
-      return data;
-    }
-  } catch (err) {
-    console.warn(`Failed to load metadata for ${directory}:`, err);
-  }
-  
-  dirMetadataCache.set(directory, null);
-  return null;
+// Pre-fetch metadata for carousel images via hosted API
+const metadataCache = new Map<string, any>();
+async function getMetaForImage(imgSrc: string): Promise<any> {
+  if (metadataCache.has(imgSrc)) return metadataCache.get(imgSrc);
+  const meta = await getImageMetadata(imgSrc);
+  metadataCache.set(imgSrc, meta);
+  return meta;
 }
 ---
 
@@ -90,20 +67,14 @@ function loadMetadataForDirectory(directory: string): any {
       <!-- Fixed carousel layer -->
       <div class="carousel-hero-fixed">
         <Carousel 
-          images={images.map((img) => {
-            const filename = img.src.split('/').pop() || '';
-            const directory = getDirectoryFromSrc(img.src);
-            let meta: any = {};
-            if (directory) {
-              const dirMeta = loadMetadataForDirectory(directory);
-              meta = dirMeta?.[filename] || {};
-            }
+          images={await Promise.all(images.map(async (img) => {
+            const meta = await getMetaForImage(img.src);
             return {
               src: img.src,
               caption: img.caption,
-              metadata: meta
+              metadata: meta || {}
             };
-          })}
+          }))}
           client:load
         />
       </div>
