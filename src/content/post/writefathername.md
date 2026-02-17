@@ -2,6 +2,7 @@
 title: "What's in a Name?"
 subtitle: "I scribbled: \"If only one parent's name is required in my passport, I would like it to be my mother's. Since I am equally a son to my parents, I trust this should not pose a problem to your department.\""
 author: "Mahesh Shantaram"
+metaDescription: "Challenging patriarchal norms: requesting my mother's name instead of my father's on my Indian passport and what happened next."
 status: published
 container: facebook
 date: 2019-01-19

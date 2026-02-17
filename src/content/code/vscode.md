@@ -1,6 +1,7 @@
 ---
 title: "vscode"
 description: "Visual Studio Code"
+metaDescription: "Visual Studio Code: Microsoft's open-source code editor built with TypeScript and Electron. 163k+ stars on GitHub."
 status: "published"
 repoUrl: "https://github.com/microsoft/vscode"
 repoOwner: "microsoft"
