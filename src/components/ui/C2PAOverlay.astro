@@ -91,7 +91,7 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
 
     // Build the mini popup HTML from c2pa_mini response
     buildMiniPopup(data: any, imgSrc: string): string {
-      if (!data || data.error || data.status === 'unverified') {
+      if (!data || data.error || data.status === 'unverified' || data.status === 'Unverified') {
         return `
           <div class="c2pa-mini-popup">
             <div class="c2pa-mini-status c2pa-mini-unverified">
