@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
-import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 import scaffold from './scripts/scaffold-integration.ts';
 
@@ -9,8 +8,7 @@ import scaffold from './scripts/scaffold-integration.ts';
 export default defineConfig({
   site: 'https://thecontrarian.in',
   integrations: [react(), sitemap(), scaffold()],
-  output: 'static', // Changed to 'static' to support API endpoints
-  adapter: node({ mode: 'standalone' }),
+  output: 'static',
   vite: {
     build: {
       cssMinify: true,
