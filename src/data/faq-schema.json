@@ -1,0 +1,82 @@
+{
+  "projects": {
+    "matrimania": {
+      "name": "Matrimania",
+      "description": "Documentary photography project examining India's wedding industry",
+      "faqs": [
+        {
+          "question": "What is Matrimania?",
+          "answer": "Matrimania is a long-term documentary photography project by Mahesh Shantaram that examines India's wedding industry as a lens to understand class, aspiration, consumption, and social power in contemporary Indian society. The project was built over several years, documenting weddings across different social strata."
+        },
+        {
+          "question": "How long did it take to complete the Matrimania project?",
+          "answer": "Matrimania was developed over more than a decade, starting in 2009. The photographer documented weddings across various cities in India, capturing the evolution of the Indian wedding industry and its reflection of broader social changes."
+        },
+        {
+          "question": "Where has Matrimania been exhibited?",
+          "answer": "Matrimania has been shown internationally at prestigious photography festivals including Photoquai in Paris, PhotoPhnomPenh, Delhi Photo Festival, Addis Photo Festival, Chobi Mela, and Angkor Photo Festival."
+        },
+        {
+          "question": "What themes does Matrimania explore?",
+          "answer": "The project explores themes of class division, consumption patterns, patriarchy, arranged marriage traditions, social aspiration, and the wedding-industrial complex in India. It examines how weddings serve as a performance of social status and cultural identity."
+        },
+        {
+          "question": "Is the Matrimania photobook available for purchase?",
+          "answer": "Information about the Matrimania photobook can be found on the project page. The book presents a curated selection of photographs from the larger series, designed as a narrative journey through Indian wedding culture."
+        }
+      ]
+    },
+    "the-african-portraits": {
+      "name": "The African Portraits",
+      "description": "Documentary project on racism faced by African migrants in India",
+      "faqs": [
+        {
+          "question": "What is The African Portraits project about?",
+          "answer": "The African Portraits is a documentary photography series by Mahesh Shantaram that documents the experiences of African students and immigrants living in India. Created between 2016-2017, the project captures stories of resilience, identity, and belonging while examining racism and discrimination faced by the African community in India."
+        },
+        {
+          "question": "Where was The African Portraits photographed?",
+          "answer": "The project was photographed across multiple Indian cities including Bangalore, Delhi, Jaipur, and other locations where African students and migrants have established communities. Each location offered different perspectives on the African experience in India."
+        },
+        {
+          "question": "What was the approach to creating these portraits?",
+          "answer": "Each photograph was taken with consent and often followed by conversations about the subject's experiences, dreams, and challenges. The portraits are intimate yet respectful, aiming to capture both vulnerability and strength, with accompanying captions that include direct quotes and observations."
+        },
+        {
+          "question": "Was this project supported by any institutions?",
+          "answer": "Yes, The African Portraits was supported by the Khoj International Artists' Association residency program in New Delhi, which provided resources and context for developing this important social documentary project."
+        },
+        {
+          "question": "Why focus on African experiences in India?",
+          "answer": "The African student community in India has grown significantly, with thousands pursuing education in Indian universities. However, their experiences are often marked by discrimination and cultural misunderstanding. This series aims to humanize these experiences and give voice to individuals whose stories are rarely heard in mainstream discourse."
+        }
+      ]
+    },
+    "general": {
+      "name": "General FAQs",
+      "description": "Common questions about Mahesh Shantaram's work",
+      "faqs": [
+        {
+          "question": "Who is Mahesh Shantaram?",
+          "answer": "Mahesh Shantaram is a Bangalore-based data scientist and documentary photographer. He worked as an independent photographer for over a decade, focusing on long-form narrative documentary projects examining Indian society, politics, and institutions. He later transitioned into data science while maintaining his commitment to visual storytelling."
+        },
+        {
+          "question": "What kind of photography does Mahesh Shantaram specialize in?",
+          "answer": "Mahesh specializes in long-form documentary photography that examines social systems, institutions, and cultural practices. His work focuses on pattern recognition and synthesizing complex social realities into coherent visual narratives, often requiring years of fieldwork rather than single assignments."
+        },
+        {
+          "question": "Where has Mahesh Shantaram's work been exhibited?",
+          "answer": "His work has been shown internationally at major photography festivals including Photoquai (Paris), PhotoPhnomPenh, Delhi Photo Festival, Addis Photo Festival, Chobi Mela, and Angkor Photo Festival, among others."
+        },
+        {
+          "question": "How can I contact Mahesh Shantaram for collaborations or prints?",
+          "answer": "For inquiries about collaborations, print purchases, or licensing, please use the contact information available on the website. Mahesh is open to discussing projects at the intersection of data analysis, visualization, and storytelling."
+        },
+        {
+          "question": "Does Mahesh Shantaram still photograph weddings?",
+          "answer": "No, Mahesh no longer works as a wedding photographer. His involvement with wedding photography was specifically for the Matrimania documentary project, which examined the wedding industry as a social phenomenon rather than providing commercial wedding photography services."
+        }
+      ]
+    }
+  }
+}
