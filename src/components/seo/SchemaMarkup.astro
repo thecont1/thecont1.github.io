@@ -12,8 +12,8 @@ interface Props {
 
 const { title, description, image, datePublished, type, url } = Astro.props;
 
-const siteUrl = Astro.site?.href || AUTHOR.url;
-const ogImage = image ? new URL(image, Astro.site).href : undefined;
+const siteBase = Astro.site ?? new URL(AUTHOR.url);
+const ogImage = image ? new URL(image, siteBase).href : undefined;
 
 const authorObj = {
   "@type": "Person",
@@ -95,8 +95,11 @@ function buildSchema() {
 }
 
 const schema = buildSchema();
+const safeJsonLd = schema
+  ? JSON.stringify(schema).replace(/<\/script/gi, "<\\/script")
+  : null;
 ---
 
-{schema && (
-  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+{safeJsonLd && (
+  <script type="application/ld+json" set:html={safeJsonLd} />
 )}
