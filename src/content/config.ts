@@ -132,6 +132,7 @@ const codeSchema = z.object({
 const datastorySchema = z.object({
   title: z.string(),
   subtitle: z.string().optional(),
+  metaDescription: z.string().max(160).optional(),
   author: z.string(),
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
@@ -176,6 +177,7 @@ const photogallerySchema = z.object({
   // Core content
   title: z.string(),
   subtitle: z.string(),
+  metaDescription: z.string().max(160).optional(),
   author: z.string(),
   category: z.string().optional(),
   heroImage: z.string().optional(),

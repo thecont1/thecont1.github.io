@@ -21,6 +21,7 @@ const collectionName = "Photogallery";
 
 // Use images from frontmatter
 const images = post.data.images || [];
+const seoDescription = post.data.metaDescription || post.data.subtitle;
 
 // Layout type - default to "tile" if not specified
 const layoutType = post.data.layoutType || "tile";
@@ -49,14 +50,14 @@ async function getMetaForImage(imgSrc: string): Promise<any> {
 
 {layoutType === "carousel" ? (
   <!-- CAROUSEL LAYOUT - Full page with curtain, then footer -->
-  <Layout title={post.data.title} description={post.data.subtitle} image={post.data.heroImage || images[0]?.src} type="article" publishedDate={post.data.date?.toISOString()}>
+  <Layout title={post.data.title} description={seoDescription} image={post.data.heroImage || images[0]?.src} type="article" publishedDate={post.data.date?.toISOString()}>
     <Fragment slot="head">
       {images.slice(0, 1).map((img) => (
         <link rel="preload" as="image" href={img.src} />
       ))}
       <SchemaMarkup
         title={post.data.title}
-        description={post.data.subtitle}
+        description={seoDescription}
         image={post.data.heroImage || images[0]?.src}
         datePublished={post.data.date?.toISOString()}
         type="gallery"
@@ -102,11 +103,11 @@ async function getMetaForImage(imgSrc: string): Promise<any> {
   </Layout>
 ) : (
   <!-- REGULAR PHOTOGALLERY LAYOUTS (tile/one-up) -->
-  <Layout title={post.data.title} description={post.data.subtitle} image={post.data.heroImage || images[0]?.src} type="article" publishedDate={post.data.date?.toISOString()}>
+  <Layout title={post.data.title} description={seoDescription} image={post.data.heroImage || images[0]?.src} type="article" publishedDate={post.data.date?.toISOString()}>
     <Fragment slot="head">
       <SchemaMarkup
         title={post.data.title}
-        description={post.data.subtitle}
+        description={seoDescription}
         image={post.data.heroImage || images[0]?.src}
         datePublished={post.data.date?.toISOString()}
         type="gallery"
