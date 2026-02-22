@@ -291,13 +291,13 @@ body.controls-visible .carousel-controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6rem 0.25rem 4rem; /* Increased top padding significantly to avoid menubar clash */
+  padding: 5rem 1.5rem 3rem;
   margin: 0;
 
   font-family: "DM Sans", sans-serif;
-  font-size: clamp(5rem, 15vw, 12rem); /* Increased for super-sizing */
+  font-size: var(--hero-font-size, 10vw); /* Dynamic font size set by JS */
   font-weight: 700;
-  line-height: 0.9; /* Slightly increased for better readability on desktop */
+  line-height: var(--hero-line-height, 0.9);
   text-align: center;
 
   color: rgba(255, 255, 255, 0.95);
@@ -313,7 +313,7 @@ body.controls-visible .carousel-controls {
   max-height: 100vh;
   box-sizing: border-box;
   
-  /* Ensure text doesn't overflow vertically or horizontally */
+  /* Ensure text doesn't overflow */
   overflow: hidden;
   word-wrap: break-word;
   hyphens: auto;
@@ -322,53 +322,14 @@ body.controls-visible .carousel-controls {
 /* Mobile-specific hero statement optimizations */
 @media (max-width: 768px) {
   .hero-statement {
-    font-size: clamp(4rem, 16vw, 7rem); /* Increased for mobile super-sizing */
-    padding: 0.25rem 2.5rem; /* Significantly increased horizontal margin to prevent word bleeding */
-    line-height: 0.85; /* Slightly increased for better mobile readability */
-    height: 100vh;
-    max-height: 100vh;
-    box-sizing: border-box;
-    /* Ensure text fills the available space better */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-  }
-}
-
-/* Desktop-specific hero statement optimizations */
-@media (min-width: 1200px) {
-  .hero-statement {
-    font-size: clamp(8rem, 12vw, 14rem); /* Super-sized for large desktops */
-    line-height: 0.8; /* Slightly increased for better line separation */
-    padding: 6rem 0.25rem 4rem; /* Increased top padding to avoid menubar clash */
-  }
-}
-
-/* Extra large desktop optimization */
-@media (min-width: 1600px) {
-  .hero-statement {
-    font-size: clamp(10rem, 10vw, 16rem); /* Maximum super-sizing for very large screens */
-    line-height: 0.75; /* Slightly increased for better line separation */
-    padding: 7rem 0.25rem 5rem; /* Increased top padding for larger screens */
-  }
-}
-
-/* Ultra-wide desktop optimization */
-@media (min-width: 2000px) {
-  .hero-statement {
-    font-size: clamp(12rem, 9vw, 18rem); /* Controlled scaling for ultra-wide */
-    line-height: 0.73; /* Slightly increased for better line separation */
-    padding: 8rem 0.5rem 6rem; /* Increased top padding for ultra-wide screens */
+    padding: 4rem 1.5rem 2rem;
   }
 }
 
 /* Additional mobile landscape optimization */
 @media (max-width: 768px) and (orientation: landscape) {
   .hero-statement {
-    font-size: clamp(2.6rem, 12vw, 4.5rem); /* Optimized for landscape mobile */
-    line-height: 1.0; /* Slightly increased for better readability */
-    padding: 0.25rem 2rem; /* Increased horizontal margin for landscape */
+    padding: 2rem 2rem;
   }
 }
 
