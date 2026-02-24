@@ -1,9 +1,8 @@
 [project]
 name = "thecontrarian-scripts"
 version = "0.1.0"
-description = "Python utilities for thecontrarian.in (EXIF extraction and C2PA credentials)"
+description = "Python utilities for thecontrarian.in"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "Pillow>=10.0.0",
-    "c2pa-python>=0.27.0",
+    "nbconvert>=7.17.0",
 ]
