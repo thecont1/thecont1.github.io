@@ -1,0 +1,105 @@
+---
+import { AUTHOR } from "../../data/author";
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  datePublished?: string;
+  type: "article" | "gallery" | "code" | "datastory";
+  url: string;
+}
+
+const { title, description, image, datePublished, type, url } = Astro.props;
+
+const siteBase = Astro.site ?? new URL(AUTHOR.url);
+const ogImage = image ? new URL(image, siteBase).href : undefined;
+
+const authorObj = {
+  "@type": "Person",
+  name: AUTHOR.name,
+  url: AUTHOR.url,
+  sameAs: AUTHOR.sameAs,
+};
+
+function buildSchema() {
+  switch (type) {
+    case "article":
+      return {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: title,
+        ...(description && { description }),
+        ...(ogImage && { image: ogImage }),
+        ...(datePublished && { datePublished }),
+        author: authorObj,
+        publisher: {
+          "@type": "Person",
+          name: AUTHOR.name,
+          url: AUTHOR.url,
+        },
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": url,
+        },
+      };
+
+    case "gallery":
+      return {
+        "@context": "https://schema.org",
+        "@type": "ImageGallery",
+        name: title,
+        ...(description && { description }),
+        ...(ogImage && { image: ogImage }),
+        ...(datePublished && { dateCreated: datePublished }),
+        creator: authorObj,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": url,
+        },
+      };
+
+    case "code":
+      return {
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        name: title,
+        ...(description && { description }),
+        ...(datePublished && { dateCreated: datePublished }),
+        author: authorObj,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": url,
+        },
+      };
+
+    case "datastory":
+      return {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        headline: title,
+        ...(description && { description }),
+        ...(ogImage && { image: ogImage }),
+        ...(datePublished && { datePublished }),
+        author: authorObj,
+        genre: "Data Journalism",
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": url,
+        },
+      };
+
+    default:
+      return null;
+  }
+}
+
+const schema = buildSchema();
+const safeJsonLd = schema
+  ? JSON.stringify(schema).replace(/<\/script/gi, "<\\/script")
+  : null;
+---
+
+{safeJsonLd && (
+  <script type="application/ld+json" set:html={safeJsonLd} />
+)}

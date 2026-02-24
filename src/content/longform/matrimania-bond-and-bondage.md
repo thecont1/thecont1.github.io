@@ -2,6 +2,7 @@
 title: "Bond & Bondage"
 subtitle: "This semi-autobiographical essay takes you through the intertwined narratives of four women's wedding days and the author's own journey into and out of wedding photography."
 author: "Mahesh Shantaram"
+metaDescription: "Long-form essay on India's wedding culture: four women's stories revealing class, caste, and gender in the marriage marketplace."
 status: published
 date: 2018-08-18
 container: matrimania

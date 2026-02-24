@@ -2,22 +2,72 @@
 import { ClientRouter } from "astro:transitions";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
+import { AUTHOR } from "../data/author";
 import "../styles/home.css";
 
 interface Props {
   title: string;
+  description?: string;
+  image?: string;
+  type?: string;
+  publishedDate?: string;
 }
 
-const { title } = Astro.props;
+const { title, description, image, type = "website", publishedDate } = Astro.props;
+
+const siteName = "Mahesh Shantaram";
+const metaDescription = description || AUTHOR.description;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = image
+  ? new URL(image, Astro.site).href
+  : new URL(AUTHOR.image, Astro.site).href;
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: AUTHOR.name,
+  url: AUTHOR.url,
+  email: AUTHOR.email,
+  jobTitle: AUTHOR.jobTitle,
+  description: AUTHOR.description,
+  image: new URL(AUTHOR.image, Astro.site).href,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: AUTHOR.location.city,
+    addressCountry: AUTHOR.location.country,
+  },
+  sameAs: AUTHOR.sameAs,
+};
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>{title} | Mahesh Shantaram</title>
+    <title>{title} | {siteName}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonicalURL.href} />
     <ClientRouter />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={`${title} | ${siteName}`} />
+    <meta property="og:description" content={metaDescription} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={siteName} />
+    {publishedDate && <meta property="article:published_time" content={publishedDate} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@thecontrarian" />
+    <meta name="twitter:title" content={`${title} | ${siteName}`} />
+    <meta name="twitter:description" content={metaDescription} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Person Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import SiteHeader from "../SiteHeader.astro";
 import SiteFooter from "../SiteFooter.astro";
+import { AUTHOR } from "../../data/author";
 import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
@@ -52,6 +53,43 @@ const getLanguageColor = (language: string) => {
 };
 
 const languageColor = post.data.language ? getLanguageColor(post.data.language) : '#6e7681';
+
+const metaDescription = post.data.description || post.data.subtitle || AUTHOR.description;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(AUTHOR.image, Astro.site).href;
+
+const codeJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  name: post.data.title,
+  ...(post.data.description && { description: post.data.description }),
+  ...(post.data.date && { dateCreated: post.data.date.toISOString() }),
+  ...(post.data.repoUrl && { codeRepository: post.data.repoUrl }),
+  ...(post.data.language && { programmingLanguage: post.data.language }),
+  ...(post.data.license && { license: post.data.license }),
+  author: {
+    "@type": "Person",
+    name: AUTHOR.name,
+    url: AUTHOR.url,
+    sameAs: AUTHOR.sameAs,
+  },
+  mainEntityOfPage: {
+    "@type": "WebPage",
+    "@id": canonicalURL.href,
+  },
+};
+
+const personJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: AUTHOR.name,
+  url: AUTHOR.url,
+  email: AUTHOR.email,
+  jobTitle: AUTHOR.jobTitle,
+  description: AUTHOR.description,
+  image: ogImage,
+  sameAs: AUTHOR.sameAs,
+};
 ---
 
 <!DOCTYPE html>
@@ -59,15 +97,33 @@ const languageColor = post.data.language ? getLanguageColor(post.data.language) 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{post.data.title} | Code Project</title>
-  
+  <title>{post.data.title} | Code Project | Mahesh Shantaram</title>
+  <meta name="description" content={metaDescription} />
+  <link rel="canonical" href={canonicalURL.href} />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content={`${post.data.title} | Code Project | Mahesh Shantaram`} />
+  <meta property="og:description" content={metaDescription} />
+  <meta property="og:image" content={ogImage} />
+  <meta property="og:url" content={canonicalURL.href} />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Mahesh Shantaram" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@thecontrarian" />
+  <meta name="twitter:title" content={`${post.data.title} | Code Project | Mahesh Shantaram`} />
+  <meta name="twitter:description" content={metaDescription} />
+  <meta name="twitter:image" content={ogImage} />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json" set:html={JSON.stringify(codeJsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
-  
-  <!-- Emoji support -->
-  <meta charset="utf-8">
 </head>
 
 <body>

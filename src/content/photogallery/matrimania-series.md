@@ -4,6 +4,7 @@ project: matrimania
 title: "MATRIMANIA"
 subtitle: "A fictional narrative through one dreary wedding night in an India tearing at its seams."
 author: "Mahesh Shantaram"
+metaDescription: "Documentary photography exploring India's wedding industry, class, consumption, and social power through one dreary wedding night."
 heroImage: "/library/originals/MATRIMANIA/MS201502-NehaVikul0590.jpg"
 date: 2015-06-01
 layoutType: carousel

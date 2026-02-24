@@ -1,6 +1,7 @@
 ---
 title: "ngl-storyteller"
 description: "Based on a true story. Your story. Go ahead, express yourself."
+metaDescription: "AI-powered photo storytelling tool for creating surreal visual narratives. Based on MFA Photography research on computational imaging."
 status: "published"
 repoUrl: "https://github.com/thecont1/ngl-storyteller"
 repoOwner: "thecont1"
