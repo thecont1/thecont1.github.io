@@ -50,12 +50,22 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
       { type: "photogallery", slug: "matrimania-series", label: "Series" },
       { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
       { type: "photogallery", slug: "the-african-portraits", label: "Series" },
+      { type: "photogallery", slug: "kashmir", label: "Album" },
+      { type: "photogallery", slug: "matrimania-series", label: "Series" },
+      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
+      { type: "photogallery", slug: "the-african-portraits", label: "Series" },
     ]
   },
 
   {
     title: "Travels",
     items: [
+      { type: "post", slug: "bundelkhand", label: "Itinerary" },
+      { type: "post", slug: "writefathername", label: "Patriarchy" },
+      { type: "post", slug: "bundelkhand", label: "Itinerary" },
+      { type: "post", slug: "writefathername", label: "Patriarchy" },
+      { type: "post", slug: "bundelkhand", label: "Itinerary" },
+      { type: "post", slug: "writefathername", label: "Patriarchy" },
       { type: "post", slug: "bundelkhand", label: "Itinerary" },
       { type: "post", slug: "writefathername", label: "Patriarchy" },
     ]
@@ -66,12 +76,22 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
     items: [
       { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
       { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
+      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
+      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
+      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
+      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
     ]
   },
 
   {
     title: "Code",
     items: [
+      { type: "code", slug: "ngl-storyteller"},
+      { type: "code", slug: "vscode"},
+      { type: "code", slug: "ngl-storyteller"},
+      { type: "code", slug: "vscode"},
+      { type: "code", slug: "ngl-storyteller"},
+      { type: "code", slug: "vscode"},
       { type: "code", slug: "ngl-storyteller"},
       { type: "code", slug: "vscode"},
     ]

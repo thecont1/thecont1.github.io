@@ -7,8 +7,7 @@
   position: relative;
   z-index: 3;
   background: var(--paper);
-  padding: 10vh 6vw;
-  border-top: 1px solid var(--hairline);
+  padding: 5vh 6vw;
 }
 
 /* Ensure sticky headers work within these sections if we want them to be consistent with Projects */
@@ -203,7 +202,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  background: #25D366; /* WhatsApp Green */
+  background: #333333; /* WhatsApp Green */
   color: white;
   border: none;
   padding: 0.8rem 1.2rem;

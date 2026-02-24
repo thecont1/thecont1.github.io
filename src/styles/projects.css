@@ -7,7 +7,7 @@
   z-index: 3;
   --section-pad-inline: 6vw;
   background: var(--paper);
-  padding: 10vh var(--section-pad-inline) 8vh;
+  padding: 10vh var(--section-pad-inline) 0vh;
 }
 
 .projects-header {
@@ -17,7 +17,7 @@
   background: var(--paper);
   margin-inline: calc(var(--section-pad-inline, 6vw) * -1);
   padding: 1.2rem var(--section-pad-inline, 6vw) 1rem;
-  margin-bottom: 8vh;
+  margin-bottom: 5vh;
 }
 
 @media (max-width: 768px) {
@@ -70,7 +70,7 @@
   position: relative;
   z-index: 0;
   margin-bottom: 1.25rem;
-  padding: 1rem 0 1.25rem;
+  padding: 3rem 0 3.25rem;
 }
 
 .projects-section::before {

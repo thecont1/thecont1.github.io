@@ -51,7 +51,6 @@ images:
     - src: /library/originals/TheAfricanPortraits/MS201609-KhojResidency0126.jpg
     - src: /library/originals/TheAfricanPortraits/MS201602-Soladevanahalli0066.jpg
     - src: /library/originals/TheAfricanPortraits/MS201603-Jaipur0052.jpg
-    - src: /library/originals/TheAfricanPortraits/MS201609-KhojResidency0118.jpg
     - src: /library/originals/TheAfricanPortraits/MS201612-AfricanPortraits0006.jpg
     - src: /library/originals/TheAfricanPortraits/MS201609-KhojResidency0078.jpg
     - src: /library/originals/TheAfricanPortraits/MS201602-Soladevanahalli0075.jpg
