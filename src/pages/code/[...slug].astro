@@ -3,7 +3,7 @@ import { getCollection } from "astro:content";
 import Code from "../../components/layouts/Code.astro";
 
 export async function getStaticPaths() {
-  const codeProjects = await getCollection("code");
+  const codeProjects = await getCollection("code", ({ data }) => data.status === "published");
   return codeProjects.map((project) => ({
     params: { slug: project.slug },
     props: { project },

@@ -39,6 +39,7 @@ async function getFeaturedContent(item: FeaturedItem) {
   try {
     const entry = await getEntry(item.type, item.slug);
     if (!entry) return null;
+    if ((entry.data as any).status !== "published") return null;
     
     return {
       ...item,

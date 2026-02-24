@@ -1,8 +1,8 @@
 ---
+status: published
 title: "Kashmir"
 subtitle: "Land of Pain and Pleasure"
 author: "Mahesh Shantaram"
-status: draft
 date: 2026-01-04
 heroImage: "/library/originals/KASHMIR/MS201904-Kashmir0594.jpg"
 showhero: true
