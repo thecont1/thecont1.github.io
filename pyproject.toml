@@ -4,5 +4,6 @@ version = "0.1.0"
 description = "Python utilities for thecontrarian.in"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "ipython>=9.10.0",
     "nbconvert>=7.17.0",
 ]

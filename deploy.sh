@@ -66,7 +66,7 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: ./deploy.sh [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --skip-r2        Skip R2 sync (metadata extraction and upload)"
+            echo "  --skip-r2        Skip R2 sync (library upload to Cloudflare R2)"
             echo "  --skip-build     Skip Astro build"
             echo "  --skip-ftp       Skip FTP deployment"
             echo "  --r2-dir DIR     Only sync specific directory under originals/"
@@ -88,18 +88,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ==============================================================================
-# STEP 1: R2 Sync (EXIF extraction + upload)
+# STEP 1: R2 Sync (Library upload to Cloudflare R2)
 # ==============================================================================
 if [ "$SKIP_R2" = true ]; then
     echo -e "${YELLOW}⏭  Skipping R2 sync (--skip-r2)${NC}"
     echo ""
 else
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}STEP 1: R2 Sync (EXIF + Upload)${NC}"
+    echo -e "${BLUE}STEP 1: R2 Sync (Library → Cloudflare R2)${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
     
-    # Prompt user before checking R2 bucket
-    echo -e -n "${YELLOW}Sync local with Cloudflare R2? (y/n): ${NC}"
+    # Prompt user before syncing to R2
+    echo -e -n "${YELLOW}Sync local library with Cloudflare R2? (y/n): ${NC}"
     read -n 1 -r
     echo ""
     
@@ -120,14 +120,32 @@ else
 fi
 
 # ==============================================================================
-# STEP 2: Astro Build
+# STEP 2: Render Notebooks (DataStory pre-build)
+# ==============================================================================
+if [ "$SKIP_BUILD" = true ]; then
+    echo -e "${YELLOW}⏭  Skipping notebook render (--skip-build)${NC}"
+    echo ""
+else
+    echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
+    echo -e "${BLUE}STEP 2: Render Notebooks${NC}"
+    echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
+    
+    echo -e "${YELLOW}Rendering DataStory notebooks...${NC}"
+    uv run python scripts/render_notebook.py
+    
+    echo -e "${GREEN}✓ Notebooks rendered${NC}"
+    echo ""
+fi
+
+# ==============================================================================
+# STEP 3: Astro Build
 # ==============================================================================
 if [ "$SKIP_BUILD" = true ]; then
     echo -e "${YELLOW}⏭  Skipping Astro build (--skip-build)${NC}"
     echo ""
 else
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}STEP 2: Astro Build${NC}"
+    echo -e "${BLUE}STEP 3: Astro Build${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
     
     echo -e "${YELLOW}Building site with Astro...${NC}"
@@ -138,10 +156,10 @@ else
 fi
 
 # ==============================================================================
-# STEP 3: Prepare Build Output
+# STEP 4: Prepare Build Output
 # ==============================================================================
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}STEP 3: Prepare Build Output${NC}"
+echo -e "${BLUE}STEP 4: Prepare Build Output${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 
 if [ -d "dist/library" ]; then
@@ -162,14 +180,14 @@ fi
 echo ""
 
 # ==============================================================================
-# STEP 4: FTP Deployment
+# STEP 5: FTP Deployment
 # ==============================================================================
 if [ "$SKIP_FTP" = true ]; then
     echo -e "${YELLOW}⏭  Skipping FTP deployment (--skip-ftp)${NC}"
     echo ""
 else
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-    echo -e "${BLUE}STEP 4: FTP Deployment${NC}"
+    echo -e "${BLUE}STEP 5: FTP Deployment${NC}"
     echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
     
     bash scripts/deploy_ftp.sh
@@ -183,17 +201,16 @@ fi
 # ==============================================================================
 echo -e "${GREEN}"
 echo "╔════════════════════════════════════════════════════════════╗"
-echo "║          🎉 DEPLOYMENT COMPLET  E 🎉                      ║"
+echo "║          🎉 DEPLOYMENT COMPLETE 🎉                        ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo -e "${NC}"
 
 echo "Summary:"
 if [ "$SKIP_R2" = false ]; then
-    echo -e "${GREEN}  ✓${NC} EXIF metadata extracted"
-    echo -e "${GREEN}  ✓${NC} Local junk files purged"
-    echo -e "${GREEN}  ✓${NC} Library synced to R2 CDN"
+    echo -e "${GREEN}  ✓${NC} Library synced to Cloudflare R2 CDN"
 fi
 if [ "$SKIP_BUILD" = false ]; then
+    echo -e "${GREEN}  ✓${NC} DataStory notebooks rendered"
     echo -e "${GREEN}  ✓${NC} Astro site built"
 fi
 echo -e "${GREEN}  ✓${NC} dist/library removed"

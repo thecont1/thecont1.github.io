@@ -33,7 +33,7 @@ import nbformat
 
 
 CONTENT_DIR = Path(__file__).resolve().parent.parent / "src" / "content" / "datastory"
-SHA_CACHE_PATH = CONTENT_DIR / ".notebook-shas.json"
+SHA_CACHE_PATH = Path(__file__).resolve().parent / ".notebook-shas.json"
 
 # ---------------------------------------------------------------------------
 # SHA cache — tracks last-rendered GitHub commit SHA per notebook URL

@@ -104,66 +104,8 @@ else
 fi
 echo ""
 
-# Step 2: Generate metadata for originals only
-echo -e "${YELLOW}Step 2: Generating metadata.json files (originals only)${NC}"
-uv run python scripts/build_exif.py $DIR_ARG
-
-# Pick a random image and display its metadata
-echo ""
-echo -e "${BLUE}Selecting random image to verify metadata...${NC}"
-
-# Find all metadata.json files
-METADATA_FILES=()
-while IFS= read -r -d '' file; do
-    METADATA_FILES+=("$file")
-done < <(find "$LOCAL_ORIGINALS" -name "metadata.json" -print0)
-
-if [ ${#METADATA_FILES[@]} -gt 0 ]; then
-    # Pick a random metadata file
-    RANDOM_INDEX=$((RANDOM % ${#METADATA_FILES[@]}))
-    RANDOM_METADATA="${METADATA_FILES[$RANDOM_INDEX]}"
-    
-    # Get directory name
-    METADATA_DIR=$(dirname "$RANDOM_METADATA")
-    RELATIVE_DIR=$(echo "$METADATA_DIR" | sed "s|^$LOCAL_ORIGINALS/||")
-    
-    # Get first image key from metadata
-    RANDOM_IMAGE=$(python3 -c "import json, sys; data=json.load(open('$RANDOM_METADATA')); print(list(data.keys())[0] if data else '')")
-    
-    if [ -n "$RANDOM_IMAGE" ]; then
-        echo -e "${GREEN}Random sample: ${RELATIVE_DIR}/${RANDOM_IMAGE}${NC}"
-        
-        # Extract and display key metadata fields
-        python3 -c "
-import json
-import sys
-
-with open('$RANDOM_METADATA', 'r') as f:
-    data = json.load(f)
-    
-if '$RANDOM_IMAGE' in data:
-    img = data['$RANDOM_IMAGE']
-    photo = img.get('photography', {})
-    
-    print('  Camera: {}'.format(photo.get('camera_make', '') + ' ' + photo.get('camera_model', '')))
-    print('  Lens: {}'.format(photo.get('lens_model', 'N/A')))
-    print('  Settings: {} | {} | ISO {}'.format(
-        photo.get('aperture', 'N/A'),
-        photo.get('shutter_speed', 'N/A'),
-        photo.get('iso', 'N/A')
-    ))
-    if 'title' in photo:
-        print('  Title: {}'.format(photo['title'][:60] + ('...' if len(photo.get('title', '')) > 60 else '')))
-else:
-    print('  Error: Image not found in metadata')
-"
-    fi
-else
-    echo -e "${YELLOW}No metadata files found${NC}"
-fi
-
-echo ""
-echo -e "${YELLOW}Step 3: Syncing entire library to R2 (local is source of truth)${NC}"
+# Step 2: Syncing entire library to R2 (local is source of truth)
+echo -e "${YELLOW}Step 2: Syncing entire library to R2 (local is source of truth)${NC}"
 echo -e "${BLUE}Note: Files not present locally will be deleted from R2${NC}"
 echo ""
 
@@ -195,7 +137,6 @@ echo -e "${GREEN}✅ Sync complete!${NC}"
 echo ""
 echo "Summary:"
 echo "- Junk files cleaned up locally (.DS_Store, Thumbs.db, etc.)"
-echo "- Metadata generated locally (originals only)"
 echo "- Entire public/library/ synced to R2 (excluding junk files)"
 echo "- Remote files not in local library were deleted"
 echo "- Local remains single source of truth"
