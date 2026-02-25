@@ -86,6 +86,8 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
   {
     title: "Code",
     items: [
+      { type: "datastory", slug: "bangalore-metro-conspiracy-theory"},
+      { type: "datastory", slug: "bangalore-metro-phenomena-inspector"},
       { type: "code", slug: "ngl-storyteller"},
       { type: "code", slug: "vscode"},
       { type: "code", slug: "ngl-storyteller"},

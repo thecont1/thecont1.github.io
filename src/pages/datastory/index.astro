@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+
+const stories = await getCollection("datastory", ({ data }) => {
+  return data.status === "published";
+});
+
+// Sort by date, newest first
+const sortedStories = stories.sort((a, b) => {
+  const dateA = a.data.date || new Date(0);
+  const dateB = b.data.date || new Date(0);
+  return dateB.getTime() - dateA.getTime();
+});
+---
+
+<Layout title="Data Stories">
+  <main>
+    <h1>Data Stories</h1>
+    <div class="datastory-list">
+      {sortedStories.map((story) => (
+        <article class="datastory-preview">
+          <h2><a href={`/datastory/${story.slug}`}>{story.data.title}</a></h2>
+          {story.data.subtitle && <p>{story.data.subtitle}</p>}
+          {story.data.date && (
+            <time datetime={story.data.date.toISOString()}>
+              {story.data.date.toLocaleDateString()}
+            </time>
+          )}
+        </article>
+      ))}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .datastory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .datastory-preview h2 a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .datastory-preview h2 a:hover {
+    text-decoration: underline;
+  }
+
+  .datastory-preview time {
+    color: #666;
+    font-size: 0.9em;
+  }
+</style>

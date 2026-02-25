@@ -152,6 +152,11 @@
     transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.5s ease !important;
   }
 
+  /* Ensure canvas opacity transitions smoothly */
+  canvas {
+    transition: opacity 0.8s ease !important;
+  }
+
   /* Lifting elements above the curtain */
   body.screen-mode .editorial-post,
   body.screen-mode .simple-post,
@@ -246,6 +251,17 @@
     transform: scale(1.05);
     transform-origin: center center;
     will-change: transform;
+  }
+
+  /* Snow / particle canvas: fade out gently during Screen mode */
+  body.screen-mode canvas {
+    opacity: 0 !important;
+    transition: opacity 0.8s ease !important;
+  }
+
+  body.screen-mode-exiting canvas {
+    opacity: 1 !important;
+    transition: opacity 0.8s ease 0.2s !important; /* slight delay so curtain starts retracting first */
   }
 
   /* Keep Screen toggle ALWAYS on top to prevent vanishing during transitions */

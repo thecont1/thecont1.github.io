@@ -10,6 +10,7 @@
     "deploy": "bash deploy.sh",
     "scaffold": "bun scripts/scaffold.js",
     "r2:upload": "bash scripts/upload_to_r2.sh",
+    "render:notebooks": "uv run python scripts/render_notebook.py",
     "test": "echo 'No tests configured'"
   },
   "dependencies": {

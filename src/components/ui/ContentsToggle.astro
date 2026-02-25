@@ -214,10 +214,10 @@ const { title, label = "Contents" } = Astro.props;
 
   .toc-title {
     font-family: "Fraunces", serif !important;
-    font-size: 2.2rem !important;
+    font-size: 1.5rem !important;
     font-weight: 300 !important;
     color: white !important;
-    margin-bottom: 4rem !important;
+    margin-bottom: 2.5rem !important;
     line-height: 1.1 !important;
     display: block !important;
     text-transform: none !important;
@@ -266,7 +266,7 @@ const { title, label = "Contents" } = Astro.props;
   }
 
   .sticky-toc li {
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
     counter-increment: chapter;
     display: block;
     position: relative;
@@ -281,7 +281,7 @@ const { title, label = "Contents" } = Astro.props;
     text-decoration: none !important;
     color: white !important;
     font-family: "Fraunces", serif;
-    font-size: 1.6rem;
+    font-size: 1.05rem;
     line-height: 1.3;
     display: block;
     font-weight: 400;
@@ -292,7 +292,7 @@ const { title, label = "Contents" } = Astro.props;
   .sticky-toc ul a::before {
     content: counter(chapter) ". ";
     font-family: "Inter", sans-serif;
-    font-size: 1rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: #d04b36;
     margin-right: 0.5rem;

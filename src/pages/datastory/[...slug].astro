@@ -1,0 +1,41 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Datastory from "../../components/layouts/Datastory.astro";
+import SchemaMarkup from "../../components/seo/SchemaMarkup.astro";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const stories = await getCollection("datastory", ({ data }) => {
+    return data.status === "published";
+  });
+  return stories.map((story) => ({
+    params: { slug: story.slug },
+    props: { story },
+  }));
+}
+
+const { story } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<Layout
+  title={story.data.title}
+  description={story.data.metaDescription || story.data.subtitle}
+  image={story.data.heroImage}
+  type="article"
+  publishedDate={story.data.date?.toISOString()}
+>
+  <Fragment slot="head">
+    <SchemaMarkup
+      title={story.data.title}
+      description={story.data.metaDescription || story.data.subtitle}
+      image={story.data.heroImage}
+      datePublished={story.data.date?.toISOString()}
+      type="datastory"
+      url={canonicalURL}
+    />
+  </Fragment>
+  <Datastory post={story} />
+</Layout>
