@@ -21,6 +21,7 @@ The script:
 """
 
 import argparse
+import json
 import re
 import sys
 import urllib.request
@@ -32,6 +33,75 @@ import nbformat
 
 
 CONTENT_DIR = Path(__file__).resolve().parent.parent / "src" / "content" / "datastory"
+SHA_CACHE_PATH = CONTENT_DIR / ".notebook-shas.json"
+
+# ---------------------------------------------------------------------------
+# SHA cache — tracks last-rendered GitHub commit SHA per notebook URL
+# ---------------------------------------------------------------------------
+
+def load_sha_cache() -> dict:
+    """Load the SHA cache from disk, returning an empty dict if absent."""
+    if SHA_CACHE_PATH.exists():
+        try:
+            return json.loads(SHA_CACHE_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
+def save_sha_cache(cache: dict) -> None:
+    """Persist the SHA cache to disk."""
+    SHA_CACHE_PATH.write_text(
+        json.dumps(cache, indent=2, sort_keys=True), encoding="utf-8"
+    )
+
+
+def github_blob_to_api_url(notebook_url: str) -> str | None:
+    """
+    Convert a github.com blob URL to the GitHub Commits API URL that returns
+    the latest commit touching that file.
+
+    https://github.com/user/repo/blob/branch/path/to/nb.ipynb
+    → https://api.github.com/repos/user/repo/commits?path=path/to/nb.ipynb&sha=branch&per_page=1
+    """
+    url = notebook_url.strip()
+    m = re.match(
+        r"https://github\.com/([^/]+)/([^/]+)/blob/([^/]+)/(.+)",
+        url,
+    )
+    if not m:
+        return None
+    owner, repo, branch, filepath = m.group(1), m.group(2), m.group(3), m.group(4)
+    return (
+        f"https://api.github.com/repos/{owner}/{repo}/commits"
+        f"?path={filepath}&sha={branch}&per_page=1"
+    )
+
+
+def fetch_latest_sha(notebook_url: str) -> str | None:
+    """
+    Query the GitHub Commits API to get the SHA of the most recent commit
+    that touched this notebook file. Returns None for non-GitHub URLs or on error.
+    """
+    api_url = github_blob_to_api_url(notebook_url)
+    if not api_url:
+        return None
+    try:
+        req = urllib.request.Request(
+            api_url,
+            headers={
+                "User-Agent": "thecontrarian-renderer/1.0",
+                "Accept": "application/vnd.github+json",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        if data and isinstance(data, list):
+            return data[0]["sha"]
+    except Exception as e:
+        print(f"  [sha-check] Could not fetch commit SHA: {e}")
+    return None
+
 
 # Legacy markers — stripped from .md files during migration
 _LEGACY_MARKER_START = "<!-- NOTEBOOK_HTML_START -->"
@@ -208,8 +278,8 @@ def strip_legacy_markers(md_text: str) -> str:
 # Per-file processing
 # ---------------------------------------------------------------------------
 
-def process_file(md_path: Path) -> bool:
-    """Process a single .md file. Returns True on success."""
+def process_file(md_path: Path, sha_cache: dict, force: bool = False) -> bool:
+    """Process a single .md file. Returns True if notebook was (re)rendered."""
     md_text = md_path.read_text(encoding="utf-8")
     notebook_url = extract_notebook_url(md_text)
 
@@ -218,6 +288,23 @@ def process_file(md_path: Path) -> bool:
         return False
 
     print(f"Processing: {md_path.name}")
+
+    # --- SHA-based change detection for GitHub notebooks ---
+    html_path = md_path.with_suffix(".notebook.html")
+    if not force:
+        latest_sha = fetch_latest_sha(notebook_url)
+        if latest_sha:
+            cached_sha = sha_cache.get(notebook_url)
+            if cached_sha == latest_sha and html_path.exists():
+                print(f"  Up to date (SHA {latest_sha[:8]}), skipping.")
+                return False
+            print(f"  SHA changed: {str(cached_sha)[:8] if cached_sha else 'none'} → {latest_sha[:8]}")
+        else:
+            print(f"  No SHA available (non-GitHub URL), rendering unconditionally.")
+            latest_sha = None
+    else:
+        print(f"  --force: skipping SHA check.")
+        latest_sha = None
 
     try:
         notebook_json = fetch_notebook(notebook_url)
@@ -229,9 +316,15 @@ def process_file(md_path: Path) -> bool:
             print(f"  Resolved relative URLs against: {base_url}")
 
         # Write notebook HTML to sibling .notebook.html file
-        html_path = md_path.with_suffix(".notebook.html")
         html_path.write_text(html_body, encoding="utf-8")
         print(f"  Wrote {html_path.name}")
+
+        # Update SHA cache entry
+        if latest_sha or not force:
+            resolved_sha = latest_sha or fetch_latest_sha(notebook_url)
+            if resolved_sha:
+                sha_cache[notebook_url] = resolved_sha
+                print(f"  Cached SHA {resolved_sha[:8]}")
 
         # Clean legacy markers from the .md file if present
         if _LEGACY_MARKER_START in md_text:
@@ -258,37 +351,44 @@ def main():
         "--slug", type=str,
         help="Process only this slug (filename stem without .md)"
     )
+    parser.add_argument(
+        "--force", action="store_true",
+        help="Ignore SHA cache and re-render all notebooks"
+    )
     args = parser.parse_args()
 
     if not CONTENT_DIR.exists():
         print(f"Content directory not found: {CONTENT_DIR}", file=sys.stderr)
         sys.exit(1)
 
-    success_count = 0
+    sha_cache = load_sha_cache()
+    rendered_count = 0
+    skipped_count = 0
     fail_count = 0
 
     if args.slug:
         md_path = CONTENT_DIR / f"{args.slug}.md"
         if not md_path.exists():
-            # Also try .mdx
             md_path = CONTENT_DIR / f"{args.slug}.mdx"
         if md_path.exists():
-            if process_file(md_path):
-                success_count += 1
+            if process_file(md_path, sha_cache, force=args.force):
+                rendered_count += 1
             else:
-                fail_count += 1
+                skipped_count += 1
         else:
             print(f"File not found: {args.slug}.md", file=sys.stderr)
             sys.exit(1)
     else:
         for item in sorted(CONTENT_DIR.iterdir()):
             if item.is_file() and item.suffix in (".md", ".mdx"):
-                if process_file(item):
-                    success_count += 1
+                result = process_file(item, sha_cache, force=args.force)
+                if result:
+                    rendered_count += 1
                 else:
-                    fail_count += 1
+                    skipped_count += 1
 
-    print(f"\nDone: {success_count} rendered, {fail_count} skipped/failed")
+    save_sha_cache(sha_cache)
+    print(f"\nDone: {rendered_count} rendered, {skipped_count} skipped, {fail_count} failed")
 
 
 if __name__ == "__main__":

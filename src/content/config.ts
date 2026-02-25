@@ -140,22 +140,16 @@ const datastorySchema = z.object({
   // Notebook configuration (required for datastories)
   notebook: z.object({
     engine: z.enum(["marimo", "jupyter"]),
-    entry: z.string(), // path to notebook file
-    env: z.string().optional(), // environment/venv path
+    entry: z.string(),
   }),
   
   // Taxonomy
   geography: z.array(geographyEnum).max(2).optional().default([]),
-  theme: z.array(themeEnum).max(5).optional().default([]),
+  theme: z.array(z.string()).max(5).optional().default([]),
   
   // Dates
   date: z.date().optional(),
   
-  // Lightbox settings
-  lightbox: z.object({
-    gallery: z.boolean().optional().default(true),
-  }).optional().default({ gallery: true }),
-
   // Table of Contents control
   toc: z.boolean().optional().default(false),
   
