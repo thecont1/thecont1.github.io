@@ -56,6 +56,24 @@ def save_sha_cache(cache: dict) -> None:
     )
 
 
+def read_cache_entry(cache: dict, notebook_url: str) -> tuple[str | None, bool]:
+    """
+    Read cache entry for a notebook URL.
+
+    Backward compatible formats:
+      - legacy: "<sha>"
+      - current: {"sha": "<sha>", "exclude_code_cells": bool}
+    """
+    entry = cache.get(notebook_url)
+    if isinstance(entry, str):
+        return entry, False
+    if isinstance(entry, dict):
+        sha = entry.get("sha")
+        exclude = bool(entry.get("exclude_code_cells", False))
+        return (sha if isinstance(sha, str) else None), exclude
+    return None, False
+
+
 def github_blob_to_api_url(notebook_url: str) -> str | None:
     """
     Convert a github.com blob URL to the GitHub Commits API URL that returns
@@ -112,13 +130,19 @@ _LEGACY_MARKER_END = "<!-- NOTEBOOK_HTML_END -->"
 # Frontmatter parsing
 # ---------------------------------------------------------------------------
 
-def extract_notebook_url(md_text: str) -> str | None:
-    """Parse YAML frontmatter and return notebook.entry value."""
+def extract_notebook_config(md_text: str) -> tuple[str | None, bool]:
+    """Parse YAML frontmatter and return (notebook.entry, notebook.excludeCodeCells)."""
     m = re.match(r"^---\s*\n(.*?)\n---", md_text, re.DOTALL)
     if not m:
-        return None
+        return None, False
     frontmatter = m.group(1)
     in_notebook = False
+    notebook_url: str | None = None
+    exclude_code_cells = False
+
+    def _parse_bool(value: str) -> bool:
+        return value.strip().lower() in {"true", "yes", "on", "1"}
+
     for line in frontmatter.splitlines():
         stripped = line.strip()
         if stripped.startswith("notebook:"):
@@ -127,10 +151,15 @@ def extract_notebook_url(md_text: str) -> str | None:
         if in_notebook:
             if stripped.startswith("entry:"):
                 val = stripped.split(":", 1)[1].strip().strip('"').strip("'")
-                return val if val else None
+                notebook_url = val if val else None
+                continue
+            if stripped.startswith("excludeCodeCells:"):
+                val = stripped.split(":", 1)[1].strip().strip('"').strip("'")
+                exclude_code_cells = _parse_bool(val)
+                continue
             if not line.startswith(" ") and not line.startswith("\t"):
                 in_notebook = False
-    return None
+    return notebook_url, exclude_code_cells
 
 
 # ---------------------------------------------------------------------------
@@ -246,11 +275,12 @@ def strip_document_shell(html: str) -> str:
     html = re.sub(r'\n{3,}', '\n\n', html)
     return html.strip()
 
-def render_notebook_html(notebook_json: str) -> str:
+def render_notebook_html(notebook_json: str, *, exclude_code_cells: bool = False) -> str:
     """Convert notebook JSON string to an HTML body fragment via nbconvert."""
     nb = nbformat.reads(notebook_json, as_version=4)
     exporter = HTMLExporter()
     exporter.template_name = "basic"
+    exporter.exclude_input = exclude_code_cells
     exporter.exclude_input_prompt = False
     exporter.exclude_output_prompt = False
     body, _resources = exporter.from_notebook_node(nb)
@@ -281,24 +311,33 @@ def strip_legacy_markers(md_text: str) -> str:
 def process_file(md_path: Path, sha_cache: dict, force: bool = False) -> bool:
     """Process a single .md file. Returns True if notebook was (re)rendered."""
     md_text = md_path.read_text(encoding="utf-8")
-    notebook_url = extract_notebook_url(md_text)
+    notebook_url, exclude_code_cells = extract_notebook_config(md_text)
 
     if not notebook_url:
         print(f"  Skipping {md_path.name}: no notebook.entry URL")
         return False
 
     print(f"Processing: {md_path.name}")
+    if exclude_code_cells:
+        print("  notebook.excludeCodeCells: enabled (code inputs will be hidden)")
 
     # --- SHA-based change detection for GitHub notebooks ---
     html_path = md_path.with_suffix(".notebook.html")
     if not force:
         latest_sha = fetch_latest_sha(notebook_url)
         if latest_sha:
-            cached_sha = sha_cache.get(notebook_url)
-            if cached_sha == latest_sha and html_path.exists():
+            cached_sha, cached_exclude_code_cells = read_cache_entry(sha_cache, notebook_url)
+            if (
+                cached_sha == latest_sha
+                and cached_exclude_code_cells == exclude_code_cells
+                and html_path.exists()
+            ):
                 print(f"  Up to date (SHA {latest_sha[:8]}), skipping.")
                 return False
-            print(f"  SHA changed: {str(cached_sha)[:8] if cached_sha else 'none'} → {latest_sha[:8]}")
+            print(
+                f"  Render input changed: sha {str(cached_sha)[:8] if cached_sha else 'none'} → {latest_sha[:8]}, "
+                f"excludeCodeCells {cached_exclude_code_cells} → {exclude_code_cells}"
+            )
         else:
             print(f"  No SHA available (non-GitHub URL), rendering unconditionally.")
             latest_sha = None
@@ -308,7 +347,10 @@ def process_file(md_path: Path, sha_cache: dict, force: bool = False) -> bool:
 
     try:
         notebook_json = fetch_notebook(notebook_url)
-        html_body = render_notebook_html(notebook_json)
+        html_body = render_notebook_html(
+            notebook_json,
+            exclude_code_cells=exclude_code_cells,
+        )
 
         base_url = derive_base_url(notebook_url)
         if base_url:
@@ -323,8 +365,13 @@ def process_file(md_path: Path, sha_cache: dict, force: bool = False) -> bool:
         if latest_sha or not force:
             resolved_sha = latest_sha or fetch_latest_sha(notebook_url)
             if resolved_sha:
-                sha_cache[notebook_url] = resolved_sha
-                print(f"  Cached SHA {resolved_sha[:8]}")
+                sha_cache[notebook_url] = {
+                    "sha": resolved_sha,
+                    "exclude_code_cells": exclude_code_cells,
+                }
+                print(
+                    f"  Cached SHA {resolved_sha[:8]} with excludeCodeCells={exclude_code_cells}"
+                )
 
         # Clean legacy markers from the .md file if present
         if _LEGACY_MARKER_START in md_text:

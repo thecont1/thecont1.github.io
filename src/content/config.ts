@@ -141,6 +141,7 @@ const datastorySchema = z.object({
   notebook: z.object({
     engine: z.enum(["marimo", "jupyter"]),
     entry: z.string(),
+    excludeCodeCells: z.boolean().optional().default(false),
   }),
   
   // Taxonomy
