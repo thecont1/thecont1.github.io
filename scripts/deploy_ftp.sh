@@ -30,7 +30,8 @@ if [ "${DRY_RUN}" != "0" ]; then
 fi
 
 # lftp mirror behavior:
-# - FTP timestamps can be unreliable; by default we compare by size only (ignore time).
+# - We compare by size + mtime so changed files with same byte length (common for hashed asset name swaps in HTML)
+#   are still uploaded.
 # - Set PRINT_ACTIONS=1 to show each transfer/delete action.
 PRINT_ACTIONS="${PRINT_ACTIONS:-0}"
 MIRROR_VERBOSITY_FLAG=""
@@ -62,8 +63,8 @@ else
 fi
 echo ""
 
-# Step 2: Mirror static site directory
-echo "Step 2: Mirroring ${LOCAL_DIR} to remote ${REMOTE_DIR}..."
+# Step 2: Mirror static site directory (delete stale files, but keep historical hashed /_astro assets)
+echo "Step 2: Mirroring ${LOCAL_DIR} to remote ${REMOTE_DIR} (safe asset strategy)..."
 lftp -c "
 set ssl:verify-certificate no
 set net:timeout 30
@@ -71,7 +72,10 @@ set net:max-retries 3
 set net:reconnect-interval-base 5
 set ftp:passive-mode on
 open -u ${FTP_USER},${FTP_PASS} ${FTP_HOST}
-mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --ignore-time --parallel=3 --no-perms ${LOCAL_DIR} ${REMOTE_DIR}
+# Pass 1: Sync everything except /_astro with deletion enabled
+mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --delete --depth-first --parallel=3 --no-perms --exclude-glob _astro/** ${LOCAL_DIR} ${REMOTE_DIR}
+# Pass 2: Sync /_astro without deletion so old hashed files remain available for cached HTML
+mirror ${MIRROR_DRYRUN_FLAG} ${MIRROR_VERBOSITY_FLAG} --reverse --depth-first --parallel=3 --no-perms ${LOCAL_DIR}/_astro ${REMOTE_DIR}/_astro
 bye
 "
 echo -e "${GREEN}✓ Static site mirrored${NC}"
