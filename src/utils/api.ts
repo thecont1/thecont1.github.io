@@ -12,14 +12,10 @@ export const C2PA_API_BASE = 'https://apps.thecontrarian.in/c2pa';
 export function resolveImageUri(imgPath: string): string {
   let pathname: string;
   
-  // Extract pathname from full URLs or use as-is for relative paths
-  if (imgPath.startsWith('http://') || imgPath.startsWith('https://')) {
-    try {
-      pathname = new URL(imgPath).pathname;
-    } catch {
-      pathname = imgPath;
-    }
-  } else {
+  try {
+    // Extract pathname for both full URLs and relative paths, stripping query parameters
+    pathname = new URL(imgPath, 'http://dummy.com').pathname;
+  } catch {
     pathname = imgPath;
   }
   

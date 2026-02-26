@@ -443,7 +443,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
           openLightbox(image);
         };
       });
-      
+
       if (includeHero) {
         const heroImg = document.querySelector(".post-hero img") as HTMLImageElement;
         if (heroImg && !heroImg.closest("a") && !heroImg.classList.contains("no-lightbox")) {

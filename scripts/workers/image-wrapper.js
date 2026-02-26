@@ -100,7 +100,8 @@ async function proxyRawImage(path, env) {
   }
   const headers = new Headers();
   headers.set("Content-Type", obj.httpMetadata?.contentType || mimeForPath(path));
-  headers.set("Cache-Control", "public, max-age=604800, immutable");
+  headers.set("Cache-Control", "public, max-age=604800");
+  headers.set("Vary", "Sec-Fetch-Dest");
   headers.set("X-Robots-Tag", "noindex");
   headers.set("ETag", obj.httpEtag || "");
   return new Response(obj.body, { status: 200, headers });
@@ -1376,18 +1377,25 @@ export default {
     const imgPublicUrl = publicUrl(r2Key);
 
     // ── Decide: raw image or lightbox HTML ──────────────────────
-    // Serve raw image if ANY of these are true:
-    //  1. Referer is from an allowed origin (embedded <img> on our site)
-    //  2. Referer is from library.thecontrarian.in itself (lightbox <img> loading)
-    //  3. Sec-Fetch-Dest: image (browser <img> tag fetch)
-    //  4. Accept header prefers image/* over text/html (non-browser image clients)
-    const refHost = refererHost(request);
-    const isSelfReferer = refHost === "library.thecontrarian.in";
-    const isImageFetch = request.headers.get("Sec-Fetch-Dest") === "image";
-    const acceptsImage = (request.headers.get("Accept") || "").startsWith("image/");
+    // Top-level navigations (Sec-Fetch-Dest: document) ALWAYS get lightbox HTML,
+    // even when Referer is our own site (e.g. "Open Image in New Tab").
+    const secFetchDest = (request.headers.get("Sec-Fetch-Dest") || "").toLowerCase();
+    if (secFetchDest === "document") {
+      // Fall through to lightbox HTML path below
+    } else {
+      // Serve raw image if ANY of these are true:
+      //  1. Referer is from an allowed origin (embedded <img> on our site)
+      //  2. Referer is from library.thecontrarian.in itself (lightbox <img> loading)
+      //  3. Sec-Fetch-Dest: image (browser <img> tag fetch)
+      //  4. Accept header prefers image/* over text/html (non-browser image clients)
+      const refHost = refererHost(request);
+      const isSelfReferer = refHost === "library.thecontrarian.in";
+      const isImageFetch = secFetchDest === "image";
+      const acceptsImage = (request.headers.get("Accept") || "").startsWith("image/");
 
-    if (isAllowedReferer(request) || isSelfReferer || isImageFetch || acceptsImage) {
-      return proxyRawImage(r2Key, env);
+      if (isAllowedReferer(request) || isSelfReferer || isImageFetch || acceptsImage) {
+        return proxyRawImage(r2Key, env);
+      }
     }
 
     // ── Lightbox HTML path (browsers + social crawlers) ─────────
@@ -1415,6 +1423,7 @@ export default {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
         "Cache-Control": "private, no-store",
+        "Vary": "Sec-Fetch-Dest",
         "X-Robots-Tag": "noindex, nofollow",
       },
     });
