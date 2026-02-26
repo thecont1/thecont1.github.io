@@ -50,7 +50,8 @@ function sanitizePath(raw) {
   if (!raw) return null;
   let path = raw.split("?")[0].split("#")[0];
   path = decodeURIComponent(path).replace(/^\/+/, "");
-  if (/(\/?\.\.\\/|\$)/.test(path)) return null;
+  if (/(?:^|\/)\.\.(?:\/|$)/.test(path)) return null;
+  if (path.includes("\0")) return null;
   if (/[\x00-\x1F\x7F]/.test(path)) return null;
   // ← now allows forward slashes for subdirectory paths
   if (!/^[0-9A-Za-z._\/\-]+$/.test(path)) return null;
@@ -85,29 +86,113 @@ function escHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
-// ← now uses R2 binding instead of fetch()
+// Serve raw image directly from R2.
+// R2 is the source of truth — if the key doesn't exist, it's a genuine 404.
+// IMPORTANT: We cannot fetch() to library.thecontrarian.in/originals/* as fallback
+// because that URL matches this Worker's route and would cause an infinite loop.
 async function proxyRawImage(path, env) {
   const obj = await env.BUCKET.get(path);
   if (!obj) {
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: publicUrl(path),
-        "Cache-Control": "public, max-age=300",
-      },
+    return new Response("Image not found.", {
+      status: 404,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
   }
   const headers = new Headers();
-  headers.set("Content-Type", mimeForPath(path));
-  headers.set("Cache-Control", "public, max-age=604800");
+  headers.set("Content-Type", obj.httpMetadata?.contentType || mimeForPath(path));
+  headers.set("Cache-Control", "public, max-age=604800, immutable");
   headers.set("X-Robots-Tag", "noindex");
+  headers.set("ETag", obj.httpEtag || "");
   return new Response(obj.body, { status: 200, headers });
 }
 
+/* ── Server-side OG metadata ── */
+const C2PA_API = "https://apps.thecontrarian.in/c2pa";
+
+// Fetch with a hard timeout — returns null on timeout instead of blocking
+function fetchWithTimeout(url, timeoutMs = 2000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
+
+async function fetchOGMetadata(imageUrl) {
+  const og = {
+    title: "",
+    description: "",
+    width: 0,
+    height: 0,
+    creator: "",
+    source: "",
+    date: "",
+  };
+
+  const encoded = encodeURIComponent(imageUrl);
+
+  // Fetch c2pa_mini and exif in parallel with 2s timeout
+  // If APIs are slow, we gracefully return defaults rather than blocking
+  const [miniRes, exifRes] = await Promise.allSettled([
+    fetchWithTimeout(C2PA_API + "/api/c2pa_mini?uri=" + encoded),
+    fetchWithTimeout(C2PA_API + "/api/exif_metadata?uri=" + encoded),
+  ]);
+
+  // Parse c2pa_mini
+  if (miniRes.status === "fulfilled" && miniRes.value.ok) {
+    try {
+      const mini = await miniRes.value.json();
+      if (mini) {
+        og.creator = mini.creator || "";
+        og.source = mini.source || mini.digital_source_type || "";
+        og.date = mini.date || "";
+      }
+    } catch { /* ignore parse errors */ }
+  }
+
+  // Parse exif_metadata
+  if (exifRes.status === "fulfilled" && exifRes.value.ok) {
+    try {
+      const data = await exifRes.value.json();
+      const key = Object.keys(data)[0];
+      if (key && data[key]) {
+        const meta = data[key];
+        og.width = meta.width || 0;
+        og.height = meta.height || 0;
+
+        // IPTC title/description for richer OG
+        const iptc = meta.iptc || {};
+        const photo = meta.photography || {};
+        if (iptc.title) og.title = iptc.title;
+        if (iptc.description || photo.description) {
+          og.description = iptc.description || photo.description;
+        }
+
+        // Fallback creator from EXIF
+        if (!og.creator && photo.artist) og.creator = photo.artist;
+      }
+    } catch { /* ignore parse errors */ }
+  }
+
+  return og;
+}
+
 /* ── Lightbox HTML ── */
-function lightboxHtml(imgPublicUrl, altText) {
+function lightboxHtml(imgPublicUrl, altText, og = {}) {
   const pu = escHtml(imgPublicUrl);
   const al = escHtml(altText);
+
+  // Build dynamic OG fields
+  const filename = altText.split("/").pop() || "Image";
+  const ogTitle = escHtml(og.title || (og.creator ? og.creator + " — " + filename : "thecontrarian.in — " + filename));
+  const descParts = [];
+  if (og.description) descParts.push(og.description);
+  else descParts.push("From thecontrarian.in archive.");
+  if (og.creator && !og.title) descParts.push("By " + og.creator);
+  if (og.source) descParts.push(og.source);
+  if (og.date) descParts.push(og.date);
+  const ogDesc = escHtml(descParts.join(" · "));
+  const ogW = og.width ? `\n  <meta property="og:image:width" content="${og.width}" />` : "";
+  const ogH = og.height ? `\n  <meta property="og:image:height" content="${og.height}" />` : "";
 
   return `<!doctype html>
 <html lang="en">
@@ -115,19 +200,19 @@ function lightboxHtml(imgPublicUrl, altText) {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="The Contrarian — Image" />
-  <meta property="og:description" content="Photograph from The Contrarian archive." />
+  <meta property="og:title" content="${ogTitle}" />
+  <meta property="og:description" content="${ogDesc}" />
   <meta property="og:image" content="${pu}" />
-  <meta property="og:image:secure_url" content="${pu}" />
+  <meta property="og:image:secure_url" content="${pu}" />${ogW}${ogH}
   <meta property="og:image:alt" content="${al}" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="The Contrarian — Image" />
-  <meta name="twitter:description" content="Photograph from The Contrarian archive." />
+  <meta name="twitter:title" content="${ogTitle}" />
+  <meta name="twitter:description" content="${ogDesc}" />
   <meta name="twitter:image" content="${pu}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <title>Image Viewer</title>
+  <title>${ogTitle}</title>
   <style>
     /* ── Exact c2pa app design tokens ── */
     :root {
@@ -1287,22 +1372,45 @@ export default {
       });
     }
 
-    const imgPublicUrl = publicUrl("originals/" + path);
+    const r2Key = "originals/" + path;
+    const imgPublicUrl = publicUrl(r2Key);
 
-    // Embedded image request from an allowed origin → serve raw
-    if (isAllowedReferer(request)) {
-      return proxyRawImage("originals/" + path, env);
+    // ── Decide: raw image or lightbox HTML ──────────────────────
+    // Serve raw image if ANY of these are true:
+    //  1. Referer is from an allowed origin (embedded <img> on our site)
+    //  2. Referer is from library.thecontrarian.in itself (lightbox <img> loading)
+    //  3. Sec-Fetch-Dest: image (browser <img> tag fetch)
+    //  4. Accept header prefers image/* over text/html (non-browser image clients)
+    const refHost = refererHost(request);
+    const isSelfReferer = refHost === "library.thecontrarian.in";
+    const isImageFetch = request.headers.get("Sec-Fetch-Dest") === "image";
+    const acceptsImage = (request.headers.get("Accept") || "").startsWith("image/");
+
+    if (isAllowedReferer(request) || isSelfReferer || isImageFetch || acceptsImage) {
+      return proxyRawImage(r2Key, env);
     }
 
-    // <img src> fetch (Sec-Fetch-Dest: image) → serve raw
-    // Direct browser navigation (Sec-Fetch-Dest: document) → serve lightbox
-    if (request.headers.get("Sec-Fetch-Dest") === "image") {
-      return proxyRawImage("originals/" + path, env);
-    }
+    // ── Lightbox HTML path (browsers + social crawlers) ─────────
+    // Use Cloudflare Cache API so repeated crawler hits are instant.
+    // IMPORTANT: Cache key must differ from the raw URL — otherwise
+    // the browser's <img> tag fetching the same URL gets cached HTML
+    // instead of image bytes, breaking the image display.
+    const cache = caches.default;
+    const lightboxUrl = new URL(url.toString());
+    lightboxUrl.searchParams.set("_view", "lightbox");
+    const cacheKey = new Request(lightboxUrl.toString(), { method: "GET" });
+    let cachedResponse = await cache.match(cacheKey);
+    if (cachedResponse) return cachedResponse;
+
+    // Fetch OG metadata server-side (2s timeout — won't block forever)
+    let og = {};
+    try {
+      og = await fetchOGMetadata(imgPublicUrl);
+    } catch { /* render with defaults if metadata fetch fails */ }
 
     const altText = path;
-    const html = lightboxHtml(imgPublicUrl, altText);
-    return new Response(html, {
+    const html = lightboxHtml(imgPublicUrl, altText, og);
+    const response = new Response(html, {
       status: 200,
       headers: {
         "Content-Type": "text/html; charset=utf-8",
@@ -1310,6 +1418,9 @@ export default {
         "X-Robots-Tag": "noindex, nofollow",
       },
     });
+
+    // Cache in background — don't block the response
+    ctx.waitUntil(cache.put(cacheKey, response.clone()));
+    return response;
   },
 };
-

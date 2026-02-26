@@ -44,6 +44,9 @@ Thumbs.db
 # misc
 dirstruct.txt
 .cursorrules
-remote-only/
+
+# Cloudflare Wrangler
+.wrangler/
+.wrangler.toml.bak
 
 playwright-report/

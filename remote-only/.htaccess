@@ -1,0 +1,15 @@
+RewriteEngine On
+
+# Redirect all /library/** requests to the CDN origin.
+# The Cloudflare Worker on library.thecontrarian.in handles lightbox-vs-raw-image routing.
+RewriteCond %{HTTP_HOST} ^(www\.)?thecontrarian\.in$ [NC]
+RewriteRule ^library/(.*)$ https://library.thecontrarian.in/$1 [R=301,L,NC,NE]
+
+# HTML should always revalidate to avoid old pages referencing pruned hashed assets.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html?|xhtml)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
