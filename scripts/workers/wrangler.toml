@@ -1,0 +1,11 @@
+name = "image-wrapper"
+main = "image-wrapper.js"
+compatibility_date = "2024-11-01"
+
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "thecontrarian-library"
+
+[[routes]]
+pattern = "library.thecontrarian.in/originals/*"
+zone_id = "4d5dc5c5aae360574b2d67ddd4a03f45"
