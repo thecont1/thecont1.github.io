@@ -10,3 +10,15 @@ bucket_name = "thecontrarian-library"
 [[routes]]
 pattern = "library.thecontrarian.in/originals/*"
 zone_id = "4d5dc5c5aae360574b2d67ddd4a03f45"
+
+[[routes]]
+pattern = "library.thecontrarian.in/about/*"
+zone_id = "4d5dc5c5aae360574b2d67ddd4a03f45"
+
+[[routes]]
+pattern = "library.thecontrarian.in/throwaways/*"
+zone_id = "4d5dc5c5aae360574b2d67ddd4a03f45"
+
+[[routes]]
+pattern = "library.thecontrarian.in/*"
+zone_id = "4d5dc5c5aae360574b2d67ddd4a03f45"

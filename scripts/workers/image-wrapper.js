@@ -609,20 +609,21 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
     @media (max-width: 900px) {
       body { overflow: auto; height: auto; }
       .lightbox { flex-direction: column; height: auto; min-height: 100vh; overflow: visible; }
-      .lightbox-main { order: 2; min-height: 50vh; position: relative; }
+      .lightbox-main { order: 1; min-height: 50vh; position: relative; }
       .lightbox-sidebar {
-        order: 1; width: 100%; border-right: none;
+        order: 2; width: 100%; border-right: none;
         border-bottom: 1px solid var(--color-border);
         max-height: none; flex: none;
       }
       .lightbox-img { max-width: calc(100vw - var(--space-8) * 2); max-height: none; margin: 0 auto; display: block; }
       .sidebar-content { overflow: visible; padding-bottom: var(--space-12); display: flex; flex-direction: column; }
       .cc-status-section { order: 1; }
+      .digital-source-section { order: 2; }
+      .description-section { order: 3; }
+      .creator-section { order: 4; }
       .overview-section { order: 5; }
       .provenance-section { order: 6; }
       .technical-section { order: 7; }
-      .creator-section { order: 8; }
-      .description-section { order: 9; }
     }
   </style>
 </head>
@@ -635,18 +636,39 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
     </section>
 
     <aside class="lightbox-sidebar" aria-label="Image metadata panel">
-      <!-- Toolbar -->
-      <div class="sidebar-toolbar">
-        <div class="toolbar-buttons"></div>
-        <a class="toolbar-text-link" href="https://thecontrarian.in" target="_blank" rel="noopener">thecontrarian.in</a>
-      </div>
-
       <!-- Image Title Header -->
       <div class="image-title-header" id="imageTitleHeader">
         <h1 class="image-title" id="imageTitle"></h1>
       </div>
 
       <div class="sidebar-content">
+        <!-- Title & Caption -->
+        <div class="description-section" id="descriptionSection">
+          <h2>Title &amp; Caption</h2>
+          <h3 class="iptc-title" id="iptcTitle" style="display:none;"></h3>
+          <p class="description-text" id="imageDescription"></p>
+          <p class="iptc-location" id="iptcLocation" style="display:none;"></p>
+          <p class="iptc-keywords" id="iptcKeywords" style="display:none;"></p>
+          <p class="description-empty" id="descriptionEmpty">No description available</p>
+        </div>
+
+        <!-- Creator Information -->
+        <div class="creator-section" id="creatorSection">
+          <h3 class="section-title">Creator Information</h3>
+          <div class="creator-grid" id="creatorGrid">
+            <div class="creator-item"><span class="creator-label">Artist</span><span class="creator-value" id="artist">\u2014</span></div>
+            <div class="creator-item" id="authorWebsiteItem" style="display:none;"><span class="creator-label">Website</span><span class="creator-value" id="authorWebsite"></span></div>
+            <div class="creator-item" id="authorEmailItem" style="display:none;"><span class="creator-label">Email</span><span class="creator-value" id="authorEmail"></span></div>
+            <div class="creator-item" id="authorPhoneItem" style="display:none;"><span class="creator-label">Phone</span><span class="creator-value" id="authorPhone"></span></div>
+            <div class="creator-item" id="authorJobItem" style="display:none;"><span class="creator-label">Title</span><span class="creator-value" id="authorJob"></span></div>
+            <div class="creator-item" id="authorOrgItem" style="display:none;"><span class="creator-label">Organization</span><span class="creator-value" id="authorOrg"></span></div>
+            <div class="creator-social" id="authorSocial" style="display:none;">
+              <span class="creator-label">Social Media</span>
+              <div class="social-links" id="socialLinks"></div>
+            </div>
+          </div>
+        </div>
+
         <div id="meta-status" class="loading-meta">Fetching metadata\u2026</div>
 
         <!-- CC Status -->
@@ -721,33 +743,6 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
         <div class="technical-section" id="technicalSection">
           <h3 class="section-title">Technical Details</h3>
           <div id="techContent"></div>
-        </div>
-
-        <!-- Creator Information -->
-        <div class="creator-section" id="creatorSection">
-          <h3 class="section-title">Creator Information</h3>
-          <div class="creator-grid" id="creatorGrid">
-            <div class="creator-item"><span class="creator-label">Artist</span><span class="creator-value" id="artist">\u2014</span></div>
-            <div class="creator-item" id="authorWebsiteItem" style="display:none;"><span class="creator-label">Website</span><span class="creator-value" id="authorWebsite"></span></div>
-            <div class="creator-item" id="authorEmailItem" style="display:none;"><span class="creator-label">Email</span><span class="creator-value" id="authorEmail"></span></div>
-            <div class="creator-item" id="authorPhoneItem" style="display:none;"><span class="creator-label">Phone</span><span class="creator-value" id="authorPhone"></span></div>
-            <div class="creator-item" id="authorJobItem" style="display:none;"><span class="creator-label">Title</span><span class="creator-value" id="authorJob"></span></div>
-            <div class="creator-item" id="authorOrgItem" style="display:none;"><span class="creator-label">Organization</span><span class="creator-value" id="authorOrg"></span></div>
-            <div class="creator-social" id="authorSocial" style="display:none;">
-              <span class="creator-label">Social Media</span>
-              <div class="social-links" id="socialLinks"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Title & Caption -->
-        <div class="description-section" id="descriptionSection">
-          <h2>Title &amp; Caption</h2>
-          <h3 class="iptc-title" id="iptcTitle" style="display:none;"></h3>
-          <p class="description-text" id="imageDescription"></p>
-          <p class="iptc-location" id="iptcLocation" style="display:none;"></p>
-          <p class="iptc-keywords" id="iptcKeywords" style="display:none;"></p>
-          <p class="description-empty" id="descriptionEmpty">No description available</p>
         </div>
       </div>
 
@@ -970,6 +965,13 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
         : focalLengthVal;
       const dimensions = (meta.width && meta.height) ? meta.width + ' \\u00d7 ' + meta.height : '';
       const resolution = (exif.XResolution && exif.YResolution) ? exif.XResolution + ' \\u00d7 ' + exif.YResolution + ' DPI' : '';
+      const formatBytes = (bytes) => {
+        if (!bytes) return '';
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+      };
+      const fileSize = formatBytes(meta.file_size_bytes);
       const expMode = exif.ExposureMode !== undefined ? (exposureModes[exif.ExposureMode] || '') : '';
       const wb = exif.WhiteBalance !== undefined ? (whiteBalanceModes[exif.WhiteBalance] || '') : '';
       const flash = exif.Flash !== undefined ? (flashStates[exif.Flash] || '') : '';
@@ -996,6 +998,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
         item('Focal Length', focalWith35mm),
         '</div></div>',
         '<div class="tech-group"><h4 class="tech-group-title">Image Properties</h4><div class="tech-grid">',
+        item('File Size', fileSize),
         item('Resolution', resolution),
         item('Dimensions', dimensions),
         '</div><div class="tech-grid">',
@@ -1348,19 +1351,25 @@ export default {
 
     // ── Route the request to an image path ──────────────────────
     let imagePath = "";
+    let isOriginals = false;
 
+    // Check if this is an originals path (for lightbox eligibility)
     if (pathname.startsWith("/library/originals/")) {
       imagePath = pathname.slice("/library/originals/".length);
+      isOriginals = true;
     } else if (pathname.startsWith("/library/")) {
       imagePath = pathname.slice("/library/".length);
+      isOriginals = false;
     } else if (
       url.hostname === "library.thecontrarian.in" &&
       pathname.startsWith("/originals/")
     ) {
       // Worker route: library.thecontrarian.in/originals/* → pathname is /originals/…
       imagePath = pathname.slice("/originals/".length);
+      isOriginals = true;
     } else if (url.hostname === "library.thecontrarian.in") {
       imagePath = pathname.slice(1);
+      isOriginals = imagePath.startsWith("originals/");
     } else {
       return fetch(request);
     }
@@ -1373,12 +1382,19 @@ export default {
       });
     }
 
-    const r2Key = "originals/" + path;
+    // Build R2 key: preserve full path structure for non-originals
+    const r2Key = isOriginals ? "originals/" + path : path;
     const imgPublicUrl = publicUrl(r2Key);
 
     // ── Decide: raw image or lightbox HTML ──────────────────────
-    // Top-level navigations (Sec-Fetch-Dest: document) ALWAYS get lightbox HTML,
-    // even when Referer is our own site (e.g. "Open Image in New Tab").
+    // Only originals are eligible for lightbox HTML
+    if (!isOriginals) {
+      // Always serve raw image for non-originals directories
+      return proxyRawImage(r2Key, env);
+    }
+
+    // For originals: check if this is a navigation request
+    // Top-level navigations (Sec-Fetch-Dest: document) get lightbox HTML
     const secFetchDest = (request.headers.get("Sec-Fetch-Dest") || "").toLowerCase();
     if (secFetchDest === "document") {
       // Fall through to lightbox HTML path below
