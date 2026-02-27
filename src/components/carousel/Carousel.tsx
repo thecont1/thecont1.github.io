@@ -1,6 +1,6 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, Suspense, lazy, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
-import InfoPanel from "./InfoPanel";
+const InfoPanel = lazy(() => import("./InfoPanel"));
 
 const PLACEHOLDER_IMAGE_SRC =
   "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
@@ -363,6 +363,8 @@ export default function Carousel({ images }: { images: Image[] }) {
                 src={revealed[i] ? img.src : PLACEHOLDER_IMAGE_SRC}
                 alt=""
                 className="carousel-image"
+                width={img.metadata?.width || undefined}
+                height={img.metadata?.height || undefined}
                 loading={i === index ? "eager" : "lazy"}
                 fetchPriority={i === index ? "high" : "low"}
                 decoding="async"
@@ -389,7 +391,11 @@ export default function Carousel({ images }: { images: Image[] }) {
         </button>
       </div>
 
-      {showInfo && metadata && <InfoPanel metadata={metadata} imageSrc={currentImage.src} />}
+      {showInfo && metadata && (
+        <Suspense fallback={null}>
+          <InfoPanel metadata={metadata} imageSrc={currentImage.src} />
+        </Suspense>
+      )}
       {!metadata && <div className="debug-no-meta">No metadata available</div>}
     </div>
   );
