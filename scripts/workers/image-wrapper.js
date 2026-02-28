@@ -90,12 +90,22 @@ function escHtml(str) {
 // Constructs a /cdn-cgi/image/ subrequest — Workers can MAKE subrequests to
 // /cdn-cgi/ even though they cannot INTERCEPT incoming requests to it.
 // Falls back to serving the raw R2 image if the transformation fails.
+const ALLOWED_FORMATS = new Set(["auto", "webp", "avif", "jpeg", "png"]);
+
+function validateTransformParams({ w, q, f }) {
+  const width = Math.min(Math.max(parseInt(w, 10) || 0, 1), 4096);
+  const quality = Math.min(Math.max(parseInt(q, 10) || 85, 1), 100);
+  const format = ALLOWED_FORMATS.has(f) ? f : "auto";
+  return { width, quality, format };
+}
+
 async function proxyTransformedImage(request, r2Key, env, { w, q, f }) {
+  const { width, quality, format } = validateTransformParams({ w, q, f });
   try {
     const originUrl = new URL(request.url);
     // Strip query params — cdn-cgi uses path-based options
     originUrl.search = "";
-    const cdnCgiPath = `/cdn-cgi/image/width=${w},quality=${q || 85},format=${f || "auto"}${originUrl.pathname}`;
+    const cdnCgiPath = `/cdn-cgi/image/width=${width},quality=${quality},format=${format}${originUrl.pathname}`;
     originUrl.pathname = cdnCgiPath;
     // Make a clean subrequest (no forwarded headers — they can confuse the
     // Cloudflare Image Transformation pipeline for same-zone subrequests).
@@ -107,8 +117,8 @@ async function proxyTransformedImage(request, r2Key, env, { w, q, f }) {
       headers.set("Cache-Control", "public, max-age=604800");
       return new Response(resp.body, { status: 200, headers });
     }
-  } catch (_) {
-    // Fall through to raw image fallback
+  } catch (err) {
+    console.error(`[image-wrapper] proxyTransformedImage failed for ${r2Key}:`, err);
   }
   // Fallback: serve the original unoptimised image from R2.
   // Images always display; optimisation is best-effort via cdn-cgi above.

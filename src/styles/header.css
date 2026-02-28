@@ -79,6 +79,26 @@
   }
 }
 
+/* Homepage: steel-grey state when scrolled past the carousel */
+.site-header.is-scrolled {
+  background-color: rgba(75, 85, 99, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.site-header.is-scrolled .site-header-inner {
+  background-color: transparent;
+}
+
+.site-header.is-scrolled a,
+.site-header.is-scrolled button {
+  color: #fff;
+}
+
+.site-header.is-scrolled svg {
+  stroke: #fff;
+}
+
 .site-nav {
   display: flex;
   justify-content: flex-end;

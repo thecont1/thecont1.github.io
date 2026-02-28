@@ -59,7 +59,11 @@ The World of Mahesh Shantaram. Documentary Photographer and Data Scientist for t
       document.fonts.ready.then(fitHeroStatement);
     }
 
-    window.addEventListener('resize', fitHeroStatement);
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitHeroStatement, 150);
+    });
     window.addEventListener('orientationchange', function() {
       setTimeout(fitHeroStatement, 100);
     });
