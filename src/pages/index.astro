@@ -6,6 +6,7 @@ import HomeProjects from "../components/home/Projects.astro";
 import HomeAbout from "../components/home/About.astro";
 import C2PAOverlay from "../components/ui/C2PAOverlay.astro";
 import { CAROUSEL_IMAGES } from "../data/carousel";
+import { cfImageUrl } from "../utils/api";
 import { AUTHOR } from "../data/author";
 import "../styles/home.css";
 
@@ -93,7 +94,17 @@ const personJsonLd = {
     </noscript>
 
     {CAROUSEL_IMAGES.slice(0, 1).map((img) => (
-      <link rel="preload" as="image" href={img.src} />
+      <link
+        rel="preload"
+        as="image"
+        href={cfImageUrl(img.src, 1920)}
+        imagesrcset={[
+          `${cfImageUrl(img.src, 1200)} 1200w`,
+          `${cfImageUrl(img.src, 1920)} 1920w`,
+          `${cfImageUrl(img.src, 2560)} 2560w`,
+        ].join(", ")}
+        imagesizes="100vw"
+      />
     ))}
   </head>
 

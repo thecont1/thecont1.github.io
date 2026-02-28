@@ -72,6 +72,7 @@
   }
   
   .carousel-slide {
+    width: 100vw;
     height: 100vh; /* Ensure slide container is full height */
     overflow: hidden; /* Hide any vertical overflow */
   }

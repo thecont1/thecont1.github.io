@@ -1,5 +1,6 @@
 import { Fragment, Suspense, lazy, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
+import { cfImageUrl } from "../../utils/api";
 const InfoPanel = lazy(() => import("./InfoPanel"));
 
 const PLACEHOLDER_IMAGE_SRC =
@@ -197,7 +198,7 @@ export default function Carousel({ images }: { images: Image[] }) {
     if (!images.length) return;
 
     const startToken = ++preloadTokenRef.current;
-    const queue = images.map((img) => img?.src).filter(Boolean) as string[];
+    const queue = images.map((img) => img?.src ? cfImageUrl(img.src, 1920) : '').filter(Boolean);
 
     const clamp = (i: number) => {
       if (!queue.length) return 0;
@@ -360,7 +361,13 @@ export default function Carousel({ images }: { images: Image[] }) {
               }}
             >
               <img
-                src={revealed[i] ? img.src : PLACEHOLDER_IMAGE_SRC}
+                src={revealed[i] ? cfImageUrl(img.src, 1920) : PLACEHOLDER_IMAGE_SRC}
+                srcSet={revealed[i] ? [
+                  `${cfImageUrl(img.src, 1200)} 1200w`,
+                  `${cfImageUrl(img.src, 1920)} 1920w`,
+                  `${cfImageUrl(img.src, 2560)} 2560w`,
+                ].join(", ") : undefined}
+                sizes="100vw"
                 alt=""
                 className="carousel-image"
                 width={img.metadata?.width || undefined}

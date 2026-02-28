@@ -4,6 +4,21 @@
  */
 export const C2PA_API_BASE = 'https://apps.thecontrarian.in/c2pa';
 
+const CF_IMAGE_CDN = 'https://library.thecontrarian.in';
+
+/**
+ * Build a Cloudflare Image Transformation URL.
+ * Requires Image Transformations to be enabled on the library.thecontrarian.in zone.
+ * Converts /library/originals/... paths into cdn-cgi/image/ URLs that serve
+ * WebP/AVIF at the requested width, eliminating the multi-MB original JPEG payloads.
+ */
+export function cfImageUrl(src: string, width: number, quality = 85): string {
+  const path = src.startsWith('/library/')
+    ? src.slice('/library/'.length)
+    : src.replace(/^\//, '');
+  return `${CF_IMAGE_CDN}/cdn-cgi/image/width=${width},quality=${quality},format=auto/${path}`;
+}
+
 /**
  * Build the full image URI for API calls.
  * Converts root-relative paths like /library/originals/... to the CDN URL
@@ -27,3 +42,4 @@ export function resolveImageUri(imgPath: string): string {
   // Fallback: assume it's a CDN-relative path
   return `https://library.thecontrarian.in/${pathname.replace(/^\//, '')}`;
 }
+
