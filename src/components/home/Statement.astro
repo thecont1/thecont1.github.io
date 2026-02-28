@@ -2,68 +2,66 @@
 The World of Mahesh Shantaram. Documentary Photographer and Data Scientist for the Public Good.
 </p>
 
-<script>
-  function fitHeroStatement() {
-    const el = document.querySelector('.hero-statement');
-    if (!el) return;
+<script is:inline>
+  (function() {
+    function fitHeroStatement() {
+      var el = document.querySelector('.hero-statement');
+      if (!el) return;
 
-    const text = el.textContent || '';
-    const style = getComputedStyle(el);
-    const paddingTop = parseFloat(style.paddingTop);
-    const paddingBottom = parseFloat(style.paddingBottom);
-    const paddingLeft = parseFloat(style.paddingLeft);
-    const paddingRight = parseFloat(style.paddingRight);
+      var text = el.textContent || '';
+      var style = getComputedStyle(el);
+      var paddingTop = parseFloat(style.paddingTop);
+      var paddingBottom = parseFloat(style.paddingBottom);
+      var paddingLeft = parseFloat(style.paddingLeft);
+      var paddingRight = parseFloat(style.paddingRight);
 
-    const availableWidth = window.innerWidth - paddingLeft - paddingRight;
-    const availableHeight = window.innerHeight - paddingTop - paddingBottom;
+      var availableWidth = window.innerWidth - paddingLeft - paddingRight;
+      var availableHeight = window.innerHeight - paddingTop - paddingBottom;
 
-    // Create a hidden measurement element
-    const measure = document.createElement('div');
-    measure.style.cssText = `
-      position: absolute;
-      visibility: hidden;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      font-family: "DM Sans", sans-serif;
-      font-weight: 700;
-      text-align: center;
-      width: ${availableWidth}px;
-      line-height: 0.92;
-      hyphens: auto;
-    `;
-    measure.textContent = text;
-    document.body.appendChild(measure);
+      // Create a hidden measurement element
+      var measure = document.createElement('div');
+      measure.style.cssText =
+        'position:absolute;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;' +
+        'font-family:"DM Sans",sans-serif;font-weight:700;text-align:center;' +
+        'width:' + availableWidth + 'px;line-height:0.92;hyphens:auto;';
+      measure.textContent = text;
+      document.body.appendChild(measure);
 
-    // Binary search for optimal font size
-    let minSize = 10;
-    let maxSize = 400;
-    let optimalSize = minSize;
+      // Binary search for optimal font size
+      var minSize = 10;
+      var maxSize = 400;
+      var optimalSize = minSize;
 
-    while (maxSize - minSize > 1) {
-      const testSize = Math.floor((minSize + maxSize) / 2);
-      measure.style.fontSize = `${testSize}px`;
+      while (maxSize - minSize > 1) {
+        var testSize = Math.floor((minSize + maxSize) / 2);
+        measure.style.fontSize = testSize + 'px';
 
-      const fits = measure.scrollHeight <= availableHeight;
-
-      if (fits) {
-        optimalSize = testSize;
-        minSize = testSize;
-      } else {
-        maxSize = testSize;
+        if (measure.scrollHeight <= availableHeight) {
+          optimalSize = testSize;
+          minSize = testSize;
+        } else {
+          maxSize = testSize;
+        }
       }
+
+      document.body.removeChild(measure);
+
+      // Apply the optimal size
+      el.style.setProperty('--hero-font-size', optimalSize + 'px');
+      el.style.setProperty('--hero-line-height', '0.92');
     }
 
-    document.body.removeChild(measure);
+    // Run immediately (before first paint) to prevent CLS
+    fitHeroStatement();
 
-    // Apply the optimal size
-    el.style.setProperty('--hero-font-size', `${optimalSize}px`);
-    el.style.setProperty('--hero-line-height', '0.92');
-  }
+    // Re-run when web fonts finish loading (metrics may differ from system fallback)
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(fitHeroStatement);
+    }
 
-  // Run on load and resize
-  fitHeroStatement();
-  window.addEventListener('resize', fitHeroStatement);
-  window.addEventListener('orientationchange', () => {
-    setTimeout(fitHeroStatement, 100);
-  });
+    window.addEventListener('resize', fitHeroStatement);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(fitHeroStatement, 100);
+    });
+  })();
 </script>

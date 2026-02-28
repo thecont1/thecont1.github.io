@@ -3,8 +3,9 @@ import CaptionToggle from "./CaptionToggle";
 import { cfImageUrl } from "../../utils/api";
 const InfoPanel = lazy(() => import("./InfoPanel"));
 
-const PLACEHOLDER_IMAGE_SRC =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+function placeholderSvg(w: number, h: number): string {
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'/%3E`;
+}
 
 declare global {
   interface Window {
@@ -361,7 +362,7 @@ export default function Carousel({ images }: { images: Image[] }) {
               }}
             >
               <img
-                src={revealed[i] ? cfImageUrl(img.src, 1920) : PLACEHOLDER_IMAGE_SRC}
+                src={revealed[i] ? cfImageUrl(img.src, 1920) : placeholderSvg(img.metadata?.width || 2560, img.metadata?.height || 1920)}
                 srcSet={revealed[i] ? [
                   `${cfImageUrl(img.src, 1200)} 1200w`,
                   `${cfImageUrl(img.src, 1920)} 1920w`,

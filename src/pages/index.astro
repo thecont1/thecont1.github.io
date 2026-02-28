@@ -104,6 +104,7 @@ const personJsonLd = {
           `${cfImageUrl(img.src, 2560)} 2560w`,
         ].join(", ")}
         imagesizes="100vw"
+        fetchpriority="high"
       />
     ))}
   </head>
@@ -177,6 +178,50 @@ const personJsonLd = {
     <script is:inline src="/curtain-scroll-fallback.js" defer></script>
     <script is:inline src="/snow.js" defer></script>
     <script is:inline src="/mobile-nav.js" defer></script>
+    <script>
+      // Homepage header: transparent over carousel, steel grey after scrolling past it
+      {
+        const header = document.querySelector('.site-header') as HTMLElement;
+        const projects = document.getElementById('projects');
+
+        if (header && projects) {
+          const headerInner = header.querySelector('.site-header-inner') as HTMLElement;
+
+          const applySteel = () => {
+            header.style.backgroundColor = 'rgba(75, 85, 99, 0.92)';
+            header.style.backdropFilter = 'blur(8px)';
+            (header.style as any).webkitBackdropFilter = 'blur(8px)';
+            if (headerInner) headerInner.style.backgroundColor = 'transparent';
+            header.querySelectorAll<HTMLElement>('a, button').forEach(el => el.style.color = '#fff');
+            header.querySelectorAll<SVGElement>('svg').forEach(el => el.style.stroke = '#fff');
+          };
+
+          const clearSteel = () => {
+            header.style.backgroundColor = '';
+            header.style.backdropFilter = '';
+            (header.style as any).webkitBackdropFilter = '';
+            if (headerInner) headerInner.style.backgroundColor = '';
+            header.querySelectorAll<HTMLElement>('a, button').forEach(el => el.style.color = '');
+            header.querySelectorAll<SVGElement>('svg').forEach(el => el.style.stroke = '');
+          };
+
+          header.style.transition = 'background-color 0.35s ease, backdrop-filter 0.35s ease';
+
+          const observer = new IntersectionObserver(
+            ([entry]) => {
+              if (entry.isIntersecting) {
+                applySteel();
+              } else {
+                // Only clear if user scrolled back UP (projects below viewport)
+                if (entry.boundingClientRect.top > 0) clearSteel();
+              }
+            },
+            { threshold: 0, rootMargin: '-64px 0px 0px 0px' }
+          );
+          observer.observe(projects);
+        }
+      }
+    </script>
     <script>
       // WhatsApp Form Handler
       const form = document.getElementById('wa-form');

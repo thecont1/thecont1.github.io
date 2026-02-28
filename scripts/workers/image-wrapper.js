@@ -86,10 +86,37 @@ function escHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+// Proxy a resized image via Cloudflare Image Transformations.
+// Constructs a /cdn-cgi/image/ subrequest — Workers can MAKE subrequests to
+// /cdn-cgi/ even though they cannot INTERCEPT incoming requests to it.
+// Falls back to serving the raw R2 image if the transformation fails.
+async function proxyTransformedImage(request, r2Key, env, { w, q, f }) {
+  try {
+    const originUrl = new URL(request.url);
+    // Strip query params — cdn-cgi uses path-based options
+    originUrl.search = "";
+    const cdnCgiPath = `/cdn-cgi/image/width=${w},quality=${q || 85},format=${f || "auto"}${originUrl.pathname}`;
+    originUrl.pathname = cdnCgiPath;
+    // Make a clean subrequest (no forwarded headers — they can confuse the
+    // Cloudflare Image Transformation pipeline for same-zone subrequests).
+    const resp = await fetch(originUrl.toString());
+    const ct = resp.headers.get("Content-Type") || "";
+    if (resp.ok && ct.startsWith("image/")) {
+      const headers = new Headers(resp.headers);
+      headers.set("Vary", "Sec-Fetch-Dest");
+      headers.set("Cache-Control", "public, max-age=604800");
+      return new Response(resp.body, { status: 200, headers });
+    }
+  } catch (_) {
+    // Fall through to raw image fallback
+  }
+  // Fallback: serve the original unoptimised image from R2.
+  // Images always display; optimisation is best-effort via cdn-cgi above.
+  return proxyRawImage(r2Key, env);
+}
+
 // Serve raw image directly from R2.
 // R2 is the source of truth — if the key doesn't exist, it's a genuine 404.
-// IMPORTANT: We cannot fetch() to library.thecontrarian.in/originals/* as fallback
-// because that URL matches this Worker's route and would cause an infinite loop.
 async function proxyRawImage(path, env) {
   const obj = await env.BUCKET.get(path);
   if (!obj) {
@@ -1349,11 +1376,9 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // Pass Cloudflare Image Transformation requests straight through —
-    // they use /cdn-cgi/image/... paths and must never be intercepted here.
-    if (pathname.startsWith("/cdn-cgi/")) {
-      return fetch(request);
-    }
+    // Note: /cdn-cgi/* requests never reach Workers (Cloudflare reserves that path).
+    // Image transform requests now use query params (?w=&q=&f=) routed through
+    // this Worker, which proxies them via a /cdn-cgi/image/ subrequest.
 
     // ── Route the request to an image path ──────────────────────
     let imagePath = "";
@@ -1416,6 +1441,13 @@ export default {
       const acceptsImage = (request.headers.get("Accept") || "").startsWith("image/");
 
       if (isAllowedReferer(request) || isSelfReferer || isImageFetch || acceptsImage) {
+        // Check for image transform query params (?w=&q=&f=)
+        const w = url.searchParams.get("w");
+        if (w) {
+          const q = url.searchParams.get("q") || "85";
+          const f = url.searchParams.get("f") || "auto";
+          return proxyTransformedImage(request, r2Key, env, { w, q, f });
+        }
         return proxyRawImage(r2Key, env);
       }
     }
@@ -1427,6 +1459,10 @@ export default {
     // instead of image bytes, breaking the image display.
     const cache = caches.default;
     const lightboxUrl = new URL(url.toString());
+    // Strip image-transform params so all sizes share one cache entry
+    lightboxUrl.searchParams.delete("w");
+    lightboxUrl.searchParams.delete("q");
+    lightboxUrl.searchParams.delete("f");
     lightboxUrl.searchParams.set("_view", "lightbox");
     const cacheKey = new Request(lightboxUrl.toString(), { method: "GET" });
     let cachedResponse = await cache.match(cacheKey);

@@ -8,15 +8,16 @@ const CF_IMAGE_CDN = 'https://library.thecontrarian.in';
 
 /**
  * Build a Cloudflare Image Transformation URL.
- * Requires Image Transformations to be enabled on the library.thecontrarian.in zone.
- * Converts /library/originals/... paths into cdn-cgi/image/ URLs that serve
- * WebP/AVIF at the requested width, eliminating the multi-MB original JPEG payloads.
+ * Routes through the Worker at library.thecontrarian.in so that:
+ *  - <img> fetches get optimised WebP/AVIF via cf.image (Worker proxies to /cdn-cgi/image/)
+ *  - "Open Image in New Tab" (document navigations) hit the Worker → C2PA viewer
+ * Query-param format avoids /cdn-cgi/image/ paths which Workers cannot intercept.
  */
 export function cfImageUrl(src: string, width: number, quality = 85): string {
   const path = src.startsWith('/library/')
     ? src.slice('/library/'.length)
     : src.replace(/^\//, '');
-  return `${CF_IMAGE_CDN}/cdn-cgi/image/width=${width},quality=${quality},format=auto/${path}`;
+  return `${CF_IMAGE_CDN}/${path}?w=${width}&q=${quality}&f=auto`;
 }
 
 /**

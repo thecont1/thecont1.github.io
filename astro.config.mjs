@@ -10,7 +10,7 @@ export default defineConfig({
   integrations: [react(), sitemap(), scaffold()],
   output: 'static',
   build: {
-    inlineStylesheets: 'auto'
+    inlineStylesheets: 'always'
   },
   vite: {
     build: {
