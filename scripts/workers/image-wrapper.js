@@ -816,7 +816,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
     const formatDate = (dateStr) => {
-      if (!dateStr) return '\\u2014';
+      if (!dateStr) return '—';
       const cleaned = String(dateStr).replace(/^(\\d{4}):(\\d{2}):(\\d{2})/, '$1-$2-$3');
       const d = new Date(cleaned);
       if (isNaN(d.getTime())) return dateStr;
@@ -845,7 +845,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
       return make + ' ' + model;
     };
 
-    const setText = (el, val) => { if (el) el.textContent = val || '\\u2014'; };
+    const setText = (el, val) => { if (el) el.textContent = val || '—'; };
     const setHtml = (el, val) => { if (el) el.innerHTML = val; };
     const show = (el) => { if (el) el.style.display = ''; };
     const hide = (el) => { if (el) el.style.display = 'none'; };
@@ -921,7 +921,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
       updateImageTitle(name);
 
       const format = (meta.format || '').toUpperCase();
-      setText(formatBadge, format || '\\u2014');
+      setText(formatBadge, format || '—');
 
       const captured = formatDate(photo.date_original || exif.DateTimeOriginal || '');
       const digitized = formatDate(photo.date_digitized || exif.DateTimeDigitized || '');
@@ -963,8 +963,8 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
       const focalWith35mm = focalLengthVal && exif.FocalLengthIn35mmFilm
         ? focalLengthVal + ' (' + exif.FocalLengthIn35mmFilm + 'mm eq.)'
         : focalLengthVal;
-      const dimensions = (meta.width && meta.height) ? meta.width + ' \\u00d7 ' + meta.height : '';
-      const resolution = (exif.XResolution && exif.YResolution) ? exif.XResolution + ' \\u00d7 ' + exif.YResolution + ' DPI' : '';
+      const dimensions = (meta.width && meta.height) ? meta.width + ' × ' + meta.height : '';
+      const resolution = (exif.XResolution && exif.YResolution) ? exif.XResolution + ' × ' + exif.YResolution + ' DPI' : '';
       const formatBytes = (bytes) => {
         if (!bytes) return '';
         const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -976,7 +976,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
       const wb = exif.WhiteBalance !== undefined ? (whiteBalanceModes[exif.WhiteBalance] || '') : '';
       const flash = exif.Flash !== undefined ? (flashStates[exif.Flash] || '') : '';
 
-      const item = (label, value) => '<div class="tech-item"><span class="tech-label">' + esc(label) + '</span><span class="tech-value">' + esc(value || '\\u2014') + '</span></div>';
+      const item = (label, value) => '<div class="tech-item"><span class="tech-label">' + esc(label) + '</span><span class="tech-value">' + esc(value || '—') + '</span></div>';
 
       setHtml(techContent, [
         '<div class="tech-group"><h4 class="tech-group-title">Camera & Lens</h4><div class="tech-grid">',
@@ -1113,7 +1113,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
 
       const loc = [iptc.location, iptc.city].filter(Boolean).join(', ');
       if (loc) {
-        setHtml(iptcLocation, '\\ud83d\\udccd ' + esc(loc));
+        setHtml(iptcLocation, '📍 ' + esc(loc));
         show(iptcLocation);
         hasContent = true;
       }
@@ -1165,35 +1165,35 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
         let title = '', desc = '', timestamp = '', verified = false, icon = '';
 
         if (item.generator) {
-          title = 'Claim Generator'; desc = item.generator; icon = '\\u2699\\ufe0f';
+          title = 'Claim Generator'; desc = item.generator; icon = '⚙️';
           timestamp = item.version ? 'Version: ' + item.version : '';
           headerItems.push({ title, desc, timestamp, verified, icon });
         } else if (item.issuer && item.name === 'Issued By') {
-          title = 'Issued By'; desc = item.issuer; icon = '\\ud83c\\udfdb\\ufe0f';
+          title = 'Issued By'; desc = item.issuer; icon = '🏛️';
           headerItems.push({ title, desc, timestamp, verified, icon });
         } else if (item.date && item.name === 'Issued On') {
-          title = 'Issued On'; desc = item.date; icon = '\\ud83d\\udcc5';
+          title = 'Issued On'; desc = item.date; icon = '📅';
           headerItems.push({ title, desc, timestamp, verified, icon });
         } else if (item.verification) {
-          title = 'Verification'; desc = item.verification; icon = '\\u2713';
+          title = 'Verification'; desc = item.verification; icon = '✓';
           timestamp = item.issuer ? 'Issuer: ' + item.issuer : '';
           verified = String(item.verification).toLowerCase().includes('valid');
           verifyItem.push({ title, desc, timestamp, verified, icon });
         } else if (item.name === 'Action' && item.action) {
           title = getActionLabel(item); desc = getActionDescription(item);
-          icon = '\\ud83d\\udccb';
-          timestamp = [item.software ? 'Tool: ' + item.software : '', item.when || ''].filter(Boolean).join(' \\u00b7 ');
+          icon = '📋';
+          timestamp = [item.software ? 'Tool: ' + item.software : '', item.when || ''].filter(Boolean).join(' · ');
           middleItems.push({ title, desc, timestamp, verified, icon });
         } else if (item.name === 'Ingredient') {
-          title = 'Original Image'; desc = 'Source image with embedded C2PA metadata'; icon = '\\ud83d\\udcf8';
+          title = 'Original Image'; desc = 'Source image with embedded C2PA metadata'; icon = '📸';
           timestamp = item.relationship ? 'Relationship: ' + item.relationship : '';
           verified = true;
           middleItems.push({ title, desc, timestamp, verified, icon });
         } else if (item.author && item.name !== 'Author') {
-          title = 'Author'; desc = item.author; icon = '\\ud83d\\udc64'; verified = true;
+          title = 'Author'; desc = item.author; icon = '👤'; verified = true;
           middleItems.push({ title, desc, timestamp, verified, icon });
         } else if (item.title) {
-          title = 'Title'; desc = item.title; icon = '\\ud83d\\udcdd';
+          title = 'Title'; desc = item.title; icon = '📝';
           middleItems.push({ title, desc, timestamp, verified, icon });
         }
       });
@@ -1210,7 +1210,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
         const style = isHidden ? ' style="display:none;"' : '';
         return '<li class="' + cls + '"' + style + '>'
           + '<strong>' + row.icon + ' ' + esc(row.title) + '</strong>'
-          + '<p>' + esc(row.desc || '\\u2014') + '</p>'
+          + '<p>' + esc(row.desc || '—') + '</p>'
           + (row.timestamp ? '<p class="timestamp">' + esc(row.timestamp) + '</p>' : '')
           + '</li>';
       };
@@ -1271,7 +1271,7 @@ function lightboxHtml(imgPublicUrl, altText, og = {}) {
     const renderAll = () => {
       if (!state.exifLoaded || !state.c2paLoaded) {
         show(metaStatus);
-        setText(metaStatus, state.exifLoaded || state.c2paLoaded ? 'Loading metadata\\u2026' : 'Fetching credentials\\u2026');
+        setText(metaStatus, state.exifLoaded || state.c2paLoaded ? 'Loading metadata…' : 'Fetching credentials…');
       } else {
         hide(metaStatus);
       }
@@ -1348,6 +1348,12 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const pathname = url.pathname;
+
+    // Pass Cloudflare Image Transformation requests straight through —
+    // they use /cdn-cgi/image/... paths and must never be intercepted here.
+    if (pathname.startsWith("/cdn-cgi/")) {
+      return fetch(request);
+    }
 
     // ── Route the request to an image path ──────────────────────
     let imagePath = "";
