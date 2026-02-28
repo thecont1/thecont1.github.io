@@ -10,25 +10,25 @@ Personal website for Mahesh Shantaram (thecontrarian.in) — a documentary photo
 
 ### Development
 ```bash
-npm install              # Install dependencies
-npm run dev              # Start dev server at localhost:4321
-npm run build            # Build production site to ./dist/
-npm run preview          # Preview production build locally
-npm run astro check      # Run Astro type checking
+bun install              # Install dependencies
+bun run dev              # Start dev server at localhost:4321
+bun run build            # Build production site to ./dist/
+bun run preview          # Preview production build locally
+bun run check             # Run Astro type checking
 ```
 
 ### Utility Scripts
 ```bash
-npm run astro            # Access Astro CLI directly
-npm run extract:exif     # Extract EXIF metadata locally (see use cases below)
-npm run r2:upload        # End-to-end: extract metadata + upload to R2
-npm run deploy           # Full deployment: R2 sync + build + FTP upload
+bun run astro -- <args>  # Access Astro CLI directly
+bun run extract:exif     # Extract EXIF metadata locally (see use cases below)
+bun run r2:upload        # End-to-end: extract metadata + upload to R2
+bun run deploy           # Full deployment: R2 sync + build + FTP upload
 ```
 
 **EXIF Extraction Use Cases:**
-- **Local-only updates**: `npm run extract:exif` - Regenerate all metadata without R2 upload
-- **Specific directory**: `npm run extract:exif -- --dir DIRECTORY` - Update one folder only
-- **End-to-end workflow**: `npm run r2:upload` - Extract metadata AND upload to R2 (recommended for new images)
+- **Local-only updates**: `bun run extract:exif` - Regenerate all metadata without R2 upload
+- **Specific directory**: `bun run extract:exif -- --dir DIRECTORY` - Update one folder only
+- **End-to-end workflow**: `bun run r2:upload` - Extract metadata AND upload to R2 (recommended for new images)
 
 ## Architecture
 
@@ -157,7 +157,7 @@ The site integrates computational notebooks for data storytelling:
 
 ### Production Deployment (thecontrarian.in)
 - **Platform**: cPanel hosting via FTP
-- **Script**: `npm run deploy` (wraps `deploy.sh`)
+- **Script**: `bun run deploy` (wraps `deploy.sh`)
 - **Build output**: Pure static site to `./dist/`
 - **Site URL**: https://thecontrarian.in
 - **Deployment Steps**:
@@ -183,7 +183,7 @@ The site integrates computational notebooks for data storytelling:
 - **Platform**: GitHub Pages
 - **Workflow**: `.github/workflows/astro.yml` handles CI/CD
 - **Site URL**: https://thecont1.github.io
-- **Requirements**: Node.js 20, Python 3.12, UV package manager
+- **Requirements**: Bun 1.3+, Python 3.12, UV package manager
 
 ## Content Authoring
 
@@ -210,7 +210,7 @@ When creating new content:
 ### Type Safety Status
 - **100% type coverage** across all Astro components
 - **Clean TypeScript compilation** with strict type checking
-- **Zero errors, zero warnings** in `npm run astro check`
+- **Zero errors, zero warnings** in `bun run check`
 - **Global type declarations**: `src/types/global.d.ts` for custom window properties
 
 ### Major Type Safety Improvements (Jan 2026)
