@@ -24,7 +24,7 @@ cp ~/my_photos/*.jpg public/library/originals/NEW_SERIES/
 
 **2. Upload to R2 (generates metadata automatically):**
 ```bash
-npm run r2:upload
+bun run r2:upload
 # Or for specific directory:
 bash scripts/upload_to_r2.sh NEW_SERIES
 ```
@@ -67,7 +67,7 @@ git push
 
 | Task | Command |
 |------|--------|
-| **Upload images to R2** | `npm run r2:upload` or `bash scripts/upload_to_r2.sh` |
+| **Upload images to R2** | `bun run r2:upload` or `bash scripts/upload_to_r2.sh` |
 | Upload specific directory | `bash scripts/upload_to_r2.sh DIRECTORY` |
 | Extract metadata only | `uv run python scripts/build_exif.py --dir DIRECTORY` |
 | Direct R2 upload (rclone) | `rclone sync local/ :s3:bucket/originals/DIR/` |
@@ -76,7 +76,7 @@ git push
 
 ## Development Workflow
 
-During development (`npm run dev`):
+During development (`bun run dev`):
 - The scaffold integration watches `public/library/originals/`
 - When JPGs are added/modified, metadata is auto-regenerated
 - Remember to upload to R2 before deployment!
@@ -104,8 +104,8 @@ R2 CDN:
 ## Best Practices
 
 1. **Add images locally first** - Keep them in `public/library/originals/` for C2PA processing
-2. **Run `npm run r2:upload` after adding/modifying images** - Generates metadata and uploads to R2
+2. **Run `bun run r2:upload` after adding/modifying images** - Generates metadata and uploads to R2
 3. **Commit metadata.json files to Git** - They're tracked and used at runtime
 4. **Use meaningful directory names** - They become URL paths
 5. **Don't commit images** - They're gitignored and served from R2 CDN
-6. **Dev mode auto-updates** - Metadata regenerates automatically when images change during `npm run dev`
+6. **Dev mode auto-updates** - Metadata regenerates automatically when images change during `bun run dev`

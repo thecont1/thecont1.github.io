@@ -8,7 +8,7 @@ The `deploy.sh` script orchestrates the entire build and deployment process. It'
 
 ```bash
 # Full deployment (recommended)
-npm run deploy
+bun run deploy
 # or
 ./deploy.sh
 
@@ -26,7 +26,7 @@ The master script executes these steps in order:
    - Uploads `public/library/` to R2 CDN via `scripts/upload_to_r2.sh`
 
 2. **Astro Build**
-   - Runs `npm run build` to generate static site
+   - Runs `bun run build` to generate static site
 
 3. **Clean Build Output**
    - Deletes `dist/library` (served from R2 CDN, not needed on server)
@@ -58,7 +58,7 @@ The master script executes these steps in order:
 
 ### Full Deployment (All Changes)
 ```bash
-npm run deploy
+bun run deploy
 ```
 Use when: You've added/modified images AND made code changes.
 
@@ -82,7 +82,7 @@ Use when: You've added/modified images but haven't changed code.
 ```bash
 # Build and test locally
 ./deploy.sh --skip-r2 --skip-ftp
-npm run preview
+bun run preview
 ```
 
 ### Specific Directory Update
@@ -112,7 +112,7 @@ THECONT1_FTP_PASSWORD=your_ftp_password
 
 The script checks for these commands:
 - `uv` - Python package manager
-- `npm` - Node package manager
+- `bun` - JavaScript package manager/runtime
 - `lftp` - FTP client
 - `rclone` - R2 sync tool
 
@@ -139,7 +139,7 @@ Check your `.env` file has the correct `THECONT1_FTP_PASSWORD`.
 Verify all Cloudflare R2 environment variables are set correctly.
 
 ### Build fails
-Run `npm install` to ensure all dependencies are installed.
+Run `bun install` to ensure all dependencies are installed.
 
 ## Notes
 

@@ -6,6 +6,7 @@ import HomeProjects from "../components/home/Projects.astro";
 import HomeAbout from "../components/home/About.astro";
 import C2PAOverlay from "../components/ui/C2PAOverlay.astro";
 import { CAROUSEL_IMAGES } from "../data/carousel";
+import { cfImageUrl } from "../utils/api";
 import { AUTHOR } from "../data/author";
 import "../styles/home.css";
 
@@ -76,16 +77,35 @@ const personJsonLd = {
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts (non-render-blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&family=Lexend:wght@300;400;500;600;700;800&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&family=Lexend:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
 
     {CAROUSEL_IMAGES.slice(0, 1).map((img) => (
-      <link rel="preload" as="image" href={img.src} />
+      <link
+        rel="preload"
+        as="image"
+        href={cfImageUrl(img.src, 1920)}
+        imagesrcset={[
+          `${cfImageUrl(img.src, 1200)} 1200w`,
+          `${cfImageUrl(img.src, 1920)} 1920w`,
+          `${cfImageUrl(img.src, 2560)} 2560w`,
+        ].join(", ")}
+        imagesizes="100vw"
+        fetchpriority="high"
+      />
     ))}
   </head>
 
@@ -158,6 +178,32 @@ const personJsonLd = {
     <script is:inline src="/curtain-scroll-fallback.js" defer></script>
     <script is:inline src="/snow.js" defer></script>
     <script is:inline src="/mobile-nav.js" defer></script>
+    <script>
+      // Homepage header: transparent over carousel, steel grey after scrolling past it
+      {
+        const header = document.querySelector('.site-header') as HTMLElement;
+        const projects = document.getElementById('projects');
+
+        if (header && projects) {
+          header.style.transition = 'background-color 0.35s ease, backdrop-filter 0.35s ease';
+
+          const observer = new IntersectionObserver(
+            ([entry]) => {
+              if (entry.isIntersecting) {
+                header.classList.add('is-scrolled');
+              } else {
+                // Only clear if user scrolled back UP (projects below viewport)
+                if (entry.boundingClientRect.top > 0) {
+                  header.classList.remove('is-scrolled');
+                }
+              }
+            },
+            { threshold: 0, rootMargin: '-64px 0px 0px 0px' }
+          );
+          observer.observe(projects);
+        }
+      }
+    </script>
     <script>
       // WhatsApp Form Handler
       const form = document.getElementById('wa-form');

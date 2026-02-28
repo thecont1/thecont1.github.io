@@ -1,4 +1,18 @@
 ---
+import { getImageMetadata } from "../../utils/exif";
+
+const aboutImages = [
+  { src: "/library/about/ms1.jpg", alt: "Portrait by my 3 year-old niece", caption: "Portrait by my 3 year-old niece when I was teaching her how to make a portrait. San Jose, 2013." },
+  { src: "/library/about/ms2.jpg", alt: "Photoquai, Paris, 2011", caption: "My profound explanation causes the Culture Minister to instantly spin into a deep meditative state whereupon he ponders the meaning of life; Photoquai, Paris, 2011." },
+  { src: "/library/about/ms3.jpg", alt: "First days. Navi Mumbai, 2000", caption: "First days. Navi Mumbai, 2000." },
+];
+
+const aboutImagesWithDimensions = await Promise.all(
+  aboutImages.map(async (img) => {
+    const meta = await getImageMetadata(img.src);
+    return { ...img, width: meta?.width, height: meta?.height };
+  })
+);
 ---
 <section id="about" class="about-section">
   <header class="projects-header">
@@ -31,18 +45,19 @@
 
     <div class="about-scroll-wrapper">
       <div class="about-images">
-        <figure class="about-card">
-          <img src="/library/about/ms1.jpg" alt="Portrait by my 3 year-old niece" />
-          <figcaption>Portrait by my 3 year-old niece when I was teaching her how to make a portrait. San Jose, 2013.</figcaption>
-        </figure>
-        <figure class="about-card">
-          <img src="/library/about/ms2.jpg" alt="Photoquai, Paris, 2011" />
-          <figcaption>My profound explanation causes the Culture Minister to instantly spin into a deep meditative state whereupon he ponders the meaning of life; Photoquai, Paris, 2011.</figcaption>
-        </figure>
-        <figure class="about-card">
-          <img src="/library/about/ms3.jpg" alt="First days. Navi Mumbai, 2000" />
-          <figcaption>First days. Navi Mumbai, 2000.</figcaption>
-        </figure>
+        {aboutImagesWithDimensions.map((img) => (
+          <figure class="about-card">
+            <img
+              src={img.src}
+              alt={img.alt}
+              width={img.width || undefined}
+              height={img.height || undefined}
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption>{img.caption}</figcaption>
+          </figure>
+        ))}
       </div>
     </div>
   </div>
