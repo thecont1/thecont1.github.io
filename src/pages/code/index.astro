@@ -4,6 +4,7 @@ import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import C2PAOverlay from "../../components/ui/C2PAOverlay.astro";
 import { AUTHOR } from "../../data/author";
+import "../../styles/fonts.css";
 import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
@@ -32,7 +33,9 @@ const personJsonLd = {
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href={canonicalURL.href} />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
     <!-- Open Graph -->
     <meta property="og:title" content={title} />
@@ -52,18 +55,14 @@ const personJsonLd = {
     <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&display=swap"
-      rel="stylesheet"
-    />
   </head>
 
   <body>
+    <canvas id="snow-canvas" aria-hidden="true"></canvas>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <SiteHeader />
     
-    <main class="code-index">
+    <main id="main-content" class="code-index" tabindex="-1">
       <header class="page-header">
         <h1>Code Projects</h1>
         <p>Open source projects and creative coding experiments</p>
@@ -103,6 +102,9 @@ const personJsonLd = {
 
     <SiteFooter />
     <C2PAOverlay />
+    <script is:inline src="/textmode.js" defer></script>
+    <script is:inline src="/snow-loader.js" defer></script>
+    <script is:inline src="/mobile-nav.js" defer></script>
   </body>
 </html>
 

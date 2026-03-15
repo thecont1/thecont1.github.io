@@ -43,7 +43,7 @@ import { navLinks } from "../data/nav";
       </button>
 
       <!-- Mobile Navigation Toggle - moved to end of site-actions -->
-      <button class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false">
+      <button class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-nav">
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
@@ -51,7 +51,7 @@ import { navLinks } from "../data/nav";
     </div>
 
     <!-- Mobile Navigation Menu -->
-    <nav class="site-nav mobile-nav" aria-hidden="true">
+    <nav id="mobile-nav" class="site-nav mobile-nav" aria-hidden="true" aria-label="Mobile navigation" inert>
       <div class="mobile-nav-overlay"></div>
       <div class="mobile-nav-content">
         <button class="mobile-nav-close" aria-label="Close navigation menu">

@@ -9,6 +9,8 @@
   let mobileNav = null;
   let mobileNavClose = null;
   let mobileNavOverlay = null;
+  let mobileNavContent = null;
+  let lastFocusedElement = null;
 
   function ensureMobileNavInBody() {
     if (!mobileNav) return;
@@ -25,12 +27,21 @@
     mobileNav = document.querySelector('.mobile-nav');
     mobileNavClose = document.querySelector('.mobile-nav-close');
     mobileNavOverlay = document.querySelector('.mobile-nav-overlay');
+    mobileNavContent = document.querySelector('.mobile-nav-content');
 
     if (!mobileMenuToggle || !mobileNav) {
       return; // Elements not found, exit gracefully
     }
 
+    if (mobileNav.dataset.initialized === 'true') {
+      syncMenuState(false);
+      return;
+    }
+
+    mobileNav.dataset.initialized = 'true';
+
     ensureMobileNavInBody();
+    syncMenuState(false);
 
     // Add event listeners
     mobileMenuToggle.addEventListener('click', toggleMobileMenu);
@@ -67,14 +78,9 @@
   }
 
   function openMobileMenu() {
-    mobileNav.setAttribute('aria-hidden', 'false');
-    mobileMenuToggle.setAttribute('aria-expanded', 'true');
-    mobileMenuToggle.setAttribute('aria-label', 'Close navigation menu');
-    
-    // Prevent body scroll when menu is open
-    document.body.style.overflow = 'hidden';
-    
-    // Focus management - focus the close button
+    lastFocusedElement = document.activeElement;
+    syncMenuState(true);
+
     if (mobileNavClose) {
       setTimeout(() => {
         mobileNavClose.focus();
@@ -83,21 +89,23 @@
   }
 
   function closeMobileMenu() {
-    mobileNav.setAttribute('aria-hidden', 'true');
-    mobileMenuToggle.setAttribute('aria-expanded', 'false');
-    mobileMenuToggle.setAttribute('aria-label', 'Open navigation menu');
-    
-    // Restore body scroll
-    document.body.style.overflow = '';
-    
-    // Return focus to toggle button
-    mobileMenuToggle.focus();
+    syncMenuState(false);
+
+    const focusTarget = lastFocusedElement instanceof HTMLElement ? lastFocusedElement : mobileMenuToggle;
+    focusTarget?.focus();
+    lastFocusedElement = null;
   }
 
   function handleKeydown(event) {
-    // Close menu on Escape key
-    if (event.key === 'Escape' && mobileNav.getAttribute('aria-hidden') === 'false') {
+    const isOpen = mobileNav.getAttribute('aria-hidden') === 'false';
+
+    if (event.key === 'Escape' && isOpen) {
       closeMobileMenu();
+      return;
+    }
+
+    if (event.key === 'Tab' && isOpen) {
+      trapFocus(event);
     }
   }
 
@@ -105,6 +113,44 @@
     // Close mobile menu if viewport becomes desktop size
     if (window.innerWidth > 768 && mobileNav.getAttribute('aria-hidden') === 'false') {
       closeMobileMenu();
+    }
+  }
+
+  function syncMenuState(isOpen) {
+    mobileNav.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+    mobileMenuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    mobileMenuToggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+
+    if (isOpen) {
+      mobileNav.removeAttribute('inert');
+    } else {
+      mobileNav.setAttribute('inert', '');
+    }
+
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+  }
+
+  function trapFocus(event) {
+    if (!mobileNavContent) return;
+
+    const focusableElements = mobileNavContent.querySelectorAll(
+      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+
+    if (!focusableElements.length) return;
+
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    if (event.shiftKey && document.activeElement === firstElement) {
+      event.preventDefault();
+      lastElement.focus();
+      return;
+    }
+
+    if (!event.shiftKey && document.activeElement === lastElement) {
+      event.preventDefault();
+      firstElement.focus();
     }
   }
 

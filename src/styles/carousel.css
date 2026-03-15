@@ -411,8 +411,7 @@ body.photogallery-carousel {
   align-items: center;
   justify-content: center;
   
-  /* Use backgroundColor from frontmatter with forced transparency */
-  background: color-mix(in srgb, var(--curtain-bg, #141414) 75%, transparent);
+  background: rgba(12, 12, 12, 0.58);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   
@@ -422,7 +421,7 @@ body.photogallery-carousel {
 /* Fallback for browsers without color-mix support */
 @supports not (background: color-mix(in srgb, #000 50%, transparent)) {
   .carousel-curtain {
-    background: rgba(20, 20, 20, 0.75);
+    background: rgba(12, 12, 12, 0.58);
   }
 }
 
@@ -439,6 +438,7 @@ body.photogallery-carousel {
   letter-spacing: 0.2em;
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
   margin-bottom: 1.5rem;
 }
 
@@ -459,6 +459,7 @@ body.photogallery-carousel {
   font-style: italic;
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.65);
   margin: 0;
   max-width: 600px;
   margin: 0 auto;
