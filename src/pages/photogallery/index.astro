@@ -6,15 +6,17 @@ const photogalleries = await getCollection("photogallery", ({ data }) => data.st
 ---
 
 <Layout title="Photo Galleries">
-  <h1>Photo Galleries</h1>
-  <div class="collection-grid">
-    {photogalleries.map((gallery) => (
-      <article class="collection-item">
-        <a href={`/photogallery/${gallery.id}`}>
-          <h2>{gallery.data.title}</h2>
-          <p>{gallery.data.subtitle}</p>
-        </a>
-      </article>
-    ))}
-  </div>
+  <main>
+    <h1>Photo Galleries</h1>
+    <div class="collection-grid">
+      {photogalleries.map((gallery) => (
+        <article class="collection-item">
+          <a href={`/photogallery/${gallery.id}`}>
+            <h2>{gallery.data.title}</h2>
+            <p>{gallery.data.subtitle}</p>
+          </a>
+        </article>
+      ))}
+    </div>
+  </main>
 </Layout>
