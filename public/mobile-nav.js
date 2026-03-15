@@ -11,6 +11,7 @@
   let mobileNavOverlay = null;
   let mobileNavContent = null;
   let lastFocusedElement = null;
+  let closeButtonFocusTimer = null;
 
   function ensureMobileNavInBody() {
     if (!mobileNav) return;
@@ -81,14 +82,26 @@
     lastFocusedElement = document.activeElement;
     syncMenuState(true);
 
+    if (closeButtonFocusTimer) {
+      clearTimeout(closeButtonFocusTimer);
+    }
+
     if (mobileNavClose) {
-      setTimeout(() => {
-        mobileNavClose.focus();
+      closeButtonFocusTimer = setTimeout(() => {
+        closeButtonFocusTimer = null;
+        if (mobileNav.getAttribute('aria-hidden') === 'false' && !mobileNav.hasAttribute('inert')) {
+          mobileNavClose.focus();
+        }
       }, 100);
     }
   }
 
   function closeMobileMenu() {
+    if (closeButtonFocusTimer) {
+      clearTimeout(closeButtonFocusTimer);
+      closeButtonFocusTimer = null;
+    }
+
     syncMenuState(false);
 
     const focusTarget = lastFocusedElement instanceof HTMLElement ? lastFocusedElement : mobileMenuToggle;
