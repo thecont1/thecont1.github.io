@@ -18,7 +18,6 @@ The World of Mahesh Shantaram. Documentary Photographer and Data Scientist for t
       var availableWidth = window.innerWidth - paddingLeft - paddingRight;
       var availableHeight = window.innerHeight - paddingTop - paddingBottom;
 
-      // Create a hidden measurement element
       var measure = document.createElement('div');
       measure.style.cssText =
         'position:absolute;visibility:hidden;white-space:pre-wrap;word-wrap:break-word;' +
@@ -27,7 +26,6 @@ The World of Mahesh Shantaram. Documentary Photographer and Data Scientist for t
       measure.textContent = text;
       document.body.appendChild(measure);
 
-      // Binary search for optimal font size
       var minSize = 10;
       var maxSize = 400;
       var optimalSize = minSize;
@@ -46,15 +44,12 @@ The World of Mahesh Shantaram. Documentary Photographer and Data Scientist for t
 
       document.body.removeChild(measure);
 
-      // Apply the optimal size
       el.style.setProperty('--hero-font-size', optimalSize + 'px');
       el.style.setProperty('--hero-line-height', '0.92');
     }
 
-    // Run immediately (before first paint) to prevent CLS
     fitHeroStatement();
 
-    // Re-run when web fonts finish loading (metrics may differ from system fallback)
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(fitHeroStatement);
     }

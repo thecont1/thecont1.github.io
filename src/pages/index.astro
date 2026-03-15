@@ -8,6 +8,13 @@ import C2PAOverlay from "../components/ui/C2PAOverlay.astro";
 import { CAROUSEL_IMAGES } from "../data/carousel";
 import { cfImageUrl } from "../utils/api";
 import { AUTHOR } from "../data/author";
+import "../styles/fonts.css";
+import "../styles/global.css";
+import "../styles/header.css";
+import "../styles/hero.css";
+import "../styles/projects.css";
+import "../styles/pages.css";
+import "../styles/footer.css";
 import "../styles/home.css";
 
 const title = "Mahesh Shantaram | Visual Artist, Data Scientist";
@@ -56,9 +63,10 @@ const personJsonLd = {
     <title>{title}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow" />
     <link rel="canonical" href={canonicalURL.href} />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
-    <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
@@ -66,32 +74,14 @@ const personJsonLd = {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mahesh Shantaram" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@thecontrarian" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
-
-    <!-- Google Fonts (non-render-blocking) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&family=Lexend:wght@300;400;500;600;700;800&display=swap"
-      rel="stylesheet"
-      media="print"
-      onload="this.media='all'"
-    />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=DM+Sans:wght@500;600&family=Lexend:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
 
     {CAROUSEL_IMAGES.slice(0, 1).map((img) => (
       <link
@@ -111,34 +101,16 @@ const personJsonLd = {
 
   <body>
     <canvas id="snow-canvas" aria-hidden="true"></canvas>
-    <!-- Persistent navigation -->
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <SiteHeader />
 
-    <main>
-      <!-- ===================================== -->
-      <!-- HERO: carousel + curtain -->
-      <!-- ===================================== -->
+    <main id="main-content" tabindex="-1">
       <HomeHero />
-
-      <!-- Creates space for curtain lift -->
       <div class="scroll-runway"></div>
-
-      <!-- Small pause before projects take over -->
       <div class="scroll-buffer"></div>
-
-      <!-- ===================================== -->
-      <!-- PROJECTS -->
-      <!-- ===================================== -->
       <HomeProjects />
-
-      <!-- ===================================== -->
-      <!-- ABOUT ME -->
-      <!-- ===================================== -->
       <HomeAbout />
 
-      <!-- ===================================== -->
-      <!-- CONTACT -->
-      <!-- ===================================== -->
       <section id="contact" class="contact-section">
         <header class="projects-header">
           <h2 class="projects-title">Contact</h2>
@@ -147,9 +119,10 @@ const personJsonLd = {
         <div class="contact-grid">
           <div class="whatsapp-box">
             <h3>Start a Conversation over WhatsApp</h3>
-            <p class="wa-label">Type a message below and hit send to open a chat with me.</p>
+            <p id="wa-message-help" class="wa-label">Type a message below and hit send to open a chat with me.</p>
             <form id="wa-form" class="wa-form">
-              <textarea id="wa-message" rows="7" placeholder="Type your message here."></textarea>
+              <label class="sr-only" for="wa-message">Your WhatsApp message</label>
+              <textarea id="wa-message" rows="7" placeholder="Type your message here." aria-describedby="wa-message-help"></textarea>
               <button type="submit" class="wa-btn">
                 Send to WhatsApp
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
@@ -164,58 +137,27 @@ const personJsonLd = {
             <p class="contact-intro">Get in touch to say hello.</p>
             <a href="mailto:ms@thecontrarian.in" class="email-link">ms@thecontrarian.in</a>
           </div>
-
         </div>
       </section>
 
-      <!-- ===================================== -->
-      <!-- FOOTER -->
-      <!-- ===================================== -->
       <SiteFooter />
     </main>
     <C2PAOverlay />
     <script is:inline src="/textmode.js" defer></script>
     <script is:inline src="/curtain-scroll-fallback.js" defer></script>
-    <script is:inline src="/snow.js" defer></script>
+    <script is:inline src="/snow-loader.js" defer></script>
     <script is:inline src="/mobile-nav.js" defer></script>
     <script>
-      // Homepage header: transparent over carousel, steel grey after scrolling past it
-      {
-        const header = document.querySelector('.site-header') as HTMLElement;
-        const projects = document.getElementById('projects');
-
-        if (header && projects) {
-          header.style.transition = 'background-color 0.35s ease, backdrop-filter 0.35s ease';
-
-          const observer = new IntersectionObserver(
-            ([entry]) => {
-              if (entry.isIntersecting) {
-                header.classList.add('is-scrolled');
-              } else {
-                // Only clear if user scrolled back UP (projects below viewport)
-                if (entry.boundingClientRect.top > 0) {
-                  header.classList.remove('is-scrolled');
-                }
-              }
-            },
-            { threshold: 0, rootMargin: '-64px 0px 0px 0px' }
-          );
-          observer.observe(projects);
-        }
-      }
-    </script>
-    <script>
-      // WhatsApp Form Handler
       const form = document.getElementById('wa-form');
       const messageInput = document.getElementById('wa-message') as HTMLTextAreaElement;
-      const PHONE_NUMBER = "919980129770";
+      const PHONE_NUMBER = '919980129770';
 
       if (form && messageInput) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
+        form.addEventListener('submit', (event) => {
+          event.preventDefault();
           const text = encodeURIComponent(messageInput.value);
           if (!text) return;
-          
+
           const url = `https://wa.me/${PHONE_NUMBER}?text=${text}`;
           window.open(url, '_blank');
         });

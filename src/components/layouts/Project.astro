@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { render, getEntries, type CollectionEntry } from "astro:content";
 import Carousel from "../carousel/Carousel.tsx";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import C2PAOverlay from "../ui/C2PAOverlay.astro";
@@ -13,12 +13,12 @@ interface Props {
 const { post } = Astro.props;
 
 // 1. Fetch referenced content from the project frontmatter
-const photogalleries = await Promise.all((post.data.photogalleries || []).map((ref: any) => ref()));
-const essays = await Promise.all((post.data.essays || []).map((ref: any) => ref()));
-const longforms = await Promise.all((post.data.longforms || []).map((ref: any) => ref()));
-const posts = await Promise.all((post.data.posts || []).map((ref: any) => ref()));
-const datastories = await Promise.all((post.data.datastories || []).map((ref: any) => ref()));
-const code = await Promise.all((post.data.code || []).map((ref: any) => ref()));
+const photogalleries = await getEntries(post.data.photogalleries || []);
+const essays = await getEntries(post.data.essays || []);
+const longforms = await getEntries(post.data.longforms || []);
+const posts = await getEntries(post.data.posts || []);
+const datastories = await getEntries(post.data.datastories || []);
+const code = await getEntries(post.data.code || []);
 
 const projectContent = [...photogalleries, ...essays, ...longforms, ...posts, ...datastories, ...code]
   .filter((p) => p?.data?.status === "published");
@@ -60,7 +60,7 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
   <section class="project-modules">
     <div class="modules-grid">
       {projectContent.map((module: any) => (
-        <a href={`/${module.collection}/${module.slug}`} class="module-card">
+        <a href={`/${module.collection}/${module.id}`} class="module-card">
           <span class="module-type">{(module.data as any).layout || module.collection}</span>
           <h2 class="module-title">{module.data.title}</h2>
           <p class="module-subtitle">{(module.data as any).subtitle}</p>
@@ -77,7 +77,7 @@ const backgroundColor = post.data.backgroundColor || "var(--paper)";
        {/* Note: ContentDispatcher usually renders Content, but here we might just want links? 
            Or if the Project post has content, render it. */}
        {async () => {
-         const { Content } = await post.render();
+         const { Content } = await render(post);
          return <Content />;
        }}
     </div>

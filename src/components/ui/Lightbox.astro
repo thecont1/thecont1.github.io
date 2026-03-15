@@ -312,7 +312,7 @@ const { selector = "main", gallery = true, includeHero = false } = Astro.props;
         const descEl = exifContainer.querySelector('.info-panel-description');
         if (descEl) descEl.textContent = description;
 
-        attachCRButton(lightboxImages[activeImgIndex]?.src || targetImgEl.src);
+        attachCRButton((lightboxImages[activeImgIndex] as HTMLImageElement)?.src || targetImgEl.src);
       } catch (err) {
         exifContainer.innerHTML = `<p>Metadata unavailable</p>`;
       }

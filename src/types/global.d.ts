@@ -5,6 +5,7 @@ declare global {
     __postMetadataCache?: Map<string, any>;
     __lightboxMetadataCache?: Map<string, any>;
     __attachLightboxListeners?: () => void;
+    renderMathInElement?: (container: HTMLElement, options?: any) => void;
   }
 
   var __postMetadataCache: Map<string, any> | undefined;

@@ -7,7 +7,7 @@ export const prerender = true;
 export async function getStaticPaths() {
   const photogalleries = await getCollection("photogallery", ({ data }) => data.status === "published");
   return photogalleries.map((entry) => ({
-    params: { slug: entry.slug },
+    params: { slug: entry.id },
     props: { entry },
   }));
 }

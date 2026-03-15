@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { render, type CollectionEntry } from "astro:content";
 import Lightbox from "../ui/Lightbox.astro";
 import ScreenToggle from "../ui/ScreenToggle.astro";
 import ContentsToggle from "../ui/ContentsToggle.astro";
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await post.render();
+const { Content, headings } = await render(post);
 
 const backgroundColor = post.data.backgroundColor || "#f9e4e4";
 
