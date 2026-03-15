@@ -1,9 +1,11 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, Suspense, lazy, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
-import InfoPanel from "./InfoPanel";
+import { cfImageUrl } from "../../utils/api";
+const InfoPanel = lazy(() => import("./InfoPanel"));
 
-const PLACEHOLDER_IMAGE_SRC =
-  "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+function placeholderSvg(w: number, h: number): string {
+  return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}'/%3E`;
+}
 
 declare global {
   interface Window {
@@ -197,7 +199,7 @@ export default function Carousel({ images }: { images: Image[] }) {
     if (!images.length) return;
 
     const startToken = ++preloadTokenRef.current;
-    const queue = images.map((img) => img?.src).filter(Boolean) as string[];
+    const queue = images.map((img) => img?.src ? cfImageUrl(img.src, 1920) : '').filter(Boolean);
 
     const clamp = (i: number) => {
       if (!queue.length) return 0;
@@ -360,9 +362,17 @@ export default function Carousel({ images }: { images: Image[] }) {
               }}
             >
               <img
-                src={revealed[i] ? img.src : PLACEHOLDER_IMAGE_SRC}
+                src={revealed[i] ? cfImageUrl(img.src, 1920) : placeholderSvg(img.metadata?.width || 2560, img.metadata?.height || 1920)}
+                srcSet={revealed[i] ? [
+                  `${cfImageUrl(img.src, 1200)} 1200w`,
+                  `${cfImageUrl(img.src, 1920)} 1920w`,
+                  `${cfImageUrl(img.src, 2560)} 2560w`,
+                ].join(", ") : undefined}
+                sizes="100vw"
                 alt=""
                 className="carousel-image"
+                width={img.metadata?.width || undefined}
+                height={img.metadata?.height || undefined}
                 loading={i === index ? "eager" : "lazy"}
                 fetchPriority={i === index ? "high" : "low"}
                 decoding="async"
@@ -389,7 +399,11 @@ export default function Carousel({ images }: { images: Image[] }) {
         </button>
       </div>
 
-      {showInfo && metadata && <InfoPanel metadata={metadata} imageSrc={currentImage.src} />}
+      {showInfo && metadata && (
+        <Suspense fallback={null}>
+          <InfoPanel metadata={metadata} imageSrc={currentImage.src} />
+        </Suspense>
+      )}
       {!metadata && <div className="debug-no-meta">No metadata available</div>}
     </div>
   );

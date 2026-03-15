@@ -37,7 +37,6 @@ const personJsonLd = {
     <link rel="canonical" href={canonicalURL.href} />
     <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
-    <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
@@ -45,16 +44,13 @@ const personJsonLd = {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mahesh Shantaram" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@thecontrarian" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
-
   </head>
 
   <body>
@@ -113,122 +109,5 @@ const personJsonLd = {
     max-width: 1200px;
     margin: 0 auto;
     padding: 8rem 2rem 4rem;
-    font-family: "Inter", sans-serif;
-  }
-
-  .page-header {
-    text-align: center;
-    margin-bottom: 4rem;
-  }
-
-  .page-header h1 {
-    font-family: "Fraunces", serif;
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--text);
-  }
-
-  .page-header p {
-    font-size: 1.2rem;
-    color: var(--muted);
-  }
-
-  .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
-  }
-
-  .project-card {
-    background: var(--paper);
-    border: 1px solid var(--hairline);
-    border-radius: 12px;
-    padding: 2rem;
-    transition: all 0.2s ease;
-  }
-
-  .project-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border-color: var(--accent);
-  }
-
-  .project-card a {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-  }
-
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-  }
-
-  .github-icon {
-    color: var(--muted);
-  }
-
-  .card-header h2 {
-    font-family: "Fraunces", serif;
-    font-size: 1.4rem;
-    margin: 0;
-    color: var(--text);
-  }
-
-  .description {
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  .project-meta {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-  }
-
-  .language,
-  .stars,
-  .license {
-    background: var(--surface);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    color: var(--accent);
-    font-weight: 500;
-  }
-
-  .tags {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    background: var(--surface);
-    color: var(--muted);
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
-  }
-
-  @media (max-width: 768px) {
-    .code-index {
-      padding: 6rem 1rem 2rem;
-    }
-
-    .page-header h1 {
-      font-size: 2.5rem;
-    }
-
-    .projects-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .project-card {
-      padding: 1.5rem;
-    }
   }
 </style>

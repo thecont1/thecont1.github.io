@@ -7,6 +7,7 @@
  */
 import { getEntry } from "astro:content";
 import { FEATURED_ITEMS, FEATURED_SECTIONS, type FeaturedItem } from "../../data/featured";
+import { cfImageUrl } from "../../utils/api";
 
 // Helper to normalize public paths
 const normalizePublicPath = (p?: string) => (p ? p.replace(/^\/public\//, "/") : p);
@@ -89,7 +90,7 @@ const typeIcons: Record<string, string> = {
 
 <section id="projects" class="projects">
   <header class="projects-header">
-    <h1 class="projects-title">The Projects</h1>
+    <h2 class="projects-title">The Projects</h2>
   </header>
 
   {useSections ? (
@@ -105,8 +106,9 @@ const typeIcons: Record<string, string> = {
                 <div class="card-media">
                   {(() => {
                     const heroSrc = normalizePublicPath(item.heroImage);
+                    const optimizedSrc = heroSrc?.startsWith('/library/') ? cfImageUrl(heroSrc, 600) : heroSrc;
                     return heroSrc && (heroSrc.startsWith('http') || hasPublicFile(heroSrc)) ? (
-                      <img src={heroSrc} alt={item.title} />
+                      <img src={optimizedSrc} alt={item.title} loading="lazy" decoding="async" />
                     ) : (
                       <div class="card-placeholder-icon">
                         <span>{typeIcons[item.type] || "📄"}</span>
@@ -138,8 +140,9 @@ const typeIcons: Record<string, string> = {
                 <div class="card-media">
                   {(() => {
                     const heroSrc = normalizePublicPath(item.heroImage);
+                    const optimizedSrc = heroSrc?.startsWith('/library/') ? cfImageUrl(heroSrc, 600) : heroSrc;
                     return heroSrc && (heroSrc.startsWith('http') || hasPublicFile(heroSrc)) ? (
-                      <img src={heroSrc} alt={item.title} />
+                      <img src={optimizedSrc} alt={item.title} loading="lazy" decoding="async" />
                     ) : (
                       <div class="card-placeholder-icon">
                         <span>{typeIcons[item.type] || "📄"}</span>

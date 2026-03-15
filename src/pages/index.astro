@@ -6,6 +6,7 @@ import HomeProjects from "../components/home/Projects.astro";
 import HomeAbout from "../components/home/About.astro";
 import C2PAOverlay from "../components/ui/C2PAOverlay.astro";
 import { CAROUSEL_IMAGES } from "../data/carousel";
+import { cfImageUrl } from "../utils/api";
 import { AUTHOR } from "../data/author";
 import "../styles/fonts.css";
 import "../styles/global.css";
@@ -66,7 +67,6 @@ const personJsonLd = {
     <link rel="canonical" href={canonicalURL.href} />
     <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
-    <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
@@ -74,53 +74,43 @@ const personJsonLd = {
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Mahesh Shantaram" />
 
-    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@thecontrarian" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <!-- Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify(websiteJsonLd)} />
     <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
 
     {CAROUSEL_IMAGES.slice(0, 1).map((img) => (
-      <link rel="preload" as="image" href={img.src} />
+      <link
+        rel="preload"
+        as="image"
+        href={cfImageUrl(img.src, 1920)}
+        imagesrcset={[
+          `${cfImageUrl(img.src, 1200)} 1200w`,
+          `${cfImageUrl(img.src, 1920)} 1920w`,
+          `${cfImageUrl(img.src, 2560)} 2560w`,
+        ].join(", ")}
+        imagesizes="100vw"
+        fetchpriority="high"
+      />
     ))}
   </head>
 
   <body>
     <canvas id="snow-canvas" aria-hidden="true"></canvas>
     <a class="skip-link" href="#main-content">Skip to main content</a>
-    <!-- Persistent navigation -->
     <SiteHeader />
 
     <main id="main-content" tabindex="-1">
-      <!-- ===================================== -->
-      <!-- HERO: carousel + curtain -->
-      <!-- ===================================== -->
       <HomeHero />
-
-      <!-- Creates space for curtain lift -->
       <div class="scroll-runway"></div>
-
-      <!-- Small pause before projects take over -->
       <div class="scroll-buffer"></div>
-
-      <!-- ===================================== -->
-      <!-- PROJECTS -->
-      <!-- ===================================== -->
       <HomeProjects />
-
-      <!-- ===================================== -->
-      <!-- ABOUT ME -->
-      <!-- ===================================== -->
       <HomeAbout />
 
-      <!-- ===================================== -->
-      <!-- CONTACT -->
-      <!-- ===================================== -->
       <section id="contact" class="contact-section">
         <header class="projects-header">
           <h2 class="projects-title">Contact</h2>
@@ -147,13 +137,9 @@ const personJsonLd = {
             <p class="contact-intro">Get in touch to say hello.</p>
             <a href="mailto:ms@thecontrarian.in" class="email-link">ms@thecontrarian.in</a>
           </div>
-
         </div>
       </section>
 
-      <!-- ===================================== -->
-      <!-- FOOTER -->
-      <!-- ===================================== -->
       <SiteFooter />
     </main>
     <C2PAOverlay />
@@ -162,17 +148,16 @@ const personJsonLd = {
     <script is:inline src="/snow-loader.js" defer></script>
     <script is:inline src="/mobile-nav.js" defer></script>
     <script>
-      // WhatsApp Form Handler
       const form = document.getElementById('wa-form');
       const messageInput = document.getElementById('wa-message') as HTMLTextAreaElement;
-      const PHONE_NUMBER = "919980129770";
+      const PHONE_NUMBER = '919980129770';
 
       if (form && messageInput) {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
+        form.addEventListener('submit', (event) => {
+          event.preventDefault();
           const text = encodeURIComponent(messageInput.value);
           if (!text) return;
-          
+
           const url = `https://wa.me/${PHONE_NUMBER}?text=${text}`;
           window.open(url, '_blank');
         });

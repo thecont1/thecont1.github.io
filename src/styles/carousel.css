@@ -63,15 +63,15 @@
 /* Mobile-specific carousel image optimization */
 @media (max-width: 768px) {
   .carousel-image {
-    height: 100vh; /* Full viewport height for mobile */
-    width: auto;
-    max-width: none; /* Remove max-width constraint to allow horizontal overflow */
-    min-width: 100vw; /* Ensure image fills at least full width */
+    width: 100%; /* Fill slide container width (100vw) — gives browser explicit size before load */
+    height: 100%; /* Fill slide container height (100vh) — eliminates CLS from unsized image */
+    max-width: none;
     object-fit: cover; /* Cover to fill height while maintaining aspect ratio */
     object-position: left center; /* Align to left edge as specified in requirements */
   }
   
   .carousel-slide {
+    width: 100vw;
     height: 100vh; /* Ensure slide container is full height */
     overflow: hidden; /* Hide any vertical overflow */
   }

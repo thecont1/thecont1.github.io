@@ -43,9 +43,9 @@ Personal website for Mahesh Shantaram (thecontrarian.in) — a documentary photo
 - **Dev-time watcher**: `scripts/scaffold-integration.ts` (Astro integration) watches:
   - `src/content/**` to auto-scaffold new empty `.md/.mdx`
   - `public/library/originals/**/*.{jpg,jpeg}` to keep `metadata.json` up-to-date by running the scoped Python extractor
-- **Startup sync in dev**: on `npm run dev`, the integration scans `public/library/originals/` and regenerates metadata for any folder whose newest JPG/JPEG is newer than `metadata.json`.
+- **Startup sync in dev**: on `bun run dev`, the integration scans `public/library/originals/` and regenerates metadata for any folder whose newest JPG/JPEG is newer than `metadata.json`.
 - **R2 CDN Migration**: Images are now served from Cloudflare R2 (https://pub-94814f577b9949a59be8bf7b24fd4963.r2.dev/originals/). Local `public/library/originals/` is maintained for metadata extraction and C2PA processing.
-- **R2 Upload**: Use `npm run r2:upload` (or `scripts/upload_to_r2.sh`) to upload images and metadata to R2. Optionally specify a directory: `bash scripts/upload_to_r2.sh DIRECTORY`.
+- **R2 Upload**: Use `bun run r2:upload` (or `scripts/upload_to_r2.sh`) to upload images and metadata to R2. Optionally specify a directory: `bash scripts/upload_to_r2.sh DIRECTORY`.
 
 ### Homepage Featured Content
 - **Manual Control**: `src/data/featured.ts` - curated list of featured items
@@ -117,12 +117,46 @@ The site integrates computational notebooks for data storytelling:
 - **Marimo/Jupyter**: Interactive notebooks embedded via `notebook` frontmatter
 - Specify notebook engine, entry point, and environment in content frontmatter
 
+## Performance Optimisation
+
+Lighthouse-driven optimisation pass targeting Core Web Vitals on the homepage.
+
+### Image Delivery — Cloudflare Image Transformations
+- **`cfImageUrl()` helper** (`src/utils/api.ts`): builds `/cdn-cgi/image/width=…,quality=85,format=auto/…` URLs against `library.thecontrarian.in`.
+- **Carousel** (`Carousel.tsx`): `<img>` tags use `cfImageUrl` for `src` and responsive `srcSet` (1200w / 1920w / 2560w). Preload queue also uses `cfImageUrl` to avoid fetching full originals.
+- **Project cards** (`Projects.astro`): hero thumbnails served at 600px via `cfImageUrl`.
+- **Preload** (`index.astro`): `<link rel="preload" as="image">` with `imagesrcset` for the first carousel image.
+- **Result**: images served as AVIF at 300–516 KB instead of 2–4 MB JPEG originals.
+
+### Render-Blocking Resources
+- **CSS inlining**: `astro.config.mjs` sets `build.inlineStylesheets: 'auto'` — stylesheets below ~8 KB are inlined into the HTML, eliminating network roundtrips.
+- **Google Fonts**: all `<link>` tags converted to `media="print"` with an `onload` handler that swaps to `media="all"`, plus `<noscript>` fallback. Applied in `index.astro`, `Layout.astro`, `Code.astro`, and `code/index.astro`.
+
+### Cumulative Layout Shift (CLS)
+- **Carousel images**: explicit `width` / `height` attributes threaded from EXIF metadata at build time.
+- **About photos** (`About.astro`): dimensions fetched at build time and applied to `<img>` tags.
+- **Mobile carousel slide**: `.carousel-slide` pinned to `width: 100vw` on mobile to prevent reflow when placeholder swaps for real image.
+
+### Accessibility
+- **Heading order**: Projects section title changed from `<h1>` to `<h2>` for proper hierarchy.
+- **Colour contrast**: `.site-title` gets `text-shadow: none` (the dark background tint `rgba(0,0,0,0.22)` is sufficient); inherited text-shadow was causing a 4.03:1 ratio vs the required 4.5:1.
+
+### Cloudflare Edge Caching (TTFB)
+- **Cache Rule**: HTML responses cached at Cloudflare edge with `cache-control: max-age=7200, must-revalidate`. Warm-cache TTFB drops from ~1.4 s to < 50 ms.
+- **Worker passthrough**: `image-wrapper.js` explicitly passes `/cdn-cgi/` requests through so Cloudflare Image Transformations are never intercepted.
+
+### InfoPanel Lazy Loading
+- `InfoPanel` is loaded via `React.lazy` + `Suspense` to reduce the initial JS bundle on the homepage.
+
 ## Deployment
 
-- **Platform**: GitHub Pages
-- **Workflow**: `.github/workflows/astro.yml` handles CI/CD
-- **Build output**: Static site to `./dist/`
-- **Site URL**: https://thecont1.github.io
+- **Static files**: FTP to BigRock India hosting via `deploy.sh`
+- **Image library**: Cloudflare R2 CDN (`library.thecontrarian.in`)
+- **Cloudflare Worker**: `image-wrapper.js` routes image requests (lightbox HTML for direct visits, raw proxy for same-origin)
+- **Build**: `bun run build` (Astro static output to `./dist/`)
+- **Deploy command**: `uv run ./deploy.sh --skip-r2` (skip R2 sync for code-only deploys)
+- **GitHub**: commits for version control record; `.github/workflows/astro.yml` available for CI/CD but not the primary deploy path
+- **Site URL**: https://thecontrarian.in
 
 ## Content Authoring
 

@@ -9,6 +9,9 @@ export default defineConfig({
   site: 'https://thecontrarian.in',
   integrations: [react(), sitemap(), scaffold()],
   output: 'static',
+  build: {
+    inlineStylesheets: 'always'
+  },
   vite: {
     build: {
       cssMinify: true,
