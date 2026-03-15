@@ -11,7 +11,7 @@ export async function getStaticPaths() {
     return data.status === "published";
   });
   return essays.map((essay) => ({
-    params: { slug: essay.slug },
+    params: { slug: essay.id },
     props: { essay },
   }));
 }

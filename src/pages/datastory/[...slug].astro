@@ -11,7 +11,7 @@ export async function getStaticPaths() {
     return data.status === "published";
   });
   return stories.map((story) => ({
-    params: { slug: story.slug },
+    params: { slug: story.id },
     props: { story },
   }));
 }

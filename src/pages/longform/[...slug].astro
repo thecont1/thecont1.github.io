@@ -11,7 +11,7 @@ export async function getStaticPaths() {
     return data.status === "published";
   });
   return longforms.map((longform) => ({
-    params: { slug: longform.slug },
+    params: { slug: longform.id },
     props: { longform },
   }));
 }

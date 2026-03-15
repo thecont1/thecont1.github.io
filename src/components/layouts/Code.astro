@@ -1,8 +1,9 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import { render, type CollectionEntry } from "astro:content";
 import SiteHeader from "../SiteHeader.astro";
 import SiteFooter from "../SiteFooter.astro";
 import { AUTHOR } from "../../data/author";
+import "../../styles/fonts.css";
 import "../../styles/global.css";
 import "../../styles/header.css";
 import "../../styles/footer.css";
@@ -13,7 +14,7 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content } = await post.render();
+const { Content } = await render(post);
 
 const backgroundColor = post.data.backgroundColor || "#0f0f23";
 
@@ -99,7 +100,9 @@ const personJsonLd = {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{post.data.title} | Code Project | Mahesh Shantaram</title>
   <meta name="description" content={metaDescription} />
+  <meta name="robots" content="index, follow" />
   <link rel="canonical" href={canonicalURL.href} />
+  <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
   <!-- Open Graph -->
   <meta property="og:title" content={`${post.data.title} | Code Project | Mahesh Shantaram`} />
@@ -120,15 +123,12 @@ const personJsonLd = {
   <script type="application/ld+json" set:html={JSON.stringify(codeJsonLd)} />
   <script type="application/ld+json" set:html={JSON.stringify(personJsonLd)} />
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet">
 </head>
 
 <body>
   <!-- Snow canvas for snow effect -->
   <canvas id="snow-canvas" aria-hidden="true"></canvas>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
   
   <!-- Site Header -->
   <SiteHeader />
@@ -241,7 +241,7 @@ const personJsonLd = {
     </header>
 
     <!-- Main content -->
-    <main class="repo-content">
+    <main id="main-content" class="repo-content" tabindex="-1">
       <div class="repo-container">
         <div class="content-wrapper">
           <!-- Tags section -->
@@ -275,7 +275,7 @@ const personJsonLd = {
 
   <!-- JavaScript for site functionality -->
   <script is:inline src="/textmode.js" defer></script>
-  <script is:inline src="/snow.js" defer></script>
+  <script is:inline src="/snow-loader.js" defer></script>
   <script is:inline src="/mobile-nav.js" defer></script>
 
   <script>

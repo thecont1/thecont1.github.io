@@ -1,4 +1,5 @@
 import { defineCollection, reference, z } from "astro:content";
+import { glob } from "astro/loaders";
 
 // ============================================================================
 // TAXONOMY ENUMS
@@ -93,14 +94,14 @@ const codeSchema = z.object({
   status: z.enum(["private", "draft", "published"]).default("published"),
   
   // Repository metadata
-  repoUrl: z.string().url(),
+  repoUrl: z.url(),
   repoOwner: z.string(),
   repoName: z.string(),
   language: z.string().optional(),
   stars: z.number().optional(),
   forks: z.number().optional(),
   license: z.string().optional(),
-  homepage: z.string().url().optional(),
+  homepage: z.url().optional(),
   
   // Dates
   date: z.date().optional(),
@@ -122,7 +123,7 @@ const codeSchema = z.object({
     fetchedAt: z.date(),
     readme: z.string().optional(),
     fileTree: z.array(z.string()).default([]),
-    languages: z.record(z.number()).optional(),
+    languages: z.record(z.string(), z.number()).optional(),
   }).optional(),
 });
 
@@ -137,6 +138,11 @@ const datastorySchema = z.object({
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   
+  // Lightbox settings
+  lightbox: z.object({
+    gallery: z.boolean().optional().default(true),
+  }).optional().default({ gallery: true }),
+
   // Notebook configuration (required for datastories)
   notebook: z.object({
     engine: z.enum(["marimo", "jupyter"]),
@@ -234,15 +240,39 @@ const projectSchema = z.object({
   showhero: z.boolean().optional().default(true),
 });
 
+// Helper to strip file extension from entry path so entry.id matches the old entry.slug behavior
+const stripExt = ({ entry }: { entry: string }) => entry.replace(/\.(md|mdx)$/, "");
+
 // ============================================================================
 // EXPORT COLLECTIONS
 // ============================================================================
 export const collections = {
-  post: defineCollection({ schema: postSchema }),
-  essay: defineCollection({ schema: essaySchema }),
-  longform: defineCollection({ schema: longformSchema }),
-  code: defineCollection({ schema: codeSchema }),
-  datastory: defineCollection({ schema: datastorySchema }),
-  photogallery: defineCollection({ schema: photogallerySchema }),
-  project: defineCollection({ schema: projectSchema }),
+  post: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/post", generateId: stripExt }),
+    schema: postSchema,
+  }),
+  essay: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/essay", generateId: stripExt }),
+    schema: essaySchema,
+  }),
+  longform: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/longform", generateId: stripExt }),
+    schema: longformSchema,
+  }),
+  code: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/code", generateId: stripExt }),
+    schema: codeSchema,
+  }),
+  datastory: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/datastory", generateId: stripExt }),
+    schema: datastorySchema,
+  }),
+  photogallery: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/photogallery", generateId: stripExt }),
+    schema: photogallerySchema,
+  }),
+  project: defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/project", generateId: stripExt }),
+    schema: projectSchema,
+  }),
 };
