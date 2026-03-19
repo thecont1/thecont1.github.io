@@ -11,6 +11,13 @@ export interface ExifMetadata {
   width: number;
   height: number;
   exif: Record<string, any>;
+  iptc?: {
+    title?: string;
+    description?: string;
+    location?: string;
+    city?: string;
+    keywords?: string;
+  };
   photography?: {
     camera_make?: string;
     camera_model?: string;
@@ -104,11 +111,14 @@ export function getCameraSettings(metadata: ExifMetadata): string {
  * @param metadata - EXIF metadata object
  * @returns Caption text or empty string
  */
-export function getImageCaption(metadata: ExifMetadata): string {
-  if (!metadata.photography) return '';
-  
-  // Prefer title, fall back to description
-  return metadata.photography.title || metadata.photography.description || '';
+export function getImageCaption(metadata: ExifMetadata | null | undefined): string {
+  if (!metadata) return '';
+
+  const iptc = metadata.iptc || {};
+  const photo = metadata.photography || {};
+
+  // Prefer IPTC caption/title, then photography title/description.
+  return iptc.title || iptc.description || photo.title || photo.description || '';
 }
 
 /**

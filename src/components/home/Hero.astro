@@ -5,21 +5,26 @@ import { CAROUSEL_IMAGES } from "../../data/carousel";
 import "../../styles/home.css";
 import "../../styles/carousel.css";
 import "../../styles/info-panel.css";
-import { getImageMetadata } from "../../utils/exif";
+import { getImageCaption, getImageMetadata } from "../../utils/exif";
 
 const images = await Promise.all(
   CAROUSEL_IMAGES.map(async (img) => {
     const meta = await getImageMetadata(img.src);
+    const caption = getImageCaption(meta) || '';
+
     return {
       src: img.src,
-      caption: (img as any).caption || meta?.photography?.description || '',
-      metadata: meta || {}
+      caption,
+      alt: caption,
+      width: meta?.width,
+      height: meta?.height,
     };
   })
 );
 ---
 
 <section class="home-hero">
+  <h1 class="sr-only">Mahesh Shantaram — Documentary Photographer and Data Scientist</h1>
   <!-- Fixed carousel layer -->
   <div class="hero-fixed">
     <Carousel images={images} client:load />
