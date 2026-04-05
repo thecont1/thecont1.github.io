@@ -5,6 +5,10 @@
     if (started) return;
     started = true;
 
+    if (document.body.classList.contains("no-snow")) {
+      try { localStorage.setItem("pixel_dust_enabled", "false"); } catch (e) {}
+    }
+
     const script = document.createElement("script");
     script.src = "/snow.js";
     script.defer = true;
