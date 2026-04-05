@@ -46,27 +46,16 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
   {
     title: "Photography",
     items: [
+      { type: "photogallery", slug: "ayodhya", label: "Album" },
       { type: "photogallery", slug: "kashmir", label: "Album" },
-      { type: "photogallery", slug: "matrimania-series", label: "Series" },
-      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
-      { type: "photogallery", slug: "the-african-portraits", label: "Series" },
-      { type: "photogallery", slug: "kashmir", label: "Album" },
-      { type: "photogallery", slug: "matrimania-series", label: "Series" },
-      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
       { type: "photogallery", slug: "the-african-portraits", label: "Series" },
     ]
   },
 
   {
-    title: "Travels",
+    title: "A Life Worth Living Twice",
     items: [
-      { type: "post", slug: "bundelkhand", label: "Itinerary" },
-      { type: "post", slug: "writefathername", label: "Patriarchy" },
-      { type: "post", slug: "bundelkhand", label: "Itinerary" },
-      { type: "post", slug: "writefathername", label: "Patriarchy" },
-      { type: "post", slug: "bundelkhand", label: "Itinerary" },
-      { type: "post", slug: "writefathername", label: "Patriarchy" },
-      { type: "post", slug: "bundelkhand", label: "Itinerary" },
+      { type: "essay", slug: "ayodhya", label: "Politics" },
       { type: "post", slug: "writefathername", label: "Patriarchy" },
     ]
   },
@@ -75,29 +64,24 @@ export const FEATURED_SECTIONS: FeaturedSection[] = [
     title: "MATRIMANIA",
     items: [
       { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
-      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
-      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
-      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
-      { type: "essay", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Essay", label: "Essay"},
-      { type: "post", slug: "matrimania-bond-and-bondage", displayTitle: "Bond & Bondage: Post", label: "Post"},
+      { type: "photogallery", slug: "matrimania-series", label: "Series" },
+      { type: "photogallery", slug: "matrimania-photobook", label: "Book" },
     ]
   },
 
   {
-    title: "Code",
+    title: "Data Science",
     items: [
-      { type: "datastory", slug: "bangalore-traffic-monitor"},
       { type: "datastory", slug: "bangalore-metro-conspiracy-theory"},
       { type: "datastory", slug: "bangalore-metro-phenomena-inspector"},
-      { type: "code", slug: "ngl-storyteller"},
-      { type: "code", slug: "vscode"},
-      { type: "code", slug: "ngl-storyteller"},
-      { type: "code", slug: "vscode"},
-      { type: "code", slug: "ngl-storyteller"},
-      { type: "code", slug: "vscode"},
-      { type: "code", slug: "ngl-storyteller"},
-      { type: "code", slug: "vscode"},
+      { type: "datastory", slug: "bangalore-traffic-monitor"},
     ]
   },
 
+  {
+    title: "Apps",
+    items: [
+      { type: "code", slug: "ngl-storyteller"},
+    ]
+  },
 ];

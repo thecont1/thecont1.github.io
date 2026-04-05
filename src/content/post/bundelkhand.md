@@ -3,7 +3,7 @@ title: "Wonders of Bundelkhand"
 subtitle: "The Most Memorable Marvels Of Madhya Pradesh"
 author: "Vihaan Kashyap"
 metaDescription: "8-day itinerary through Madhya Pradesh's Bundelkhand region: Gwalior Fort, Orchha temples, Khajuraho sculptures, and marble rock gorges."
-status: "published"
+status: "draft"
 date: 2026-01-03
 heroImage: /library/throwaways/bundelkhand/image10.jpg
 backgroundColor: "#07e3"

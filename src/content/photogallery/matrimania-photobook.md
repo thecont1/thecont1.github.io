@@ -1,7 +1,7 @@
 ---
 status: published
 project: matrimania
-title: "MATRIMANIA"
+title: "MATRIMANIA (Hatje Cantz, 2018)"
 subtitle: "A fictional narrative through one dreary wedding night in an India tearing at its seams."
 author: "Mahesh Shantaram"
 metaDescription: "The Matrimania photobook: a curated collection examining India's wedding culture, class, and consumption through documentary photography."

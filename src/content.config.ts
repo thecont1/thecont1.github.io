@@ -2,15 +2,18 @@ import { defineCollection, reference, z } from "astro:content";
 import { glob } from "astro/loaders";
 
 const geographyEnum = z.enum([
-  "bangalore", "india", "africa", "europe", "usa", "asia", "middle-east", "airtime"
+  "india", "africa", "europe", "usa", "asia", "middle-east", "airtime",
+  "bangalore", "ayodhya", 
+  "uttar pradesh", "delhi", "kerala", "tamil nadu", "maharashtra", "west bengal", "gujarat", "rajasthan", "madhya pradesh", "chhattisgarh", "odisha", "jharkhand", "bihar", "sikkim", "tripura", "meghalaya", "mizoram", "nagaland", "arunachal pradesh", "assam", "manipur"
 ]);
 const themeEnum = z.enum([
-  "weddings", "travel", "society", "justice", "technology", "motorcycling", "patriarchy",
-  "humour", "interview", "lore", "night", "racism", "india", "portraits"
+  "weddings", "travel", "society", "justice", "technology", "motorcycling", "patriarchy", "reporting",
+  "humour", "interview", "lore", "night", "racism", "india", "portraits", "religion", "politics", "nationalism", "history"
 ]);
 const containerEnum = z.enum([
   "matrimania", "the-african-portraits", "last-days-of-manmohan", "magazine-work",
-  "indiacomestogether", "caerdydd-diary", "bruxelles-diary", "conakry-diary", "facebook"
+  "indiacomestogether", "caerdydd-diary", "bruxelles-diary", "conakry-diary", "facebook",
+  "ayodhya"
 ]);
 
 const baseSchema = z.object({
@@ -20,8 +23,8 @@ const baseSchema = z.object({
   status: z.enum(["private", "draft", "published"]),
   heroImage: z.string().optional(),
   metaDescription: z.string().max(160).optional(),
-  geography: z.array(geographyEnum).max(2).optional().default([]),
-  theme: z.array(themeEnum).max(5).optional().default([]),
+  geography: z.array(geographyEnum).max(3).optional().default([]),
+  theme: z.array(themeEnum).max(6).optional().default([]),
   container: containerEnum.optional(),
   date: z.date().optional(),
   lightbox: z.object({
@@ -115,8 +118,8 @@ const photogallerySchema = z.object({
   heroImage: z.string().optional(),
   date: z.date().optional(),
   layoutType: z.enum(["tile", "one-up", "carousel"]).default("tile"),
-  geography: z.array(geographyEnum).max(2).optional().default([]),
-  theme: z.array(themeEnum).max(5).optional().default([]),
+  geography: z.array(geographyEnum).max(3).optional().default([]),
+  theme: z.array(themeEnum).max(6).optional().default([]),
   images: z.array(z.object({
     src: z.string(),
     caption: z.string().optional(),
