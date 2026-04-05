@@ -107,13 +107,16 @@ async function proxyTransformedImage(request, r2Key, env, { w, q, f }) {
     originUrl.search = "";
     const cdnCgiPath = `/cdn-cgi/image/width=${width},quality=${quality},format=${format}${originUrl.pathname}`;
     originUrl.pathname = cdnCgiPath;
-    // Make a clean subrequest (no forwarded headers — they can confuse the
-    // Cloudflare Image Transformation pipeline for same-zone subrequests).
-    const resp = await fetch(originUrl.toString());
+    // Forward only Accept so Cloudflare can negotiate the best image format
+    // without inheriting other request headers that can interfere with the pipeline.
+    const headers = new Headers();
+    const accept = request.headers.get("Accept");
+    if (accept) headers.set("Accept", accept);
+    const resp = await fetch(originUrl.toString(), { headers });
     const ct = resp.headers.get("Content-Type") || "";
     if (resp.ok && ct.startsWith("image/")) {
       const headers = new Headers(resp.headers);
-      headers.set("Vary", "Sec-Fetch-Dest");
+      headers.set("Vary", "Accept, Sec-Fetch-Dest");
       headers.set("Cache-Control", "public, max-age=604800");
       return new Response(resp.body, { status: 200, headers });
     }

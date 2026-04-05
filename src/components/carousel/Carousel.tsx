@@ -1,6 +1,7 @@
 import { Fragment, Suspense, lazy, useEffect, useRef, useState } from "react";
 import CaptionToggle from "./CaptionToggle";
 import { cfImageUrl } from "../../utils/api";
+import { getImageMetadata } from "../../utils/exif";
 const InfoPanel = lazy(() => import("./InfoPanel"));
 
 function placeholderSvg(w: number, h: number): string {
@@ -20,6 +21,13 @@ type ImageMetadata = {
   width?: number;
   height?: number;
   exif?: Record<string, any>;
+  iptc?: {
+    title?: string;
+    description?: string;
+    location?: string;
+    city?: string;
+    keywords?: string;
+  };
   photography?: {
     camera_make?: string;
     camera_model?: string;
@@ -40,6 +48,9 @@ type ImageMetadata = {
 type Image = {
   src: string;
   caption?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
   metadata?: ImageMetadata;
 };
 
@@ -56,21 +67,70 @@ export default function Carousel({ images }: { images: Image[] }) {
   const ioRef = useRef<IntersectionObserver | null>(null);
   const ioTickRef = useRef<number | null>(null);
   const preloadTokenRef = useRef(0);
+  const requestedMetadataRef = useRef(new Set<string>());
+  const [resolvedMetadataBySrc, setResolvedMetadataBySrc] = useState<Record<string, ImageMetadata | undefined>>(() => {
+    const initial: Record<string, ImageMetadata | undefined> = {};
+    images.forEach((img) => {
+      if (img?.src && img.metadata) {
+        initial[img.src] = img.metadata;
+      }
+    });
+    return initial;
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    const missingImages = images.filter((img) => img?.src && !img.metadata && !requestedMetadataRef.current.has(img.src));
+
+    if (!missingImages.length) return;
+
+    missingImages.forEach((img) => requestedMetadataRef.current.add(img.src));
+
+    (async () => {
+      const entries = await Promise.all(
+        missingImages.map(async (img) => {
+          const meta = await getImageMetadata(img.src);
+          return [img.src, meta] as const;
+        })
+      );
+
+      if (cancelled) return;
+
+      const successfulEntries = entries.filter(([, meta]) => !!meta) as Array<readonly [string, ImageMetadata]>;
+      if (!successfulEntries.length) return;
+
+      setResolvedMetadataBySrc((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        successfulEntries.forEach(([src, meta]) => {
+          if (next[src] !== meta) {
+            next[src] = meta;
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [images]);
 
   // Publish a global lookup so the Lightbox (plain JS) can display the same metadata.
   useEffect(() => {
     const map = (window.__imageMetadataBySrc ||= new Map());
     images.forEach((img) => {
-      if (!img?.src || !img?.metadata) return;
-      const wrapped = { photography: img.metadata };
-      map.set(img.src, wrapped);
+      const meta = resolvedMetadataBySrc[img.src] ?? img.metadata;
+      if (!img?.src || !meta) return;
+      map.set(img.src, meta);
       try {
         const path = new URL(img.src, window.location.origin).pathname;
-        map.set(path, wrapped);
+        map.set(path, meta);
       } catch {
       }
     });
-  }, [images]);
+  }, [images, resolvedMetadataBySrc]);
 
   useEffect(() => {
     if (index >= images.length) setIndex(0);
@@ -107,19 +167,14 @@ export default function Carousel({ images }: { images: Image[] }) {
       ioTickRef.current = window.requestAnimationFrame(() => {
         ioTickRef.current = null;
 
-        const trackRect = track.getBoundingClientRect();
-        const rootLeft = trackRect.left;
-        const rootRight = trackRect.right;
+        const leadingEdge = track.scrollLeft + track.clientWidth * 0.5;
         let bestIdx = 0;
-        let bestDist = Number.POSITIVE_INFINITY;
 
         slideRefs.current.forEach((el, i) => {
           if (!el) return;
-          const r = el.getBoundingClientRect();
-          if (r.right <= rootLeft || r.left >= rootRight) return;
-          const dist = Math.abs(r.left - rootLeft);
-          if (dist < bestDist) {
-            bestDist = dist;
+          const start = el.offsetLeft;
+          const end = start + el.offsetWidth;
+          if (leadingEdge >= start && leadingEdge < end) {
             bestIdx = i;
           }
         });
@@ -330,7 +385,7 @@ export default function Carousel({ images }: { images: Image[] }) {
   if (!images.length) return null;
 
   const currentImage = images[index];
-  const metadata = currentImage?.metadata;
+  const metadata = currentImage ? resolvedMetadataBySrc[currentImage.src] ?? currentImage.metadata : undefined;
 
   const onPrev = () => {
     setUserTookControl(true);
@@ -362,17 +417,17 @@ export default function Carousel({ images }: { images: Image[] }) {
               }}
             >
               <img
-                src={revealed[i] ? cfImageUrl(img.src, 1920) : placeholderSvg(img.metadata?.width || 2560, img.metadata?.height || 1920)}
+                src={revealed[i] ? cfImageUrl(img.src, 1920) : placeholderSvg(img.width || img.metadata?.width || 2560, img.height || img.metadata?.height || 1920)}
                 srcSet={revealed[i] ? [
                   `${cfImageUrl(img.src, 1200)} 1200w`,
                   `${cfImageUrl(img.src, 1920)} 1920w`,
                   `${cfImageUrl(img.src, 2560)} 2560w`,
                 ].join(", ") : undefined}
                 sizes="100vw"
-                alt=""
+                alt={img.alt || img.caption || img.metadata?.iptc?.description || img.metadata?.photography?.description || ""}
                 className="carousel-image"
-                width={img.metadata?.width || undefined}
-                height={img.metadata?.height || undefined}
+                width={img.width || img.metadata?.width || undefined}
+                height={img.height || img.metadata?.height || undefined}
                 loading={i === index ? "eager" : "lazy"}
                 fetchPriority={i === index ? "high" : "low"}
                 decoding="async"
@@ -404,7 +459,7 @@ export default function Carousel({ images }: { images: Image[] }) {
           <InfoPanel metadata={metadata} imageSrc={currentImage.src} />
         </Suspense>
       )}
-      {!metadata && <div className="debug-no-meta">No metadata available</div>}
+      {showInfo && !metadata && <div className="debug-no-meta">Loading metadata…</div>}
     </div>
   );
 }

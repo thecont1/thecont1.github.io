@@ -63,22 +63,22 @@
 /* Mobile-specific carousel image optimization */
 @media (max-width: 768px) {
   .carousel-image {
-    width: 100%; /* Fill slide container width (100vw) — gives browser explicit size before load */
-    height: 100%; /* Fill slide container height (100vh) — eliminates CLS from unsized image */
+    width: auto;
+    height: 100%;
     max-width: none;
-    object-fit: cover; /* Cover to fill height while maintaining aspect ratio */
-    object-position: left center; /* Align to left edge as specified in requirements */
+    object-fit: contain;
+    object-position: center;
   }
   
   .carousel-slide {
-    width: 100vw;
-    height: 100vh; /* Ensure slide container is full height */
-    overflow: hidden; /* Hide any vertical overflow */
+    width: auto;
+    height: 100vh;
+    overflow: visible;
   }
   
   .carousel-track {
-    overflow-x: auto; /* Allow horizontal scrolling for overflow */
-    overflow-y: hidden; /* Prevent vertical scrolling */
+    overflow-x: auto;
+    overflow-y: hidden;
   }
 }
 
