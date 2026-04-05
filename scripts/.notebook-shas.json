@@ -4,5 +4,8 @@
     "exclude_code_cells": true,
     "sha": "72088e676d88d44a8b60a91eed9383a92271ff82"
   },
-  "https://github.com/thecont1/namma-metro-ridership-tracker/blob/main/ridership_4analysis.ipynb": "88b4ba57f93aa1a8908157525b4fe670fb5c5af3"
+  "https://github.com/thecont1/namma-metro-ridership-tracker/blob/main/ridership_4analysis.ipynb": {
+    "exclude_code_cells": false,
+    "sha": "743aed888c9be092adc37da030fdddc4b3aece19"
+  }
 }
