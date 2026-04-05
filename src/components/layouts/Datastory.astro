@@ -102,6 +102,29 @@ if (fs.existsSync(htmlPath)) {
 </article>
 
 <script>
+  function setupTableScrollFades() {
+    const wrapper = document.querySelector('.notebook-wrapper');
+    if (!wrapper) return;
+
+    wrapper.querySelectorAll<HTMLElement>('.jp-RenderedHTMLCommon').forEach((el) => {
+      if (!el.querySelector('table')) return;
+      if (el.parentElement?.classList.contains('table-scroll-wrap')) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'table-scroll-wrap';
+      el.parentNode!.insertBefore(wrap, el);
+      wrap.appendChild(el);
+
+      const update = () => {
+        const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+        wrap.classList.toggle('scrolled-end', atEnd);
+      };
+      update();
+      el.addEventListener('scroll', update, { passive: true });
+      window.addEventListener('resize', update, { passive: true });
+    });
+  }
+
   function refineDatastoryContent() {
     const header = document.querySelector('.site-header') as HTMLElement;
     if (header) {
@@ -120,7 +143,11 @@ if (fs.existsSync(htmlPath)) {
   }
 
   refineDatastoryContent();
-  document.addEventListener('astro:page-load', refineDatastoryContent);
+  setupTableScrollFades();
+  document.addEventListener('astro:page-load', () => {
+    refineDatastoryContent();
+    setupTableScrollFades();
+  });
 
   function renderNotebookMath() {
     const wrapper = document.querySelector('.notebook-wrapper');
@@ -303,6 +330,28 @@ if (fs.existsSync(htmlPath)) {
   .notebook-wrapper .jp-RenderedHTMLCommon {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Right-edge fade: the .table-scroll-wrap div injected by JS */
+  .table-scroll-wrap {
+    position: relative;
+  }
+
+  .table-scroll-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 4rem;
+    background: linear-gradient(to right, transparent, var(--paper, #fff) 90%);
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    border-radius: 0 4px 4px 0;
+  }
+
+  .table-scroll-wrap.scrolled-end::after {
+    opacity: 0;
   }
 
   .notebook-wrapper .jp-RenderedHTMLCommon table {
