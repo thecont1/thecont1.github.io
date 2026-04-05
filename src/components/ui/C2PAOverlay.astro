@@ -463,6 +463,30 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
             <p class="c2pa-trust-message">This image has verifiable Content Credentials that confirm its creator and history.</p>
           </div>
 
+          <div class="c2pa-section">
+            <h3 class="c2pa-section-title">Provenance Comparison</h3>
+            <div class="c2pa-image-comparison">
+              <div class="c2pa-image-card">
+                <div class="c2pa-thumb-wrapper">
+                  ${thumbnails.ingredient_thumbnail ? `<img src="data:image/jpeg;base64,${thumbnails.ingredient_thumbnail}" alt="Original image" />` : '<div class="c2pa-no-thumb">No original thumbnail available</div>'}
+                </div>
+                <div class="c2pa-card-meta">
+                  <span class="c2pa-card-badge">Original</span>
+                  <p class="c2pa-card-title">${ingredient.title || 'Source File'}</p>
+                </div>
+              </div>
+              <div class="c2pa-image-card">
+                <div class="c2pa-thumb-wrapper">
+                  ${thumbnails.claim_thumbnail ? `<img src="data:image/jpeg;base64,${thumbnails.claim_thumbnail}" alt="Current image" />` : `<img src="${currentImgSrc}" alt="Current image" />`}
+                </div>
+                <div class="c2pa-card-meta">
+                  <span class="c2pa-card-badge c2pa-card-badge-current">This Image</span>
+                  <p class="c2pa-card-title">${basicInfo.title || 'Exported Version'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="c2pa-info-grid">
             <div class="c2pa-section">
               <h3 class="c2pa-section-title">Creator</h3>
@@ -492,30 +516,6 @@ import { CLOSE_SVG } from "../icons/cr-logo-svg";
               </div>
             </div>
             ` : ''}
-          </div>
-
-          <div class="c2pa-section">
-            <h3 class="c2pa-section-title">Provenance Comparison</h3>
-            <div class="c2pa-image-comparison">
-              <div class="c2pa-image-card">
-                <div class="c2pa-thumb-wrapper">
-                  ${thumbnails.ingredient_thumbnail ? `<img src="data:image/jpeg;base64,${thumbnails.ingredient_thumbnail}" alt="Original image" />` : '<div class="c2pa-no-thumb">No original thumbnail available</div>'}
-                </div>
-                <div class="c2pa-card-meta">
-                  <span class="c2pa-card-badge">Original</span>
-                  <p class="c2pa-card-title">${ingredient.title || 'Source File'}</p>
-                </div>
-              </div>
-              <div class="c2pa-image-card">
-                <div class="c2pa-thumb-wrapper">
-                  ${thumbnails.claim_thumbnail ? `<img src="data:image/jpeg;base64,${thumbnails.claim_thumbnail}" alt="Current image" />` : `<img src="${currentImgSrc}" alt="Current image" />`}
-                </div>
-                <div class="c2pa-card-meta">
-                  <span class="c2pa-card-badge c2pa-card-badge-current">This Image</span>
-                  <p class="c2pa-card-title">${basicInfo.title || 'Exported Version'}</p>
-                </div>
-              </div>
-            </div>
           </div>
 
           <div class="c2pa-section">
