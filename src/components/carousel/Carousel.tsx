@@ -167,19 +167,14 @@ export default function Carousel({ images }: { images: Image[] }) {
       ioTickRef.current = window.requestAnimationFrame(() => {
         ioTickRef.current = null;
 
-        const trackRect = track.getBoundingClientRect();
-        const rootLeft = trackRect.left;
-        const rootRight = trackRect.right;
+        const leadingEdge = track.scrollLeft + track.clientWidth * 0.5;
         let bestIdx = 0;
-        let bestDist = Number.POSITIVE_INFINITY;
 
         slideRefs.current.forEach((el, i) => {
           if (!el) return;
-          const r = el.getBoundingClientRect();
-          if (r.right <= rootLeft || r.left >= rootRight) return;
-          const dist = Math.abs(r.left - rootLeft);
-          if (dist < bestDist) {
-            bestDist = dist;
+          const start = el.offsetLeft;
+          const end = start + el.offsetWidth;
+          if (leadingEdge >= start && leadingEdge < end) {
             bestIdx = i;
           }
         });
