@@ -39,7 +39,7 @@ if (fs.existsSync(htmlPath)) {
     if (text) tocEntries.push({ slug, text });
   }
 
-  hasKatex = /\$\$|\\\(|\\\[|\\begin\{/.test(notebookHtml);
+  hasKatex = /\$\$|\\\(|\\\[|\\begin\{|(^|[^$])\$[^\n$]+\$(?!\$)/.test(notebookHtml);
 }
 ---
 

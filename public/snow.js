@@ -89,10 +89,18 @@ class PixelDust {
     this.createParticles();
     this.resize();
     this.applyState();
+    this.applyPageNoSnow();
     
     // Attach instance to canvas for test access
     if (this.canvas) {
       this.canvas.pixelDustInstance = this;
+    }
+  }
+
+  applyPageNoSnow() {
+    if (document.body.classList.contains("no-snow")) {
+      this.enabled = false;
+      this.applyState();
     }
   }
 
@@ -149,15 +157,14 @@ class PixelDust {
       if (this.canvas && this.ctx) {
         this.resize();
         this.draw();
-        // Ensure state is preserved after page navigation
         this.applyState();
+        this.applyPageNoSnow();
       } else {
-        // Preserve enabled state when reinitializing
         const currentEnabled = this.enabled;
         this.init();
-        // Restore the enabled state after init
         this.enabled = currentEnabled;
         this.applyState();
+        this.applyPageNoSnow();
       }
     });
 
