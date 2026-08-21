@@ -1,12 +1,12 @@
-app_name,repo_url
-FlatWrite,https://github.com/thecont1/flatwrite
-LET Live!,https://github.com/thecont1/india-votes-data
-TraffiCOracle,https://github.com/thecont1/traffic-oracle
-ekitty,https://github.com/thecont1/ekitty
-koreo,https://github.com/thecont1/koreo
-Quick2AVault,https://github.com/thecont1/Quick2AVault
-robby,https://github.com/thecont1/robby
-C2PA Viewer,https://github.com/thecont1/c2pa-viewer
-Metro Dash,https://github.com/thecont1/metro-dash
-ngl v1.0 😜 Not Gonna Lie,https://github.com/thecont1/ngl-storyteller
-relex,https://github.com/thecont1/relex
+app_name,repo_url,image_filename
+FlatWrite,https://github.com/thecont1/flatwrite,FlatWrite.png
+LET Live!,https://github.com/thecont1/india-votes-data,let-live.png
+TraffiCOracle,https://github.com/thecont1/traffic-oracle,traffic-oracle.png
+ekitty,https://github.com/thecont1/ekitty,ekitty.png
+koreo,https://github.com/thecont1/koreo,koreo.png
+Quick2AVault,https://github.com/thecont1/Quick2AVault,Quick2AVault.png
+robby,https://github.com/thecont1/robby,robby.png
+C2PA Viewer,https://github.com/thecont1/c2pa-viewer,c2pa-viewer.png
+Metro Dash,https://github.com/thecont1/metro-dash,metro-dash.png
+ngl v1.0 😜 Not Gonna Lie,https://github.com/thecont1/ngl-storyteller,ngl-storyteller.png
+relex,https://github.com/thecont1/relex,relex.png
