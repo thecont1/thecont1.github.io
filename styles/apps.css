@@ -145,7 +145,6 @@ a:focus-visible {
 
 .profile-theme:hover {
   border-color: var(--gh-text);
-  transform: rotate(14deg);
 }
 
 .profile-avatar-controls {
@@ -414,34 +413,32 @@ a:focus-visible {
   border-radius: 10px;
   background: var(--gh-panel);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
-  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 .app-card:hover {
   border-color: #586069;
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.27);
-  transform: translateY(-3px);
 }
 
 .app-card-media {
   display: block;
-  aspect-ratio: 3428 / 1980;
   overflow: hidden;
   border-radius: 7px;
   background: #010409;
+  transition: border-radius 320ms ease, margin 320ms ease;
 }
 
 .app-card-media img {
   display: block;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   object-position: center;
-  transition: transform 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-.app-card:hover .app-card-media img {
-  transform: scale(1.035);
+.app-card:hover .app-card-media {
+  margin: -0.7rem -0.7rem 0;
+  border-radius: 0;
 }
 
 .app-card-body {
