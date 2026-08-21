@@ -64,9 +64,11 @@
     mediaLink.setAttribute("aria-label", `Open ${app.app_name} on GitHub`);
 
     const image = document.createElement("img");
-    // Encode the complete human-readable filename portion so spaces,
-    // punctuation, emoji, and other filename characters request correctly.
-    image.src = `./${encodeURIComponent(`${app.app_name}.png`)}`;
+    // Screenshots live under assets/screenshots/ and are named per the
+    // image_filename column in apps.csv. Encode the filename portion so
+    // spaces, punctuation, emoji, and other characters request correctly.
+    const filename = app.image_filename || `${app.app_name}.png`;
+    image.src = `./assets/screenshots/${encodeURIComponent(filename)}`;
     image.alt = app.app_name;
     image.loading = "lazy";
     image.decoding = "async";

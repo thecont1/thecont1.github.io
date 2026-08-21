@@ -4,9 +4,9 @@ This directory is a **zero-build static site** for `thecont1.github.io/apps`. Gi
 
 ## Add, reorder, or remove an app
 
-Edit `apps.csv` and keep the columns `app_name,repo_url`. Add one row for a new app, reorder rows to change the gallery order, or remove a row to remove its card. The renderer keeps the exact CSV order, filling two columns on desktop and one column on mobile.
+Edit `apps.csv` and keep the columns `app_name,repo_url,image_filename`. Add one row for a new app, reorder rows to change the gallery order, or remove a row to remove its card. The renderer keeps the exact CSV order, filling two columns on desktop and one column on mobile.
 
-For every row, place one screenshot in the repository root with the exact filename `<app_name>.png`, where `<app_name>` is copied literally from the CSV. Spaces, punctuation, and emoji are valid. The browser builds each image URL with `encodeURIComponent()` on the filename portion, so a name such as `ngl v1.0 😜 Not Gonna Lie` is requested as a correctly encoded URL. If a row is removed, its screenshot can also be deleted; if a row is only reordered, no asset change is needed.
+For every row, place one screenshot in `assets/screenshots/` with the exact filename given in the `image_filename` column. Spaces, punctuation, and emoji are valid. The browser builds each image URL with `encodeURIComponent()` on the filename portion, so a name such as `ngl-storyteller.png` is requested as a correctly encoded URL. If a row is removed, its screenshot can also be deleted; if a row is only reordered, no asset change is needed.
 
 If the app name contains a comma, quote the CSV field in the usual way, for example `"A, B Tool",https://github.com/thecont1/example`. Keep the repository URL public and keyed exactly the same way in `repo-meta.json`.
 
