@@ -1,0 +1,273 @@
+{
+  "https://github.com/thecont1/flatwrite": {
+    "description": "FlatWrite turns plain markdown into beautiful, shareable documents you actually enjoy reading. Makes markdown publishing feel effortless.",
+    "languages": [
+      "JavaScript",
+      "TypeScript",
+      "CSS",
+      "Python",
+      "HTML",
+      "Bru",
+      "Shell",
+      "Dockerfile"
+    ],
+    "topics": [
+      "frameworks",
+      "markdown",
+      "mini-css",
+      "spectre-css",
+      "text-editor",
+      "ui-components"
+    ],
+    "tech_stack": [
+      "JavaScript",
+      "TypeScript",
+      "CSS",
+      "Python",
+      "HTML",
+      "Bru",
+      "Shell",
+      "Dockerfile"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/india-votes-data": {
+    "description": "🇮🇳 Generate clean and fresh data from Indian parliamentary and assembly election results published by the Election Commission of India",
+    "languages": [
+      "Jupyter Notebook",
+      "Python",
+      "HTML",
+      "JavaScript"
+    ],
+    "topics": [
+      "candidates",
+      "democracy",
+      "elections",
+      "india",
+      "kaggle-dataset",
+      "parliament",
+      "voting"
+    ],
+    "tech_stack": [
+      "Jupyter Notebook",
+      "Python",
+      "HTML",
+      "JavaScript",
+      "candidates",
+      "democracy",
+      "elections",
+      "india"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/traffic-oracle": {
+    "description": "Hyperlocal Road Traffic Monitor – compare current speeds with historical patterns across major routes. Know before you go.",
+    "languages": [
+      "TypeScript",
+      "CSS",
+      "Python",
+      "HTML"
+    ],
+    "topics": [
+      "public-data",
+      "traffic-analysis",
+      "urban-data-science"
+    ],
+    "tech_stack": [
+      "TypeScript",
+      "CSS",
+      "Python",
+      "HTML",
+      "public-data",
+      "traffic-analysis",
+      "urban-data-science"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/ekitty": {
+    "description": "A minimalist interactive equity portfolio visualization with floating SVG kitty cats, CSV parsing, and physics-driven visual encodings. · Built with Manus",
+    "languages": [
+      "TypeScript",
+      "JavaScript",
+      "CSS",
+      "HTML"
+    ],
+    "topics": [],
+    "tech_stack": [
+      "TypeScript",
+      "JavaScript",
+      "CSS",
+      "HTML"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/koreo": {
+    "description": "An open-source tool to easily implement a scrollytelling feature on images.",
+    "languages": [
+      "TypeScript",
+      "CSS",
+      "JavaScript",
+      "HTML"
+    ],
+    "topics": [
+      "choreography",
+      "media-tools",
+      "publishing",
+      "scrollytelling",
+      "web-development-tools"
+    ],
+    "tech_stack": [
+      "TypeScript",
+      "CSS",
+      "JavaScript",
+      "HTML",
+      "choreography",
+      "media-tools",
+      "publishing",
+      "scrollytelling"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/Quick2AVault": {
+    "description": "When it comes to getting your personal finances in order, if you're usually quick to a fault, say no more! Now there's Quick2AVault – the single, calm place where all your money docs land so that your finances are automatically organised, is intelligently analysed and thoughtfully visualised.",
+    "languages": [
+      "TypeScript",
+      "Dart",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "Shell",
+      "Swift",
+      "Python"
+    ],
+    "topics": [
+      "bookkeeping",
+      "document-processing",
+      "invoice-management",
+      "money",
+      "personal-finance"
+    ],
+    "tech_stack": [
+      "TypeScript",
+      "Dart",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "Shell",
+      "Swift",
+      "Python"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/robby": {
+    "description": "A tiny explainable compiler for text-based visual compositions, producing obverse and reverse images plus a process manifest.",
+    "languages": [
+      "TypeScript",
+      "Rust",
+      "JavaScript",
+      "Shell",
+      "HTML",
+      "Dockerfile"
+    ],
+    "topics": [
+      "compiler-construction",
+      "segfault"
+    ],
+    "tech_stack": [
+      "TypeScript",
+      "Rust",
+      "JavaScript",
+      "Shell",
+      "HTML",
+      "Dockerfile",
+      "compiler-construction",
+      "segfault"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/c2pa-viewer": {
+    "description": "Web app to verify C2PA content credentials and view EXIF/IPTC info embedded within an image. We do frontend as well as API call!",
+    "languages": [
+      "Python",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "Dockerfile"
+    ],
+    "topics": [
+      "c2pa",
+      "exif-metadata",
+      "image-viewer",
+      "iptc-metadata",
+      "metadata-extraction",
+      "photography",
+      "provenance",
+      "verifiable-credentials"
+    ],
+    "tech_stack": [
+      "Python",
+      "JavaScript",
+      "CSS",
+      "HTML",
+      "Dockerfile",
+      "c2pa",
+      "exif-metadata",
+      "image-viewer"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/metro-dash": {
+    "description": "(WIP) Designing a super-powered dashboard to replace the one at https://english.bmrc.co.in/ridership/",
+    "languages": [
+      "Rust",
+      "Python",
+      "Dockerfile"
+    ],
+    "topics": [
+      "dashbaord",
+      "metro",
+      "public-data",
+      "public-transport",
+      "urban-transportation"
+    ],
+    "tech_stack": [
+      "Rust",
+      "Python",
+      "Dockerfile",
+      "dashbaord",
+      "metro",
+      "public-data",
+      "public-transport",
+      "urban-transportation"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/ngl-storyteller": {
+    "description": "Based on a true story. Your story. Go ahead, express yourself.",
+    "languages": [
+      "TypeScript",
+      "HTML"
+    ],
+    "topics": [],
+    "tech_stack": [
+      "TypeScript",
+      "HTML"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  },
+  "https://github.com/thecont1/relex": {
+    "description": "Data viz for that confounding question – who's working where, with whom, on what?",
+    "languages": [
+      "TypeScript",
+      "CSS",
+      "HTML"
+    ],
+    "topics": [],
+    "tech_stack": [
+      "TypeScript",
+      "CSS",
+      "HTML"
+    ],
+    "refreshed_at": "2026-08-21T12:13:01Z"
+  }
+}

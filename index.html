@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Mahesh Shantaram's apps and open tools for the public good." />
+    <title>Apps · Mahesh Shantaram</title>
+    <link rel="stylesheet" href="./fonts.css" />
+    <link rel="stylesheet" href="./styles/source-global.css" />
+    <link rel="stylesheet" href="./styles/header.css" />
+    <link rel="stylesheet" href="./styles/footer.css" />
+    <link rel="stylesheet" href="./styles/apps.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to app gallery</a>
+
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a href="https://thecontrarian.in/" class="site-title">thecontrarian.in</a>
+
+        <nav class="site-nav desktop-nav" aria-label="Main navigation">
+          <a href="https://thecontrarian.in/#">Home</a>
+          <a href="https://thecontrarian.in/#projects">The Projects</a>
+          <a href="https://thecontrarian.in/#about">About Me</a>
+          <a href="https://thecontrarian.in/#contact">Contact</a>
+        </nav>
+
+        <div class="site-actions">
+          <button id="toggle-textmode" class="icon-btn" aria-label="Text only mode" aria-pressed="false" title="Text only mode">
+            <svg viewBox="0 0 24 24" class="eye-icon" aria-hidden="true">
+              <path d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" />
+              <circle cx="12" cy="12" r="3.5" />
+              <line x1="3" y1="3" x2="21" y2="21" class="eye-slash" />
+            </svg>
+          </button>
+          <button id="toggle-snow" class="icon-btn" aria-label="Toggle snow" aria-pressed="false" title="Toggle snow">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="snow-icon">
+              <path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07 19.07 4.93" />
+              <path d="m8 4 4 2 4-2M8 20l4-2 4 2M4 8l2 4-2 4M20 8l-2 4 2 4" />
+            </svg>
+          </button>
+          <button class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-haspopup="menu" aria-controls="mobile-nav">
+            <span class="hamburger-line" aria-hidden="true"></span>
+            <span class="hamburger-line" aria-hidden="true"></span>
+            <span class="hamburger-line" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <nav id="mobile-nav" class="site-nav mobile-nav" aria-hidden="true" aria-label="Mobile navigation" inert>
+          <div class="mobile-nav-overlay"></div>
+          <div class="mobile-nav-content">
+            <button class="mobile-nav-close" aria-label="Close navigation menu">
+              <svg class="mobile-nav-close-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+            <a href="https://thecontrarian.in/#">Home</a>
+            <a href="https://thecontrarian.in/#projects">The Projects</a>
+            <a href="https://thecontrarian.in/#about">About Me</a>
+            <a href="https://thecontrarian.in/#contact">Contact</a>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <div class="page-shell">
+        <aside class="profile-sidebar" aria-labelledby="profile-name">
+          <div class="profile-avatar-wrap">
+            <img class="profile-avatar" src="./assets/profile/avatar.jpg" alt="" width="460" height="460" />
+            <button class="profile-theme" type="button" aria-label="Profile theme accent" title="Profile theme accent">☀️</button>
+            <div class="profile-avatar-controls" aria-hidden="true">
+              <span class="avatar-control avatar-mic"><svg viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="12" rx="4" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8" /></svg></span>
+              <span class="avatar-control avatar-camera"><svg viewBox="0 0 24 24"><path d="M4 7.5h10a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2Z" /><path d="m16 11 6-3v9l-6-3" /></svg></span>
+            </div>
+          </div>
+
+          <div class="profile-copy">
+            <h2 id="profile-name">Mahesh Shantaram</h2>
+            <p class="profile-handle">thecont1 · he/him</p>
+            <p class="profile-bio">documentary photographer turned data scientist for the public good ㋡ man of the world living rent-free in a vscode workspace ㋡</p>
+            <a class="profile-edit" href="https://github.com/thecont1" target="_blank" rel="noreferrer">Edit profile</a>
+
+            <p class="profile-following">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 20v-1.5a4.5 4.5 0 0 0-4.5-4.5h-3A4.5 4.5 0 0 0 4 18.5V20M10 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM16 4.2a3.5 3.5 0 0 1 0 6.6M16 13.8a4.5 4.5 0 0 1 4 4.7V20" /></svg>
+              <strong>45</strong> followers · <strong>198</strong> following
+            </p>
+
+            <ul class="profile-details">
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></svg><span>Bangalore, India</span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v6l4 2M12 2v2M22 12h-2" /></svg><span>16:48 <em>(UTC +05:30)</em></span></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></svg><a href="mailto:ms@thecontrarian.in">ms@thecontrarian.in</a></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1" /></svg><a href="https://thecontrarian.in/" target="_blank" rel="noreferrer">https://thecontrarian.in/</a></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4 19 20M19 4 5 20" /></svg><a href="https://x.com/thecontrarian" target="_blank" rel="noreferrer">@thecontrarian</a></li>
+              <li><svg viewBox="0 0 24 24" aria-hidden="true" class="linkedin-mark"><path d="M5 4.5A1.5 1.5 0 1 1 2 4.5a1.5 1.5 0 0 1 3 0ZM2.5 8h3v12h-3zM9 8h3v1.7c.8-1.2 2.1-2 4.1-2 3.4 0 4.4 2.2 4.4 5.6V20h-3v-6c0-1.5 0-3.5-2.1-3.5S12 12.1 12 14v6H9Z" /></svg><a href="https://www.linkedin.com/in/mahesh-shantaram/" target="_blank" rel="noreferrer">in/mahesh-shantaram</a></li>
+            </ul>
+          </div>
+
+          <section class="achievements" aria-labelledby="achievements-heading">
+            <h3 id="achievements-heading">Achievements</h3>
+            <div class="achievement-row">
+              <a href="https://github.com/thecont1?achievement=pair-extraordinaire&amp;tab=achievements" target="_blank" rel="noreferrer" aria-label="Pair Extraordinaire achievement, x2"><img src="./assets/profile/pair-extraordinaire.png" alt="Pair Extraordinaire" /><span>x2</span></a>
+              <a href="https://github.com/thecont1?achievement=pull-shark&amp;tab=achievements" target="_blank" rel="noreferrer" aria-label="Pull Shark achievement, x2"><img src="./assets/profile/pull-shark.png" alt="Pull Shark" /><span>x2</span></a>
+              <a href="https://github.com/thecont1?achievement=starstruck&amp;tab=achievements" target="_blank" rel="noreferrer" aria-label="Starstruck achievement"><img src="./assets/profile/starstruck.png" alt="Starstruck" /></a>
+              <a href="https://github.com/thecont1?achievement=quickdraw&amp;tab=achievements" target="_blank" rel="noreferrer" aria-label="Quickdraw achievement"><img src="./assets/profile/quickdraw.png" alt="Quickdraw" /></a>
+              <a href="https://github.com/thecont1?achievement=yolo&amp;tab=achievements" target="_blank" rel="noreferrer" aria-label="YOLO achievement"><img src="./assets/profile/yolo.png" alt="YOLO" /></a>
+            </div>
+          </section>
+        </aside>
+
+        <section class="gallery-stage" aria-labelledby="gallery-title">
+          <div class="gallery-intro">
+            <p class="eyebrow">Open tools · public good</p>
+            <h1 id="gallery-title">Apps by Mahesh Shantaram</h1>
+            <p class="gallery-lede">A working shelf of small experiments, civic tools, and visual systems. Every card is loaded from <code>apps.csv</code>, so the order here follows the manifest.</p>
+          </div>
+          <div id="app-gallery" class="app-gallery" aria-live="polite">
+            <p class="gallery-status">Loading apps…</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-socials">
+          <a href="https://x.com/thecontrarian" target="_blank" rel="noreferrer" aria-label="X (Twitter)"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4 19 20M19 4 5 20" /></svg></a>
+          <a href="https://www.linkedin.com/in/mahesh-shantaram" target="_blank" rel="noreferrer" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 1 1 2 4.5a1.5 1.5 0 0 1 3 0ZM2.5 8h3v12h-3zM9 8h3v1.7c.8-1.2 2.1-2 4.1-2 3.4 0 4.4 2.2 4.4 5.6V20h-3v-6c0-1.5 0-3.5-2.1-3.5S12 12.1 12 14v6H9Z" /></svg></a>
+          <a href="https://wa.me/919980129770" target="_blank" rel="noreferrer" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4.1A8 8 0 1 1 20 11.5Z" /><path d="M9 8.5c.3 2 2 3.8 4.2 4.5.4.1.8-.1 1.1-.5l.5-.8" /></svg></a>
+          <a href="https://www.instagram.com/thesquarerootofindia/" target="_blank" rel="noreferrer" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" /></svg></a>
+          <a href="https://gravatar.com/thecont1" target="_blank" rel="noreferrer" aria-label="Gravatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M8 15a5 5 0 0 0 8 0M8 9a5 5 0 0 1 8 0" /></svg></a>
+          <a href="https://github.com/thecont1" target="_blank" rel="noreferrer" aria-label="GitHub"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0-2.8 17.6c.4.1.6-.2.6-.4v-1.5c-2.5.5-3-.9-3-.9-.4-1-.9-1.2-.9-1.2-.8-.5.1-.5.1-.5.9.1 1.3.9 1.3.9.8 1.3 2 1 2.5.8.1-.5.3-.9.6-1.1-2-.2-4.1-1-4.1-4.4 0-1 .3-1.8.9-2.4-.1-.2-.4-1.1.1-2.3 0 0 .8-.2 2.4.9a8.3 8.3 0 0 1 4.4 0c1.6-1.1 2.4-.9 2.4-.9.5 1.2.2 2.1.1 2.3.6.6.9 1.4.9 2.4 0 3.4-2.1 4.2-4.1 4.4.3.3.6.8.6 1.6v2.4c0 .2.2.5.6.4A9 9 0 0 0 12 3Z" /></svg></a>
+        </div>
+        <p>&copy; <span id="copyright-year">2026</span> Mahesh Shantaram. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <div class="snow-layer" aria-hidden="true"></div>
+    <script src="./app.js" defer></script>
+  </body>
+</html>
