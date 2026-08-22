@@ -292,6 +292,22 @@
 
     const year = document.querySelector("#copyright-year");
     if (year) year.textContent = String(new Date().getFullYear());
+
+    // Live local time (Asia/Kolkata, UTC+05:30)
+    const clock = document.querySelector("#local-time");
+    if (clock) {
+      const fmt = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      const tick = () => {
+        clock.textContent = `${fmt.format(new Date())} (UTC +05:30)`;
+      };
+      tick();
+      setInterval(tick, 1000);
+    }
   }
 
   async function loadGitHubMetrics() {

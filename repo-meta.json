@@ -29,8 +29,8 @@
       "Shell",
       "Dockerfile"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://flatwrite.md/"
+    "homepage": "https://flatwrite.md/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/india-votes-data": {
     "description": "🇮🇳 Generate clean and fresh data from Indian parliamentary and assembly election results published by the Election Commission of India",
@@ -59,8 +59,8 @@
       "elections",
       "india"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://letlive.thecontrarian.in/"
+    "homepage": "https://letlive.thecontrarian.in/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/traffic-oracle": {
     "description": "Hyperlocal Road Traffic Monitor – compare current speeds with historical patterns across major routes. Know before you go.",
@@ -84,29 +84,38 @@
       "traffic-analysis",
       "urban-data-science"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://co.thecontrarian.in/"
+    "homepage": "https://co.thecontrarian.in/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/ekitty": {
-    "description": "A minimalist interactive equity portfolio visualization with floating SVG kitty cats, CSV parsing, and physics-driven visual encodings. · Built with Manus",
+    "description": "A minimalist interactive equity portfolio visualisation with floating kitty cats representing your assets. We love the fat cats as long as they're green!",
     "languages": [
       "TypeScript",
       "JavaScript",
       "CSS",
       "HTML"
     ],
-    "topics": [],
+    "topics": [
+      "equity",
+      "stock-exchange",
+      "stock-market",
+      "stock-tracker"
+    ],
     "tech_stack": [
       "TypeScript",
       "JavaScript",
       "CSS",
-      "HTML"
+      "HTML",
+      "equity",
+      "stock-exchange",
+      "stock-market",
+      "stock-tracker"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": null
+    "homepage": "https://ekitty.thecontrarian.in/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/koreo": {
-    "description": "An open-source tool to easily implement a scrollytelling feature on images.",
+    "description": "An open-source tool comprising a Viewer and Studio to easily choreograph a section-based narrative progression (\"scrollytelling\") on a photograph. Inspired by ordinaryabundance.com.",
     "languages": [
       "TypeScript",
       "CSS",
@@ -130,8 +139,8 @@
       "publishing",
       "scrollytelling"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://focusguide-ds6uadox.manus.space/"
+    "homepage": "https://focusguide-ds6uadox.manus.space/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/Quick2AVault": {
     "description": "When it comes to getting your personal finances in order, if you're usually quick to a fault, say no more! Now there's Quick2AVault – the single, calm place where all your money docs land so that your finances are automatically organised, is intelligently analysed and thoughtfully visualised.",
@@ -162,8 +171,8 @@
       "Swift",
       "Python"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://devfolio.co/projects/quickavault-9e04"
+    "homepage": "https://devfolio.co/projects/quickavault-9e04",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/robby": {
     "description": "A tiny explainable compiler for text-based visual compositions, producing obverse and reverse images plus a process manifest.",
@@ -189,8 +198,8 @@
       "compiler-construction",
       "segfault"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://robby-roc-yrbz39h7.manus.space/"
+    "homepage": "https://robby-roc-yrbz39h7.manus.space/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/c2pa-viewer": {
     "description": "Web app to verify C2PA content credentials and view EXIF/IPTC info embedded within an image. We do frontend as well as API call!",
@@ -221,8 +230,8 @@
       "exif-metadata",
       "image-viewer"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://c2pa.thecontrarian.in/"
+    "homepage": "https://apps.thecontrarian.in/c2pa",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/metro-dash": {
     "description": "(WIP) Designing a super-powered dashboard to replace the one at https://english.bmrc.co.in/ridership/",
@@ -248,8 +257,8 @@
       "public-transport",
       "urban-transportation"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://namma.thecontrarian.in/"
+    "homepage": "https://namma.thecontrarian.in/",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/ngl-storyteller": {
     "description": "Based on a true story. Your story. Go ahead, express yourself.",
@@ -262,8 +271,8 @@
       "TypeScript",
       "HTML"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": "https://aistudio.google.com/apps/f3f1e8f6-6aaf-4baf-8d8a-7f813a8981a3?showPreview=true&showAssistant=true"
+    "homepage": "https://ngl-storyteller.ai.studio",
+    "refreshed_at": "2026-08-22T16:29:35Z"
   },
   "https://github.com/thecont1/relex": {
     "description": "Data viz for that confounding question – who's working where, with whom, on what?",
@@ -278,7 +287,7 @@
       "CSS",
       "HTML"
     ],
-    "refreshed_at": "2026-08-21T12:13:01Z",
-    "homepage": null
+    "homepage": null,
+    "refreshed_at": "2026-08-22T16:29:35Z"
   }
 }
