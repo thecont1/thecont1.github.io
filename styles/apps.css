@@ -670,6 +670,7 @@ a:focus-visible {
   letter-spacing: -0.04em;
   overflow-wrap: anywhere;
   text-wrap: balance;
+  white-space: nowrap;
 }
 
 .gallery-lede {
@@ -679,6 +680,7 @@ a:focus-visible {
   font-size: 1rem;
   line-height: 1.7;
   overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 
 .gallery-lede code {
@@ -702,15 +704,14 @@ a:focus-visible {
   flex-direction: column;
   min-width: 0;
   padding: 0.7rem 0.7rem 1.25rem;
-  border: 1px solid var(--gh-border);
+  border: 2px solid var(--gh-border);
   border-radius: 10px;
   background: var(--gh-panel);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
 }
 
 .app-card:hover {
-  border-color: #586069;
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.27);
+  border-color: #c1440e;
 }
 
 .app-card-media {
@@ -722,7 +723,6 @@ a:focus-visible {
   border-radius: 7px;
   background: #010409;
   cursor: zoom-in;
-  transition: border-radius 320ms ease, margin 320ms ease;
 }
 
 .app-card-media img {
@@ -732,11 +732,6 @@ a:focus-visible {
   object-fit: contain;
   object-position: center;
   pointer-events: none;
-}
-
-.app-card:hover .app-card-media {
-  margin: -0.7rem -0.7rem 0;
-  border-radius: 0;
 }
 
 .app-card-body {
