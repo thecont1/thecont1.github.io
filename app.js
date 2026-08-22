@@ -105,18 +105,16 @@
     const description = document.createElement("p");
     description.className = "app-description";
     const descText = metadata?.description || "A small, thoughtful tool by Mahesh Shantaram.";
-    description.append(document.createTextNode(descText));
+    description.textContent = descText;
 
     const homepage = metadata?.homepage;
-    if (homepage) {
-      description.append(document.createTextNode(" "));
-      const siteLink = document.createElement("a");
+    const siteLink = homepage ? document.createElement("a") : null;
+    if (siteLink) {
       siteLink.className = "app-site-link";
       siteLink.href = homepage;
       siteLink.target = "_blank";
       siteLink.rel = "noreferrer";
       siteLink.textContent = displayUrl(homepage);
-      description.append(siteLink);
     }
 
     const tags = document.createElement("div");
@@ -130,7 +128,9 @@
       tags.append(tag);
     });
 
-    body.append(heading, description, tags);
+    body.append(heading, description);
+    if (siteLink) body.append(siteLink);
+    body.append(tags);
     card.append(mediaButton, body);
     return card;
   }
