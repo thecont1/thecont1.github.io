@@ -109,6 +109,147 @@ a:focus-visible {
   min-width: 0;
 }
 
+/* Show full tall sidebar on desktop, compact on mobile */
+.profile-sidebar-compact {
+  display: none;
+}
+
+/* Full tall sidebar — desktop */
+.profile-sidebar-full .profile-avatar-wrap {
+  position: relative;
+  width: min(100%, 292px);
+  aspect-ratio: 1;
+  margin-bottom: 1.5rem;
+}
+
+.profile-sidebar-full .profile-avatar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+  border: 1px solid var(--gh-border);
+  box-shadow: 0 0 0 5px rgba(13, 17, 23, 0.86), 0 0 0 6px var(--gh-border);
+}
+
+.profile-sidebar-full .profile-copy h2 {
+  margin: 0;
+  color: var(--gh-text);
+  font-size: clamp(1.6rem, 2vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  font-family: "DM Sans", Inter, sans-serif;
+}
+
+.profile-sidebar-full .profile-handle {
+  margin: 0.3rem 0 1.55rem;
+  color: var(--gh-muted);
+  font-size: 1.12rem;
+}
+
+.profile-sidebar-full .profile-bio {
+  max-width: 31ch;
+  margin: 0 0 1.5rem;
+  color: var(--gh-text);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.profile-sidebar-full .profile-edit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  box-sizing: border-box;
+  margin-bottom: 1.45rem;
+  border: 1px solid var(--gh-border);
+  border-radius: 6px;
+  background: var(--gh-panel);
+  color: var(--gh-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.profile-sidebar-full .profile-edit:hover {
+  border-color: var(--gh-muted);
+  background: var(--gh-panel-raised);
+}
+
+.profile-sidebar-full .profile-following {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 1.45rem;
+  color: var(--gh-muted);
+  font-size: 0.93rem;
+}
+
+.profile-sidebar-full .profile-following svg {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.15rem;
+}
+
+.profile-sidebar-full .profile-following a {
+  color: var(--gh-muted);
+  text-decoration: none;
+}
+
+.profile-sidebar-full .profile-following a:hover {
+  color: var(--gh-blue);
+}
+
+.profile-sidebar-full .profile-following strong {
+  color: var(--gh-text);
+  font-weight: 600;
+}
+
+.profile-sidebar-full .profile-details {
+  display: grid;
+  gap: 0.95rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: var(--gh-text);
+  font-size: 0.96rem;
+}
+
+.profile-sidebar-full .profile-details li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.profile-sidebar-full .profile-details li > svg {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.05rem;
+  color: var(--gh-muted);
+}
+
+.profile-sidebar-full .profile-details span,
+.profile-sidebar-full .profile-details a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-sidebar-full .profile-details a {
+  color: var(--gh-text);
+  text-decoration: none;
+}
+
+.profile-sidebar-full .profile-details a:hover {
+  color: var(--gh-blue);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
 /* GitHub-style compact identity: small avatar + name/handle */
 .profile-identity {
   display: flex;
@@ -402,9 +543,14 @@ a:focus-visible {
 .contribution-weekdays {
   grid-column: 1;
   grid-row: 2;
+  position: sticky;
+  left: 0;
+  z-index: 1;
   display: grid;
   grid-template-rows: repeat(7, var(--cell));
   gap: var(--gap);
+  padding-right: 2px;
+  background: var(--gh-canvas, #0d1117);
   color: var(--gh-muted);
   font-size: 0.68rem;
   line-height: var(--cell);
@@ -783,6 +929,15 @@ body.snow-enabled .snow-layer {
   .profile-sidebar {
     position: static;
     margin-bottom: 2.25rem;
+  }
+
+  /* Swap sidebars: hide full, show compact */
+  .profile-sidebar-full {
+    display: none;
+  }
+
+  .profile-sidebar-compact {
+    display: block;
   }
 
   .profile-identity {

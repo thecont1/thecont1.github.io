@@ -301,10 +301,12 @@
       });
       if (!response.ok) return;
       const data = await response.json();
-      const followers = document.querySelector("#github-followers");
-      const following = document.querySelector("#github-following");
-      if (followers) followers.textContent = String(data.followers);
-      if (following) following.textContent = String(data.following);
+      document.querySelectorAll(".js-github-followers").forEach((el) => {
+        el.textContent = String(data.followers);
+      });
+      document.querySelectorAll(".js-github-following").forEach((el) => {
+        el.textContent = String(data.following);
+      });
     } catch (error) {
       // Silently keep the hardcoded fallback values
     }
