@@ -93,6 +93,17 @@ def fetch_languages(repo: str) -> list[str]:
     return []
 
 
+def fetch_homepage(repo: str) -> str | None:
+    try:
+        payload = json.loads(fetch(f"https://api.github.com/repos/{repo}").decode("utf-8"))
+        if isinstance(payload, dict):
+            homepage = clean_text(payload.get("homepage") or "")
+            return homepage or None
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+        print(f"  warning: homepage unavailable for {repo}: {exc}", file=sys.stderr)
+    return None
+
+
 def main() -> int:
     if not CSV_PATH.exists():
         print(f"Missing {CSV_PATH}", file=sys.stderr)
@@ -116,6 +127,7 @@ def main() -> int:
         try:
             description, topics = scrape_about(url)
             languages = fetch_languages(repo)
+            homepage = fetch_homepage(repo)
         except (HTTPError, URLError, TimeoutError, ValueError) as exc:
             print(f"  error: {exc}", file=sys.stderr)
             return 1
@@ -130,6 +142,7 @@ def main() -> int:
             "languages": languages,
             "topics": topics,
             "tech_stack": tech_stack[:8],
+            "homepage": homepage,
             "refreshed_at": refreshed_at,
         }
         time.sleep(0.15)
