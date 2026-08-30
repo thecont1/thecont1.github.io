@@ -29,8 +29,21 @@ OUTPUT_PATH = ROOT / "README.md"
 SITE_URL = "apps.thecontrarian.in"
 GITHUB_URL = "github.com/thecont1"
 RAW_BASE = "https://raw.githubusercontent.com/thecont1/thecont1.github.io/main/assets/icons"
-GITHUB_ICON = f'<img src="{RAW_BASE}/github.svg" width="14" height="14" align="middle" alt="github">'
-LINK_ICON = f'<img src="{RAW_BASE}/box-arrow-up-right.svg" width="14" height="14" align="middle" alt="live">'
+
+
+def themed_icon(name: str, alt: str) -> str:
+    """Two <img> tags — light variant for dark theme, dark variant for light theme.
+
+    GitHub swaps them via the #gh-dark-mode-only / #gh-light-mode-only URL
+    fragments. valign=middle + height 13 keeps the glyph on the text baseline.
+    """
+    light = f'<img src="{RAW_BASE}/{name}-light.svg#gh-dark-mode-only" width="13" height="13" valign="middle" alt="{alt}">'
+    dark = f'<img src="{RAW_BASE}/{name}-dark.svg#gh-light-mode-only" width="13" height="13" valign="middle" alt="{alt}">'
+    return light + dark
+
+
+GITHUB_ICON = themed_icon("github", "github")
+LINK_ICON = themed_icon("box-arrow-up-right", "live")
 
 
 def clean(value: str | None) -> str:
@@ -74,11 +87,11 @@ def render_app(row: dict[str, str], meta: dict[str, object]) -> list[str]:
     links: list[str] = []
     if repo_url:
         repo_label = repo_url[len("https://github.com/"):] if repo_url.startswith("https://github.com/") else repo_url
-        links.append(f"{GITHUB_ICON} [{repo_label}]({repo_url})")
+        links.append(f"[{GITHUB_ICON} {repo_label}]({repo_url})")
     if homepage_url:
         homepage_label = homepage_url[len("https://"):] if homepage_url.startswith("https://") else homepage_url
         homepage_label = homepage_label[:-1] if homepage_label.endswith("/") else homepage_label
-        links.append(f"{LINK_ICON} [{homepage_label}]({homepage_url})")
+        links.append(f"[{LINK_ICON} {homepage_label}]({homepage_url})")
     if links:
         lines.append(f"{'   '.join(links)}")
 
