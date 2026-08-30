@@ -1,0 +1,56 @@
+name: Sync profile README
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps.csv'
+      - 'repo-meta.json'
+      - 'scripts/generate_readme.py'
+      - '.github/workflows/sync-profile-readme.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout portfolio repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PROFILE_PAT }}
+
+      - name: Regenerate README.md
+        run: python3 scripts/generate_readme.py
+
+      - name: Commit regenerated README to portfolio repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- README.md; then
+            echo "README.md unchanged in portfolio repo."
+          else
+            git add README.md
+            git commit -m "chore: regenerate README.md from apps.csv + repo-meta.json"
+            git push
+          fi
+
+      - name: Sync README to thecont1/thecont1 profile repo
+        env:
+          PROFILE_PAT: ${{ secrets.PROFILE_PAT }}
+        run: |
+          tmpdir="$(mktemp -d)"
+          git clone --depth 1 "https://x-access-token:${PROFILE_PAT}@github.com/thecont1/thecont1.git" "$tmpdir"
+          cp README.md "$tmpdir/README.md"
+          cd "$tmpdir"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- README.md; then
+            echo "Profile README already in sync."
+          else
+            git add README.md
+            git commit -m "Sync profile README from thecont1.github.io"
+            git push
+          fi
