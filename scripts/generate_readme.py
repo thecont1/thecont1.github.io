@@ -32,13 +32,14 @@ RAW_BASE = "https://raw.githubusercontent.com/thecont1/thecont1.github.io/main/a
 
 
 def themed_icon(name: str, alt: str) -> str:
-    """Two <img> tags — light variant for dark theme, dark variant for light theme.
+    """Two markdown images — light variant for dark theme, dark variant for light theme.
 
     GitHub swaps them via the #gh-dark-mode-only / #gh-light-mode-only URL
-    fragments. valign=middle + height 13 keeps the glyph on the text baseline.
+    fragments. These fragments only work with markdown ![]() syntax, not raw
+    HTML <img> tags (which render both regardless of theme).
     """
-    light = f'<img src="{RAW_BASE}/{name}-light.svg#gh-dark-mode-only" width="13" height="13" valign="middle" alt="{alt}">'
-    dark = f'<img src="{RAW_BASE}/{name}-dark.svg#gh-light-mode-only" width="13" height="13" valign="middle" alt="{alt}">'
+    light = f"![{alt}]({RAW_BASE}/{name}-light.svg#gh-dark-mode-only)"
+    dark = f"![{alt}]({RAW_BASE}/{name}-dark.svg#gh-light-mode-only)"
     return light + dark
 
 
