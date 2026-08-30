@@ -68,7 +68,8 @@ def render_app(row: dict[str, str], meta: dict[str, object]) -> list[str]:
     lines: list[str] = []
     title = f"### [{name}]({repo_url})"
     if homepage:
-        title += f" · [live]({homepage})"
+        live_label = homepage[len("https://"):] if homepage.startswith("https://") else homepage
+        title += f" [{live_label}]({homepage})"
     lines.append(title)
     lines.append("")
     lines.append(description)
