@@ -1,37 +1,99 @@
-# Apps portfolio gallery
+# Apps by Mahesh Shantaram
 
-This directory is a **zero-build static site** for `thecont1.github.io/apps`. GitHub Pages serves the HTML, CSS, JavaScript, CSV, JSON, fonts, and screenshots as-is. The browser fetches `apps.csv` and `repo-meta.json` on each page load; there is no SSG, bundler, backend, or server-side data injection.
+A working shelf of small experiments, civic tools and data visualisations for the public good. This README is generated from `apps.csv` and `repo-meta.json` — see the live site at https://apps.thecontrarian.in/
 
-## Add, reorder, or remove an app
+Source: [https://github.com/thecont1/thecont1.github.io](https://github.com/thecont1/thecont1.github.io)
 
-Edit `apps.csv` and keep the columns `app_name,repo_url,image_filename`. Add one row for a new app, reorder rows to change the gallery order, or remove a row to remove its card. The renderer keeps the exact CSV order, filling two columns on desktop and one column on mobile.
+---
 
-For every row, place one screenshot in `assets/screenshots/` with the exact filename given in the `image_filename` column. Spaces, punctuation, and emoji are valid. The browser builds each image URL with `encodeURIComponent()` on the filename portion, so a name such as `ngl-storyteller.png` is requested as a correctly encoded URL. If a row is removed, its screenshot can also be deleted; if a row is only reordered, no asset change is needed.
+### [FlatWrite](https://github.com/thecont1/flatwrite) · [live](https://flatwrite.md/)
 
-If the app name contains a comma, quote the CSV field in the usual way, for example `"A, B Tool",https://github.com/thecont1/example`. Keep the repository URL public and keyed exactly the same way in `repo-meta.json`.
+FlatWrite turns plain markdown into beautiful, shareable documents you actually enjoy reading. Makes markdown publishing feel effortless.
 
-## Refresh repository metadata
+`JavaScript` `TypeScript` `CSS` `Python` `HTML` `Bru` `Shell` `Dockerfile`
 
-The checked-in `repo-meta.json` cache contains the About description, public language breakdown, topics, and combined tech-stack labels for each repository. Run the refresh script only when a genuinely new repository is added or when the About description, languages, or topics should be updated:
+---
 
-```sh
-python3 scripts/refresh_repo_meta.py
-```
+### [LET Live!](https://github.com/thecont1/india-votes-data) · [live](https://letlive.thecontrarian.in/)
 
-The script reads the current `apps.csv`, scrapes the public GitHub repository pages for About text and topics, reads the public language endpoint, and rewrites `repo-meta.json`. Commit that generated file with the CSV change. Editing or reordering existing CSV rows does not require a metadata refresh.
+🇮🇳 Generate clean and fresh data from Indian parliamentary and assembly election results published by the Election Commission of India
 
-## Preview locally
+`Jupyter Notebook` `Python` `HTML` `JavaScript` `candidates` `democracy` `elections` `india`
 
-From this directory, start any static HTTP server. Python’s standard-library server is sufficient:
+---
 
-```sh
-python3 -m http.server 4173
-```
+### [TraffiCOracle](https://github.com/thecont1/traffic-oracle) · [live](https://co.thecontrarian.in/)
 
-Then open `http://localhost:4173/`. Do not open `index.html` with `file://`; browser fetch requests for `apps.csv` and `repo-meta.json` need HTTP.
+Hyperlocal Road Traffic Monitor – compare current speeds with historical patterns across major routes. Know before you go.
 
-## Deploy to GitHub Pages
+`TypeScript` `CSS` `Python` `HTML` `public-data` `traffic-analysis` `urban-data-science`
 
-Push the contents of this directory, including `.nojekyll`, to the Pages repository’s `main` branch or to a `gh-pages` branch. In the repository settings, set **Pages → Build and deployment → Deploy from a branch**, select that branch, and choose `/ (root)`. The target URL is `https://thecont1.github.io/apps/`.
+---
 
-The site chrome is ported from the public source repository’s `SiteHeader.astro`, `SiteFooter.astro`, `global.css`, `header.css`, `footer.css`, and `fonts.css`. The profile sidebar follows the supplied GitHub reference screenshot and uses locally checked-in avatar and achievement assets.
+### [ekitty](https://github.com/thecont1/ekitty) · [live](https://ekitty.thecontrarian.in/)
+
+A minimalist interactive equity portfolio visualisation with floating kitty cats representing your assets. We love the fat cats as long as they're green!
+
+`TypeScript` `JavaScript` `CSS` `HTML` `equity` `stock-exchange` `stock-market` `stock-tracker`
+
+---
+
+### [koreo](https://github.com/thecont1/koreo) · [live](https://koreo.thecontrarian.in/)
+
+An open-source tool comprising a Viewer and Studio to easily choreograph a section-based narrative progression ("scrollytelling") on a photograph. Inspired by ordinaryabundance.com.
+
+`TypeScript` `CSS` `JavaScript` `HTML` `choreography` `media-tools` `publishing` `scrollytelling`
+
+---
+
+### [Quick2AVault](https://github.com/thecont1/Quick2AVault) · [live](https://devfolio.co/projects/quickavault-9e04)
+
+When it comes to getting your personal finances in order, if you're usually quick to a fault, say no more! Now there's Quick2AVault – the single, calm place where all your money docs land so that your finances are automatically organised, is intelligently analysed and thoughtfully visualised.
+
+`TypeScript` `Dart` `JavaScript` `CSS` `HTML` `Shell` `Swift` `Python`
+
+---
+
+### [robby](https://github.com/thecont1/robby) · [live](https://robby.thecontrarian.in/)
+
+A tiny explainable compiler for text-based visual compositions, producing obverse and reverse images plus a process manifest.
+
+`TypeScript` `Rust` `JavaScript` `Shell` `HTML` `Dockerfile` `compiler-construction` `segfault`
+
+---
+
+### [C2PA Viewer](https://github.com/thecont1/c2pa-viewer) · [live](https://c2pa.thecontrarian.in/)
+
+Web app to verify C2PA content credentials and view EXIF/IPTC info embedded within an image. We do frontend as well as API call!
+
+`Python` `JavaScript` `CSS` `HTML` `Dockerfile` `c2pa` `exif-metadata` `image-viewer`
+
+---
+
+### [Metro Dash](https://github.com/thecont1/metro-dash) · [live](https://namma.thecontrarian.in/)
+
+(WIP) Designing a super-powered dashboard to replace the one at https://english.bmrc.co.in/ridership/
+
+`Rust` `Python` `Dockerfile` `dashbaord` `metro` `public-data` `public-transport` `urban-transportation`
+
+---
+
+### [ngl v1.0 😜 Not Gonna Lie](https://github.com/thecont1/ngl-storyteller) · [live](https://ngl-storyteller.ai.studio)
+
+Based on a true story. Your story. Go ahead, express yourself.
+
+`TypeScript` `HTML`
+
+---
+
+### [relex](https://github.com/thecont1/relex)
+
+Data viz for that confounding question – who's working where, with whom, on what?
+
+`TypeScript` `CSS` `HTML`
+
+---
+
+## Colophon
+
+This README is auto-generated by `scripts/generate_readme.py`. Edit `apps.csv` (and refresh `repo-meta.json` with `scripts/refresh_repo_meta.py`) and re-run the generator to update it. A GitHub Actions workflow keeps the profile README at [https://github.com/thecont1/thecont1](https://github.com/thecont1/thecont1) in sync automatically.
