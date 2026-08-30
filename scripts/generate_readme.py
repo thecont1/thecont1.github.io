@@ -83,12 +83,12 @@ def render_app(row: dict[str, str], meta: dict[str, object]) -> list[str]:
         tech_stack = []
 
     lines: list[str] = []
-    lines.append(f"### {name}")
+    lines.append(f"## {name}")
 
     links: list[str] = []
     if repo_url:
         repo_label = repo_url[len("https://github.com/"):] if repo_url.startswith("https://github.com/") else repo_url
-        links.append(f"[{GITHUB_ICON} {repo_label}]({repo_url})")
+        links.append(f"[{GITHUB_ICON} {repo_label}]({repo_url})\n")
     if homepage_url:
         homepage_label = homepage_url[len("https://"):] if homepage_url.startswith("https://") else homepage_url
         homepage_label = homepage_label[:-1] if homepage_label.endswith("/") else homepage_label
